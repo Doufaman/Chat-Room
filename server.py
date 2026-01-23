@@ -1,86 +1,73 @@
-import socket
 import threading
 import time
+from typing import Dict, Type
+import socket
 
-IS_LEADER = False
-LEADER_ADDRESS = ('127.0.0.1', 10001)
-known_servers = set()
+from roles.leader import Leader
+from roles.follower import Follower
+#from roles.backup import Backup 
 
-# Create a UDP socket
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) #use IPv4, UDP
-
-# Buffer size
-buffer_size = 1024
-
-# bind local server
-server_address = '127.0.0.1'
-server_port = int(input("Enter port number to bind the server: "))
-server_socket.bind((server_address, server_port))
-
-print(f"Server up and running at {server_address}:{server_port}, Leader: {IS_LEADER}")
-
-known_servers.add((server_address, server_port)) # add self to known_servers
-
-# register to leader server
-def register_to_leader():
-    if IS_LEADER:
-        return
-    message = f"REGISTER | {server_address} | {server_port}"
-    server_socket.sendto(message.encode(),LEADER_ADDRESS)
-    print(f"Sent registration to leader at {LEADER_ADDRESS}")
+from network.network_manager import NetworkManager
 
 
-def handle_registration(data_parts,sender_address):
-    address = (data_parts[1], int(data_parts[2]))
-    known_servers.add(address)
-    print(f"New server registered:{address}")
-    print(f"Known servers now:{known_servers}")
-    # send updated server list to all known servers
-    server_list = "SERVERLIST|" + ";".join([f"{a[0]},{a[1]}" for a in known_servers])
-    server_socket.sendto(server_list.encode(), sender_address)
-    print(f"Sent server list to {sender_address}")
+class RoleManager:
+    registry: Dict[str, Type] = {
+        "leader": Leader,
+        "follower": Follower,
+        #"backup": Backup,
+    }
+
+    #initialization
+    def __init__(self, ip:str):
+        self._lock = threading.RLock()
+        self._my_ip = ip
+
+        # 统一的网络管理
+        self.network = NetworkManager(host_ip=self._my_ip)
+        #self.network.start_listening()
+
+        # 状态维护
+        self._current_role_name = None
+        self._role_instance = None
+        self._thread = None
+        self._leader_found = threading.Event() #find leader or not
+
+    def _initialize_role(self, role_name: str):
+        with self._lock:
+            role_class = self.registry[role_name]
+            self._role_instance = role_class(self.network)
+            self._current_role_name = role_name
 
 
-def receive_server_list(data_parts):
-    server_info = data_parts[1].split(";")
-    for s in server_info:
-        ip, port = s.split(",")
-        known_servers.add((ip, int(port)))
-    print(f"Updated local server list:{known_servers}")
+def dynamic_discovery(timeout = 3.0):
+    print(f"Discovery phase started. Waiting {timeout}s for Leader response...")
+
+    # try to find leader
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    sock.settimeout(timeout)
+    try:
+        broad_msg = "WHO_IS_LEADER"
+        sock.sendto(broad_msg.encode(), ('255.255.255.255', 9000))
+
+        data = sock.recvfrom(1024)
+        received_msg = data.decode()
+        print(received_msg)
+
+    except socket.timeout:
+        print("No response from Leader within timeout.")
+    finally:
+        sock.close()
 
 
-if not IS_LEADER:
-    register_to_leader()
+if __name__ == '__main__':
+    MY_IP = input("请输入服务器 IP 地址: ")
+    print(f"Starting server with IP: {MY_IP}")
+
+    dynamic_discovery()
+    
 
 
-message = 'Hi client! Nice to connect with you!'
 
 
-'''
-while True:
-    print('\nWaiting to receive message...\n')
 
-    data, address = server_socket.recvfrom(buffer_size)
-    print('Received message from client: ', address)
-    print('Message: ', data.decode())
-
-    if data:
-        server_socket.sendto(str.encode(message), address)
-        print('Replied to client: ', message)
-'''
-
-while True:
-    print("\nWaiting to receive message...\n")
-    data, address = server_socket.recvfrom(buffer_size)
-    message = data.decode()
-    print(f"Received message from {address}: {message}")
-
-    parts = message.split(" | ")
-    message_type = parts[0]
-
-    if message_type == "REGISTER" and IS_LEADER:
-        handle_registration(parts, address)
-    elif message_type == "SERVERLIST" and not IS_LEADER:
-        receive_server_list(parts)
-    else:
-        print("Received unknown message type.")
