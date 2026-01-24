@@ -36,4 +36,7 @@ LOAD_WEIGHT_CPU = 1.0'''
 # Chatroom
 # ==================================================
 
-# MAX_CLIENTS_PER_CHATROOM = 50
+MAX_CLIENTS_PER_CHATROOM = 50
+DEFAFULT_CHATROOM_1 = "chatroom_1"
+DEFAFULT_CHATROOM_2 = "chatroom_2"
+DEFAFULT_CHATROOM_3 = "chatroom_3"  
