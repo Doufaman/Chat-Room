@@ -1,4 +1,4 @@
-from utils.logger import setup_logger
+from utills.logger import setup_logger
 import logging
 
 DEBUG = True  # or False

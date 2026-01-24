@@ -3,6 +3,7 @@
 from typing import Dict, List, Optional
 import time
 from utills.logger import get_logger
+from config import MAX_SERVERS_PER_GROUP
 
 logger = get_logger("membership")
 
@@ -28,16 +29,25 @@ class MembershipManager:
         #   load_info,
         #   address
         # }
-        self.servers: Dict[str, Dict] = {}
+        self.servers: Dict[str, Dict] = {} # owner: leader
 
         # group_id -> [server_id]
-        self.groups: Dict[str, List[str]] = {}
+        self.groups: Dict[str, List[str]] = {} # owner: leader
 
-        # server_id -> [client_id]
-        self.server_clients: Dict[str, List[str]] = {}
+        # server_id -> group_id
+        self.server_groups: Dict[str, str] = {} # owner: leader
+
+        # server_id -> [chatroom_id]
+        self.server_chatrooms: Dict[str, List[str]] = {} # owner: leader
+
+        # chatroom_id -> [client_id]
+        self.chatroom_clients: Dict[str, List[str]] = {} # owner: server
 
         # chatroom_id -> server_id
-        self.chatrooms: Dict[str, str] = {}
+        self.chatrooms: Dict[str, str] = {} # owner: leader
+
+        # client_id -> client_info
+        self.clients: Dict[str, Dict] = {} # owner: leader
 
     # ------------------------------------------------------------------
     # Server lifecycle management
@@ -66,8 +76,8 @@ class MembershipManager:
             "load_info": load_info if load_info is not None else {},
             "address": address
         }
-        # initiate client info for server
-        self.server_clients[server_id] = []
+        # initiate chatroom info for server
+        self.server_chatrooms[server_id] = []
         logger.info(f"server added: {server_id}")
         
     def remove_server(self, server_id: str):
@@ -84,11 +94,8 @@ class MembershipManager:
             logger.warning(f"server {server_id} is not existed")
             return  
 
-        # 1. delete server from servers dict
+        # delete server from servers dict
         del self.servers[server_id]
-        # 2. delete server-clients mapping   
-        if server_id in self.server_clients:
-            del self.server_clients[server_id]  
 
         logger.info(f"server removed: {server_id}")
 
@@ -170,39 +177,120 @@ class MembershipManager:
     def assign_group(self, server_id: str) -> str:
         """
         Assign a server to a replication group.
+        (acc to load balancing policy)
         Return assigned group_id.
         Leader only.
         """
         pass
+        if not self.is_leader:
+            logger.error("illegal operation (not leader)")
+            return ""
+        # assign group according to the number of servers and the sum of load in each group
+        group_id = None
+        min_load = float("inf")
+
+        for g_id, servers in self.group_servers.items():
+            if len(servers) < MAX_SERVERS_PER_GROUP:
+                total_load = sum(
+                    self.servers[s_id]["load_info"]["cpu"] for s_id in servers
+                )
+                if total_load < min_load:
+                    min_load = total_load
+                    group_id = g_id
+
+        if not group_id:
+            # create a new group
+            group_id = f"group_{len(self.group_servers)}"
+            self.group_servers[group_id] = []
+
+        self.group_servers[group_id].append(server_id)
+        self.server_groups[server_id] = group_id
+
+        logger.info(f"server {server_id} assigned to group {group_id}")
+
+        return group_id
 
     def get_group_servers(self, group_id: str) -> List[str]:
         """
         Get all servers in a group.
         """
         pass
+        if group_id not in self.groups:
+            logger.warning(f"group {group_id} does not exist")
+            return []
+        return self.groups[group_id]
 
     def remove_server_from_group(self, server_id: str):
         """
         Remove server from its group.
         """
         pass
+        if server_id not in self.server_groups:
+            logger.warning(f"server {server_id} is not assigned to any group")
+            return
+
+        group_id = self.server_groups[server_id]
+        self.group_servers[group_id].remove(server_id)
+        del self.server_groups[server_id]
 
     def get_server_group(self, server_id: str) -> Optional[str]:
         """
         Get the group_id of a server.
         """
         pass
+        if server_id not in self.server_groups:
+            logger.warning(f"server {server_id} is not assigned to any group")
+            return None
+
+        return self.server_groups[server_id]
 
     # ------------------------------------------------------------------
     # Chatroom management
     # ------------------------------------------------------------------
 
-    def bind_chatroom(self, chatroom_id: str, server_id: str):
+    def bind_chatroom(self, chatroom_id: str, operation_type: str) -> str:
         """
         Bind a chatroom to a server.
+        1. "first": first bind when chatroom is created.
+        2. "rebind": rebind when origin server is dead.
+        (according to load balancing policy): active & min(cup + chatroom_num*0.1)
         Leader only.
         """
         pass
+        if not self.is_leader:
+            logger.error("illegal operation (not leader)")
+            return
+        
+        # avoid duplicate bind for "first" operation
+        if operation_type == "first" and chatroom_id in self.chatrooms:
+            logger.warning(f"chatroom {chatroom_id} is already bound to server {self.chatrooms[chatroom_id]}")
+            return self.chatrooms[chatroom_id]
+        min_load = float("inf")
+        min_chatroom_num = float("inf")
+        selected_server = None
+        # bind chatroom to server: choose server based on load
+        for srv_id in self.servers:
+            if self.servers[srv_id]["status"] != ServerStatus.ACTIVE:
+                continue
+            load_info = self.servers[srv_id]["load_info"]
+            chatroom_num = len(self.server_chatrooms.get(srv_id, []))
+            load_metric = load_info.get("cpu", 0) + chatroom_num * 0.1  # simple load metric
+            if load_metric <= min_load and chatroom_num < min_chatroom_num:
+                min_load = load_metric
+                min_chatroom_num = chatroom_num
+                selected_server = srv_id 
+
+        if not selected_server:
+            logger.warning(f"no active server available for chatroom {chatroom_id}")
+            return
+
+        self.chatrooms[chatroom_id] = selected_server
+        if selected_server not in self.server_chatrooms:
+            self.server_chatrooms[selected_server] = []
+        self.server_chatrooms[selected_server].append(chatroom_id)
+        logger.info(f"chatroom {chatroom_id} bound to server {selected_server}")
+
+        return selected_server
 
     def rebind_chatroom(self, chatroom_id: str, new_server_id: str):
         """
@@ -210,12 +298,31 @@ class MembershipManager:
         Leader only.
         """
         pass
+        if not self.is_leader:
+            logger.error("illegal operation (not leader)")
+            return
+        if chatroom_id not in self.chatrooms:
+            logger.warning(f"chatroom {chatroom_id} is not bound to any server")
+            return
 
-    def get_chatroom_server(self, chatroom_id: str) -> Optional[str]:
+        old_server_id = self.chatrooms[chatroom_id]
+        # update chatroom-server mapping
+        self.chatrooms[chatroom_id] = new_server_id
+        # remove from old server's chatroom list
+        if old_server_id in self.server_chatrooms:
+            self.server_chatrooms[old_server_id].remove(chatroom_id)
+        # add to new server's chatroom list
+        if new_server_id not in self.server_chatrooms:
+            self.server_chatrooms[new_server_id] = []
+        self.server_chatrooms[new_server_id].append(chatroom_id)
+        logger.info(f"chatroom {chatroom_id} rebound from server {old_server_id} to server {new_server_id}")
+
+    def get_chatroom_server(self, chatroom_id: str):
         """
         Get server responsible for a chatroom.
         """
         pass
+        return self.chatrooms.get(chatroom_id)
 
     def remove_chatrooms_of_server(self, server_id: str) -> List[str]:
         """
@@ -223,59 +330,46 @@ class MembershipManager:
         Return affected chatroom_ids.
         """
         pass
+        if not self.is_leader:
+            logger.error("illegal operation (not leader)")
+            return []
+        affected_chatrooms = self.server_chatrooms.get(server_id, [])
+        del self.server_chatrooms[server_id]
+        return affected_chatrooms
+
 
     # ------------------------------------------------------------------
     # Client management
     # ------------------------------------------------------------------
 
-    def add_client_to_server(self, server_id: str, client_id: str):
+    def add_client(self,client_id: str, client_info: dict):
         """
-        Record that a client is connected to a server.
+        Add a client to the membership view.
         Leader only.
         """
         pass
+        if not self.is_leader:
+            logger.error("illegal operation (not leader)")
+            return
+        if client_id in self.clients:
+            logger.warning(f"client {client_id} already exists")
+            return
+        self.clients[client_id] = client_info
+        logger.info(f"client added: {client_id}")
 
-    def remove_client_from_server(self, server_id: str, client_id: str):
+    def remove_client(self,client_id: str):
         """
-        Remove client from server-client mapping.
+        Remove client from membership view.
         """
         pass
-
-    def get_server_clients(self, server_id: str) -> List[str]:
-        """
-        Get all clients connected to a server.
-        """
-        pass
-
-    # ------------------------------------------------------------------
-    # Failure handling support (query helpers)
-    # ------------------------------------------------------------------
-
-    def get_suspect_servers(self) -> List[str]:
-        """
-        Return list of servers marked as SUSPECT.
-        """
-        pass
-
-    def get_dead_servers(self) -> List[str]:
-        """
-        Return list of servers marked as DEAD.
-        """
-        pass
-
-    def select_server_for_chatroom(self) -> Optional[str]:
-        """
-        Select a server for a new chatroom based on load.
-        Leader only.
-        """
-        pass
-
-    def select_replacement_server(self, failed_server_id: str) -> Optional[str]:
-        """
-        Select a new server to replace a failed server.
-        Leader only.
-        """
-        pass
+        if not self.is_leader:
+            logger.error("illegal operation (not leader)")
+            return
+        if client_id not in self.clients:
+            logger.warning(f"client {client_id} does not exist")
+            return
+        del self.clients[client_id]
+        logger.info(f"client removed: {client_id}")
 
     # ------------------------------------------------------------------
     # View export / import (for leader crash or sync)
