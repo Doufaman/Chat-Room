@@ -34,8 +34,9 @@ multicast: 224.0.0.100
 
 ### Message
 以 | 分隔，|前后无空格<br>
-信息类型|信息内容<br>
-WHO_IS_LEADER
+信息类型|信息内容|本地IP<br>
+以下为信息类型和解释<br>
+WHO_IS_LEADER: 新启动的服务器查询是否有正在运行的leader
 
 ### others
 BUFFER_SIZE = 1024

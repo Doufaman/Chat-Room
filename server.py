@@ -30,7 +30,7 @@ class RoleManager:
         self._current_role_name = None
         self._role_instance = None
         self._thread = None
-        self._leader_found = threading.Event() #find leader or not
+        self._stop_event = threading.Event()
 
     def _initialize_role(self, role_name: str):
         with self._lock:
@@ -47,6 +47,10 @@ def dynamic_discovery(timeout = 3.0):
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     sock.settimeout(timeout)
     try:
+        # NetworkManager也能用
+        #nw = NetworkManager(ip_local='192.168.1.102')
+        #nw.send_broadcast("WHO_IS_LEADER", "hey")
+        
         broad_msg = "WHO_IS_LEADER"
         sock.sendto(broad_msg.encode(), ('255.255.255.255', 9000))
 
