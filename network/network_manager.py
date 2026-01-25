@@ -32,6 +32,9 @@ class NetworkManager:
         # 消息回调映射（业务层通过这个获取数据）
         self.on_message_received = None 
 
+    def set_callback(self, callback_func):
+        """供 RoleManager 或 Leader 调用，设置消息回掉"""
+        self.on_message_received = callback_func
 
     # message encode/decode functions
     def message_encode(self,  
@@ -50,6 +53,7 @@ class NetworkManager:
     def send_unicast(self, target_ip, message_type,message):
         # TCP unicast send
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             s.connect((target_ip, self.port_unicast))
             data = self.message_encode(message_type, message)
             s.sendall(data)
@@ -57,19 +61,24 @@ class NetworkManager:
     def send_broadcast(self, message_type,message):
         """UDP 广播发送"""
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            if hasattr(socket, 'SO_REUSEPORT'):
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
             data = self.message_encode(message_type, message)
             s.sendto(data, ('<broadcast>', self.port_broadcast))
 
     def send_multicast(self, message_type,message):
         """UDP 组播发送"""
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as s:
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            if hasattr(socket, 'SO_REUSEPORT'):
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
             s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
             data = self.message_encode(message_type, message)
             s.sendto(data, (self.ip_multicast, self.port_multicast))
     
 
-    '''以下代码不知道能不能跑'''
     # receive message functions
     def start_listening(self):
         threading.Thread(target=self.receive_unicast, daemon=True).start()
@@ -77,29 +86,40 @@ class NetworkManager:
         #threading.Thread(target=self.receive_multicast, daemon=True).start()
 
     def receive_unicast(self):
-        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server.bind((self.host_ip, self.unicast_port))
-        server.listen(5)
-        while True:
-            conn, addr = server.accept()
-            data = conn.recv(1024)
-            if self.on_message_received:
-                self.on_message_received('UNICAST', addr, data.decode())
-            conn.close()
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
+            server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            if hasattr(socket, 'SO_REUSEPORT'):
+                server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+            server.bind(('0.0.0.0', self.port_unicast)) # 绑定所有网卡
+            server.listen(5)
+            while True:
+                conn, addr = server.accept()
+                with conn:
+                    data = conn.recv(1024)
+                    if data and self.on_message_received:
+                        msg_type, content, sender_ip = self.message_decode(data)
+                        # 触发回调给 Leader
+                        self.on_message_received(msg_type, addr)
 
     def receive_broadcast(self):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.bind((self.host_ip, self.bcast_port))
-        while True:
-            data, addr = sock.recvfrom(1024)
-            if self.on_message_received:
-                self.on_message_received('BROADCAST', addr, data.decode())
-    
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.bind(('', self.port_broadcast))
+            while True:
+                data, addr = sock.recvfrom(1024)
+                if addr[0] == self.ip_local: # 忽略自己发出的广播
+                    continue
+                if data and self.on_message_received:
+                    msg_type, message, sender_ip = self.message_decode(data)
+                    # 触发回调
+                    self.on_message_received(msg_type, message, sender_ip)
 
     #先不管multicast
     def receive_multicast(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        if hasattr(socket, 'SO_REUSEPORT'):
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         sock.bind((self.host_ip, self.mcast_port))
         mreq = socket.inet_aton(self.mcast_group) + socket.inet_aton(self.host_ip)
         sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)

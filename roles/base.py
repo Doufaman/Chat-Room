@@ -19,9 +19,9 @@ class Role(ABC):
         """Main entry. Could be blocking (loop) or a single operation depending on implementation."""
         pass
 
-        '''
+        
     @abstractmethod
     def shutdown(self):
         """Cleanly stop the role and release resources. Must be idempotent."""
         pass
-        '''
+        

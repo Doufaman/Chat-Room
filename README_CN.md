@@ -1,9 +1,13 @@
 # Chat Room 项目说明
 ## 留言
 ——Shu Ruiyi<br>
-README_CN 第一版完全由我完成，主要包含我写代码时用到的配制（已填写）和我觉得后续需要填写的（未填写，只写了标题）。这个代码现在跑不了，因为我没有上传调试时用的所有代码，有部分功能由课程实例代码完成，因为最后我们的project也不会用到，我只是用来debug，就没有上传。
+README_CN 提供关于我这部分代码的说明。<br>
+目前实现动态发现（除注册外）的功能，即server启动发送WHO_IS_LEADER寻找leader，根据有无回复选择初始化为leader或follower<br>
+IP存在问题，实际上收发信息时用的物理IP都是本机IP，但是在逻辑上根据自定义IP对server进行区分，在代码中也进行区分：<br>
+ip_local和MY_IP指自定义IP，socket中出现的addr指自动获取的本机IP，我无法更改。
 ## 运行方法
 ### Server
+在终端运行，输入自定义IP
 ### Client
 
 ## 配制说明
@@ -34,15 +38,21 @@ multicast: 224.0.0.100
 
 ### Message
 以 | 分隔，|前后无空格<br>
-信息类型|信息内容|本地IP<br>
+信息类型|信息内容|自定义IP<br>
 以下为信息类型和解释<br>
-WHO_IS_LEADER: 新启动的服务器查询是否有正在运行的leader
+WHO_IS_LEADER: 新启动的服务器查询是否有正在运行的leader<br>
+I_AM_LEADER: leader给新启动的server和client发送基本信息
 
 ### others
 BUFFER_SIZE = 1024
 
 ## 文件说明
+server.py: 服务器启动文件，包括dynamic_discovery函数<br>
+network_manager: 提供3种类型的信息收发功能，针对message的encode和decode，可能有bug<br>
+leader.py: leader相关逻辑<br>
+follower.py: follower相关逻辑<br>
 
 ## 变量说明
+ip_local和MY_IP指自定义IP，socket中出现的addr指自动获取的本机IP
 
 ## API说明
