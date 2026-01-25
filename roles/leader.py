@@ -1,23 +1,24 @@
-import socket
 import threading
 import time
 
 from .base import Role
 
 class Leader(Role):
-    def __init__(self, network):
-        self.network = network
+    def __init__(self, network_manager):
+        super().__init__()
+        self.network_manager = network_manager
         self._running = True
         self.known_servers = set()
 
-    def setup(self):
-        # 绑定真正的业务回调
-        self.nm.on_message_received = self.handle_messages
+        self.setup()
 
-    def handle_messages(self, msg_type, addr, data):
-        if data == "WHO_IS_LEADER":
-            # 立即回传身份宣告
-            self.nm.send_broadcast(f"I_AM_LEADER:{self.nm.host_ip}")
+    def setup(self):
+        print("[Leader] Setting up leader role...")
+
+    def handle_messages(self, msg_type, ip_sender):
+        if msg_type == "WHO_IS_LEADER":
+            print('receive message')
+            self.network_manager.send_broadcast(ip_sender,"I_AM_LEADER", 'imformation','')
 
     def start(self):
         pass
