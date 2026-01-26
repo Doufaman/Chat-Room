@@ -3,6 +3,16 @@ from abc import ABC, abstractmethod
 class Role(ABC):
     def __init__(self):
         self._running = True
+        # identity: INIT / FOLLOWER / LEADER / CANDIDATE
+        self._identity = "INIT"
+        # network manager
+        self.network_manager = None
+        # server id
+        self.server_id = None
+        # local ip
+        self.ip_local = None
+        # load info
+        self.load_info = None
         
         # 初始化消息处理器映射表
         self._msg_map = {

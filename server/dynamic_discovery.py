@@ -1,16 +1,16 @@
-import threading
+
 import time
-from typing import Dict, Type, Optional
+
 import socket
 
-from roles.leader import Leader
-from roles.follower import Follower
+
 #from roles.backup import Backup 
 
-from network.network_manager import NetworkManager
 
 
+'''
 class RoleManager:
+    # critical resources
     registry: Dict[str, Type] = {
         "leader": Leader,
         "follower": Follower,
@@ -43,7 +43,7 @@ class RoleManager:
             # 启动网络监听
             self.network_manager.start_listening()
 
-            print(f"[Server] Initialized role: {role_name}")
+            print(f"[Server] Initialized role: {role_name}")'''
 
 
 def dynamic_discovery(ip_local, timeout = 3.0):
@@ -60,7 +60,10 @@ def dynamic_discovery(ip_local, timeout = 3.0):
         #nw = NetworkManager(ip_local='192.168.1.102')
         #nw.send_broadcast("WHO_IS_LEADER", "hey")
         
-        broad_msg = f"WHO_IS_LEADER|hey|{ip_local}"
+        # TOOD : modify message format
+        broad_msg = {"msg_type": "WHO_IS_LEADER",
+                     "message": "hey",
+                     "sender_ip": ip_local}
         sock.sendto(broad_msg.encode(), ('255.255.255.255', 9000))
         time.sleep(0.5) #确保广播发出去
         
@@ -68,43 +71,35 @@ def dynamic_discovery(ip_local, timeout = 3.0):
             try:
                 data, addr = sock.recvfrom(1024)
                 received_msg = data.decode()
-                msg_type, message, sender_ip = received_msg.split('|')
+                # TODO2: modify message format
+                msg_type = received_msg.get("msg_type")
+                message = received_msg.get("message")
+                sender_ip = received_msg.get("sender_ip")
                 if sender_ip == ip_local: # 忽略自己发出的广播
                     continue
                 
                 if msg_type == "I_AM_LEADER":
                     print(f"[Server] Leader found at {sender_ip}: {msg_type} {message}")
-                    current_server = RoleManager(ip_local=ip_local)
-                    current_server.initialize_role("follower")
-                    return current_server
+                    # modify2: move initialization out of dynamic_discovery 
+                    # current_server = RoleManager(ip_local=ip_local)
+                    # current_server.initialize_role("follower")
+                    return "follower", sender_ip
                 elif msg_type == "WHO_IS_LEADER":
                     # ignore other WHO_IS_LEADER messages
                     continue
 
             except socket.timeout:
                 print("No response from Leader within timeout.")
+                # modify2: move initialization out of dynamic_discovery
                 # initiallize as leader
-                current_server = RoleManager(ip_local=ip_local)
-                current_server.initialize_role("leader")
-                return current_server
+                # current_server = RoleManager(ip_local=ip_local)
+                # current_server.initialize_role("leader")
+                return "leader", None
     finally:
         sock.close()
 
 
-if __name__ == '__main__':
-    MY_IP = input("请输入服务器 IP 地址: ")
-    print(f"Starting server with IP: {MY_IP}")
 
-    current_server = dynamic_discovery(MY_IP) #使用当前IP进行动态发现
-    
-    # 保持主线程运行，让后台监听线程继续工作
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        print("\n[Server] Shutting down...")
-        if current_server._role_instance:
-            current_server._role_instance.shutdown()
 
 
 

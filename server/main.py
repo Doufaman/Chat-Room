@@ -1,5 +1,11 @@
+import time
+import uuid
+from network.network_manager import NetworkManager
+from server import dynamic_discovery
 from utills.logger import setup_logger
 import logging
+from roles.leader import Leader
+from roles.follower import Follower
 
 DEBUG = True  # or False
 
@@ -8,11 +14,11 @@ if DEBUG:
 else:
     setup_logger(logging.INFO)
 
-class Server:
-    def __init__(self, server_id, config):
-        self.server_id = server_id
-        self.state = "INIT"     # INIT / FOLLOWER / LEADER / CANDIDATE
-        
+class StartupEngine:
+    def __init__(self, config):
+        # create unique server ID
+        self.server_id = str(uuid.uuid4())
+
         # --- Core modules ---
         # self.comm = Communication(config)
         # self.discovery = Discovery(self.comm)
@@ -21,27 +27,23 @@ class Server:
         # self.election = ElectionManager(self)
         # self.recovery = RecoveryManager(self)
         # self.chat = ChatroomManager(self)
-        
-        self.leader_addr = None
     
-    def start(self):
+    def start(self, self_ip):
         # 1. 启动通信
-        self.comm.start()
+        # self.comm.start()
         
         # 2. 进入 discovery
-        self.state = "DISCOVERY"
-        leader_addr = self.discovery.discover_leader()
-        
-        if leader_addr:
-            self.become_follower(leader_addr)
+        current_identity = dynamic_discovery(self_ip) #使用当前IP进行动态发现
+
+        # 生成对应的network manager
+        network_manager, leader_address = NetworkManager(ip_local=self_ip)
+
+        if current_identity == "follower":
+            Follower(self.server_id, network_manager, leader_address).start()
         else:
-            self.become_leader()
-        
-        # 3. 主循环（事件驱动）
-        while True:
-            self.handle_events()
+            Leader(self.server_id, network_manager).start()
     
-    # --------------------
+'''   # --------------------
     # State transitions
     # --------------------
     
@@ -95,7 +97,7 @@ class Server:
     def handle_events(self):
         msg = self.comm.receive()
         
-        if msg["type"] == "HEARTBEAT":
+        if msg["type"] == "HEARTBEAT": 
             self.heartbeat.handle_heartbeat(msg)
         
         elif msg["type"] == "HEARTBEAT_TIMEOUT":
@@ -123,3 +125,21 @@ class Server:
         
         elif msg["type"] == "SERVER_CRASH" and self.state == "LEADER":
             self.recovery.handle_server_crash(msg["server_id"])
+'''
+# modify1: move startup code into main.py
+if __name__ == '__main__':
+    MY_IP = input("请输入服务器 IP 地址: ")
+    print(f"Starting server with IP: {MY_IP}")
+
+    startup_engine = StartupEngine(MY_IP)
+    startup_engine.start(MY_IP)
+
+    # 保持主线程运行，让后台监听线程继续工作
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\n[Server] Shutting down...")
+        # modify: move the start od dynamic_discovery into startupengine
+        # if current_server._role_instance:
+        #    current_server._role_instance.shutdown()
