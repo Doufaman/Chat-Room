@@ -1,6 +1,6 @@
 
 class VectorClock:
-    def __init__(self, client_id, initial_users=None):
+    def __init__(self, client_id=None, initial_users=None):
         """
         initialize a vector clock for a lately joined client
         :param client_id: Unique identifier for the client 
@@ -8,7 +8,8 @@ class VectorClock:
         """
         self.client_id = client_id
         self.clock = {}
-        self.clock[client_id] = 0
+        if client_id != None:
+         self.clock[client_id] = 0
         if initial_users:
             for user in initial_users:
                     self.clock[user] = 0

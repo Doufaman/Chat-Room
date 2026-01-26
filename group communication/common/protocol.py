@@ -32,7 +32,7 @@ def safe_print(content):
     # ANSI Escape Codes:
     # \r - Move cursor to start of line
     # \033[K - Clear line from cursor to end
-    sys.stdout.write('\r\033[K') 
+    sys.stdout.write('\r\033[K')  
     print(content)
     sys.stdout.write('Enter Message: ')
     sys.stdout.flush() 

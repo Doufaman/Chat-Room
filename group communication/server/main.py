@@ -28,7 +28,7 @@ class ChatServer:
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-        self.vector_clock = VectorClock("chatting group TEST SERVER")  #the server's vector clock
+        self.vector_clock = VectorClock()  #the server's vector clock
 
     def start(self):
         """start the server to accept clients"""
@@ -71,6 +71,11 @@ class ChatServer:
                 if message['type'] == TYPE_JOIN: 
                     with self.lock:
                         self.vector_clock.add_entry(message['sender'])
+                        self.vector_clock.merge(message['vector_clock'])
+                        print(f" DEBUG: (Server) Added {message['sender']}. New Clock: {self.vector_clock.clock}")
+
+                with self.lock:
+                    self.vector_clock.merge(message['vector_clock']) # Update server's vector clock
 
                 self.msg_queue.put((client_socket, message))
 
@@ -88,15 +93,15 @@ class ChatServer:
                 # Use a snapshot of clients list to be safe
                 for client in list(self.clients):
                     try:
-                        if message['type'] == TYPE_JOIN:
-                            # FIX: Create a COPY of the message to avoid modifying the original dict in the queue
-                            # sends the current vector clock of server to all clients (Sync point)
-                            join_msg = message.copy()
-                            join_msg['vector_clock'] = self.vector_clock.copy()
-                            send_message(client, join_msg)
-                        else:
-                            if client != sender_socket:
-                                send_message(client, message)
+                            if message['type'] == TYPE_JOIN:
+                                # FIX: Create a COPY of the message to avoid modifying the original dict in the queue
+                                # sends the current vector clock of server to all clients (Sync point)
+                                join_msg = message.copy()
+                                join_msg['vector_clock'] = self.vector_clock.copy()
+                                send_message(client, join_msg)
+                            else:
+                                if client != sender_socket:
+                                    send_message(client, message)
                     except Exception as e:
                             print(f"Error while sending to a client: {e}")
 

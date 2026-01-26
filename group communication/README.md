@@ -4,6 +4,14 @@
 
 ---
 
+Server:
+Main Thread: for listening to newly joined client, then creates a unique thread for it
+Unique Thread: especially for listening to certain client with TCP connection 
+Global Queue 
+Get message from unique thread
+Give message to multicast thread 
+Multicast Thread: fetch the messages from global queue and send messages to all clients 
+
 ### 1. 推荐的仓库目录结构
 
 你可以按照功能逻辑将代码分为：**协议定义**、**网络层包装**、以及**业务逻辑（Server/Client）**。
