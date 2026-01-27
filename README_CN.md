@@ -3,8 +3,8 @@
 ——Shu Ruiyi<br>
 README_CN 提供关于我这部分代码的说明。<br>
 目前实现动态发现（除注册外）的功能，即server启动发送WHO_IS_LEADER寻找leader，根据有无回复选择初始化为leader或follower<br>
-IP存在问题，实际上收发信息时用的物理IP都是本机IP，但是在逻辑上根据自定义IP对server进行区分，在代码中也进行区分：<br>
-ip_local和MY_IP指自定义IP，socket中出现的addr指自动获取的本机IP，我无法更改。
+目前正在做的：<br>
+尝试解决自定义IP问题，role切换功能，注册功能
 ## 运行方法
 ### Server
 在终端运行，输入自定义IP
