@@ -1,11 +1,8 @@
-
 import time
-
 import socket
-
-
-#from roles.backup import Backup 
-
+import json
+#import threading
+#from typing import Type, Dict, Optional
 
 
 '''
@@ -43,11 +40,12 @@ class RoleManager:
             # 启动网络监听
             self.network_manager.start_listening()
 
-            print(f"[Server] Initialized role: {role_name}")'''
+            print(f"[Server] Initialized role: {role_name}")
+'''
 
 
 def dynamic_discovery(ip_local, timeout = 3.0):
-    print(f"[Server] Discovery phase started. Waiting {timeout}s for Leader response...")
+    print(f"[dynamic_discovery] Discovery phase started. Waiting {timeout}s for Leader response...")
 
     # try to find leader
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -64,17 +62,19 @@ def dynamic_discovery(ip_local, timeout = 3.0):
         broad_msg = {"msg_type": "WHO_IS_LEADER",
                      "message": "hey",
                      "sender_ip": ip_local}
-        sock.sendto(broad_msg.encode(), ('255.255.255.255', 9000))
-        time.sleep(0.5) #确保广播发出去
+        broad_msg_str = json.dumps(broad_msg, ensure_ascii=False)
+        sock.sendto(broad_msg_str.encode(), ('255.255.255.255', 9000))
+        time.sleep(0.5) #我停着玩的
         
         while True:
             try:
                 data, addr = sock.recvfrom(1024)
-                received_msg = data.decode()
+                received_msg_str = data.decode()
                 # TODO2: modify message format
-                msg_type = received_msg.get("msg_type")
-                message = received_msg.get("message")
-                sender_ip = received_msg.get("sender_ip")
+                received_msg_dic = json.loads(received_msg_str)
+                msg_type = received_msg_dic.get("msg_type")
+                message = received_msg_dic.get("message")
+                sender_ip = received_msg_dic.get("sender_ip")
                 if sender_ip == ip_local: # 忽略自己发出的广播
                     continue
                 
@@ -97,11 +97,6 @@ def dynamic_discovery(ip_local, timeout = 3.0):
                 return "leader", None
     finally:
         sock.close()
-
-
-
-
-
 
 
 

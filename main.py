@@ -1,11 +1,14 @@
 import time
 import uuid
-from network.network_manager import NetworkManager
-from server import dynamic_discovery
+
 from utills.logger import setup_logger
 import logging
-from roles.leader import Leader
-from roles.follower import Follower
+
+from network.network_manager import NetworkManager
+
+from server.roles.leader import Leader
+from server.roles.follower import Follower
+from server.dynamic_discovery import dynamic_discovery
 
 DEBUG = True  # or False
 
@@ -15,8 +18,12 @@ else:
     setup_logger(logging.INFO)
 
 class StartupEngine:
-    def __init__(self, config):
+    def __init__(self,
+                 self_ip,
+                 #config
+                 ):
         # create unique server ID
+        self.self_ip = self_ip
         self.server_id = str(uuid.uuid4())
 
         # --- Core modules ---
@@ -33,17 +40,18 @@ class StartupEngine:
         # self.comm.start()
         
         # 2. 进入 discovery
-        current_identity = dynamic_discovery(self_ip) #使用当前IP进行动态发现
+        current_identity, leader_address = dynamic_discovery(ip_local = self_ip) #使用当前IP进行动态发现
 
         # 生成对应的network manager
-        network_manager, leader_address = NetworkManager(ip_local=self_ip)
+        #network_manager, leader_address = NetworkManager(ip_local=self_ip)
+        network_manager = NetworkManager(ip_local=self_ip)
 
         if current_identity == "follower":
             Follower(self.server_id, network_manager, leader_address).start()
         else:
             Leader(self.server_id, network_manager).start()
     
-'''   # --------------------
+    # --------------------
     # State transitions
     # --------------------
     
@@ -125,11 +133,11 @@ class StartupEngine:
         
         elif msg["type"] == "SERVER_CRASH" and self.state == "LEADER":
             self.recovery.handle_server_crash(msg["server_id"])
-'''
+
 # modify1: move startup code into main.py
 if __name__ == '__main__':
     MY_IP = input("请输入服务器 IP 地址: ")
-    print(f"Starting server with IP: {MY_IP}")
+    print(f"[Server] Starting server with IP: {MY_IP}")
 
     startup_engine = StartupEngine(MY_IP)
     startup_engine.start(MY_IP)

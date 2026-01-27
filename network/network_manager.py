@@ -7,6 +7,7 @@ Implement the following functions:
 
 import socket
 import threading
+import json
 
 PORT_UNICAST = 9001
 PORT_BROADCAST = 9000
@@ -40,25 +41,39 @@ class NetworkManager:
     def message_encode(self,  
                     message_type,
                     message):
-        data = f"{message_type}|{message}|{self.ip_local}"
-        return data.encode()
+        data = {"msg_type": message_type,
+                "message": message,
+                "sender_ip": self.ip_local
+        }
+        data_str = json.dumps(data, ensure_ascii=False)
+        return data_str.encode()
     
     def message_decode(self, data):
-        data = data.decode()
-        message_type, message, sender_ip = data.split("|") # message里面有|就寄了
+        data_dic = json.loads(data.decode())
+        message_type = data_dic.get("msg_type")
+        message = data_dic.get("message")   
+        sender_ip = data_dic.get("sender_ip")
         return message_type, message, sender_ip
 
 
     # send message functions
-    def send_unicast(self, target_ip, message_type,message):
+    def send_unicast(self, 
+                     target_ip,
+                     target_port, 
+                     message_type,
+                     message):
         # TCP unicast send
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            s.connect((target_ip, self.port_unicast))
+            s.bind((self.ip_local,target_port))
+            #s.connect((target_ip, self.port_unicast))
             data = self.message_encode(message_type, message)
-            s.sendall(data)
+            #s.sendall(data)
+            s.sendto(data, (target_ip, target_port))
 
-    def send_broadcast(self, message_type,message):
+    def send_broadcast(self, 
+                       message_type,
+                       message):
         """UDP 广播发送"""
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -68,6 +83,7 @@ class NetworkManager:
             data = self.message_encode(message_type, message)
             s.sendto(data, ('<broadcast>', self.port_broadcast))
 
+    #没调好
     def send_multicast(self, message_type,message):
         """UDP 组播发送"""
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as s:

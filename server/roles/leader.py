@@ -20,7 +20,6 @@ class Leader(Role):
         self.network_manager.start_listening()
         
         print(f"[Server] Initialized role: {self._identity}, Server ID: {self.server_id}")
-
         print("[Leader] Setting up leader role...")
          
 
