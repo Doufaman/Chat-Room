@@ -1,6 +1,7 @@
 #This file defines the message format sent between components in the group communication
 import json 
 import sys
+import os
 
 """This defines the message types"""
 TYPE_JOIN = 'JOIN'
@@ -28,12 +29,22 @@ def decode_message(message_str):
     return json.loads(message_str.decode('utf-8'))
 
 def safe_print(content):
-    """print the message to avoid console conflicts"""
-    # ANSI Escape Codes:
-    # \r - Move cursor to start of line
-    # \033[K - Clear line from cursor to end
-    sys.stdout.write('\r\033[K')  
+    """
+    Safely print a message to the console without disrupting the user's input line.
+    Works on Windows and Unix-like systems.
+    """
+    # 1. Clear the current line (where "Your message: " might be)
+    if os.name == 'nt':
+        # Windows: Move to start (\r), overwrite with spaces, move back to start
+        sys.stdout.write('\r' + ' ' * 80 + '\r')
+    else:
+        # macOS/Linux: Move to start (\r), clear line (\033[K)
+        sys.stdout.write('\r\033[K')
+
+    # 2. Print the actual message (new line)
     print(content)
-    sys.stdout.write('Enter Message: ')
-    sys.stdout.flush() 
-    
+
+    # 3. Restore the input prompt
+    sys.stdout.write("Your message: ")
+    sys.stdout.flush()
+

@@ -88,6 +88,8 @@ class ChatClient:
                             messages_to_deliver.extend(self._check_buffer_locked())
                         else:
                             # print(f" DEBUG: Hold back msg from {sender}. My: {self.vector_clock.clock} vs Msg: {received_clock}")
+                            safe_print(f" [DEBUG] Hold back msg from {sender}. My: {self.vector_clock.clock} vs Msg: {received_clock}")
+                            
                             self.hold_back_queue.append(message) # Add to buffer
 
                 # --- CRITICAL SECTION END ---
@@ -135,22 +137,11 @@ class ChatClient:
 
     def main_thread(self):
         """Handles user input and sending"""
-        safe_print(f"Welcome {self.userid}! Type your messages below.")
+        safe_print(f"NOTE: Welcome {self.userid}! Type your messages below.")
         
         while True:
             try:
-                # Use sys.stdin to correspond with safe_print's raw stdout manipulation
-                sys.stdout.write("Your message: ")
-                sys.stdout.flush()
-                
-                line = sys.stdin.readline()
-                if not line:
-                    break
-                
-                content = line.strip()
-                if not content:
-                    continue
-
+                content = input("Your message: ")  
                 # --- CRITICAL SECTION START ---
                 # Only lock for Clock Update
                 with self.lock:
