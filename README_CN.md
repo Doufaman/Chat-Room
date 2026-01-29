@@ -8,23 +8,24 @@
 
 ## 运行方法
 ### Server
-在终端运行，输入自定义IP
+在终端运行main_server.py，输入自定义IP，单机测试需使用指定IP，详见IP配制
 ### Client
+在终端运行main_client.py
 
 ## 配制说明
 默认所有设备在同一局域网(LAN)内
 ### IP配制
 #### Server IP (静态)
-测试使用的server IP：<br>
-192.168.1.101<br>
-192.168.1.102<br>
+单机调试使用的server IP：<br>
+127.0.0.1<br>
+127.0.0.2<br>
 ……
 
 #### Client IP (动态)
 随意设置，不要用特殊IP
 
 #### others
-broadcast: 192.168.1.255（针对测试IP）或255.255.255.255
+broadcast: 255.255.255.255
 multicast: 224.0.0.100
 
 ### port配制

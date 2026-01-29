@@ -11,8 +11,10 @@ class Follower(Role):
         self.network_manager = network_manager
         self._identity = "FOLLOWER"
         self._running = True
-        self.known_servers = set()
+        self.membership_list = {}
         self.leader_address = leader_address
+
+        self.network_manager.set_callback(self.handle_messages)
 
         self.start()
 
@@ -21,6 +23,24 @@ class Follower(Role):
         # 启动网络监听
         self.network_manager.start_listening()
         print(f"[Server] Initialized role: {self._identity}, Server ID: {self.server_id}")
+
+        if self.leader_address:
+            self.register(self.leader_address)
+
+    def register(self, leader_addr):
+        print(f"[Follower] Registering with leader at {leader_addr}...")
+        self.network_manager.send_unicast(
+            leader_addr,
+            9001,
+            "FOLLOWER_REGISTER",
+            {"follower_id": self.server_id, "follower_ip": self.network_manager.ip_local}
+        )
+
+    def handle_messages(self, msg_type, message, ip_sender):
+        if msg_type == "REGISTER_ACK":
+            leader_id = message.get("leader_id")
+            self.membership_list = message.get("membership_list", {})
+            print(f'[Follower] Registered with Leader {leader_id}. Current membership list: {self.membership_list}')
 
     def run(self):
         pass

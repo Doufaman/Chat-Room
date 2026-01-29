@@ -9,6 +9,7 @@ import socket
 import threading
 import json
 
+# these ports only uesd for receiving messages
 PORT_UNICAST = 9001
 PORT_BROADCAST = 9000
 PORT_MULTICAST = 9002
@@ -62,14 +63,17 @@ class NetworkManager:
                      target_port, 
                      message_type,
                      message):
-        # TCP unicast send
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            s.bind((self.ip_local,target_port))
-            #s.connect((target_ip, self.port_unicast))
-            data = self.message_encode(message_type, message)
-            #s.sendall(data)
-            s.sendto(data, (target_ip, target_port))
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                #s.bind((self.ip_local,target_port))
+                s.bind((self.ip_local,0)) # 让系统自动分配端口
+                s.connect((target_ip, self.port_unicast))
+                data = self.message_encode(message_type, message)
+                s.sendall(data)
+                #s.sendto(data, (target_ip, target_port))
+        except Exception as e:
+            print(f"[NetworkManager] Unicast send error: {e}")
 
     def send_broadcast(self, 
                        message_type,
@@ -81,7 +85,7 @@ class NetworkManager:
             if hasattr(socket, 'SO_REUSEPORT'):
                 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
             data = self.message_encode(message_type, message)
-            s.sendto(data, ('<broadcast>', self.port_broadcast))
+            s.sendto(data, (IP_BROADCAST, self.port_broadcast))
 
     #没调好
     def send_multicast(self, message_type,message):
@@ -106,23 +110,26 @@ class NetworkManager:
             server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             if hasattr(socket, 'SO_REUSEPORT'):
                 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-            server.bind(('0.0.0.0', self.port_unicast)) # 绑定所有网卡
+            #server.bind(('0.0.0.0', self.port_unicast)) # 绑定所有网卡
+            server.bind((self.ip_local, self.port_unicast))
             server.listen(5)
             while True:
                 conn, addr = server.accept()
                 with conn:
                     data = conn.recv(1024)
                     if data and self.on_message_received:
-                        msg_type, content, sender_ip = self.message_decode(data)
-                        # 触发回调给 Leader
-                        self.on_message_received(msg_type, addr)
+                        msg_type, message, sender_ip = self.message_decode(data)
+                        # 触发回调给 Leader，传递正确的参数
+                        self.on_message_received(msg_type, message, sender_ip)
 
     def receive_broadcast(self):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            sock.bind(('', self.port_broadcast))
+            sock.bind(('0.0.0.0', self.port_broadcast))
+            #sock.bind((self.ip_local, self.port_broadcast))
             while True:
                 data, addr = sock.recvfrom(1024)
+                print(addr)
                 if addr[0] == self.ip_local: # 忽略自己发出的广播
                     continue
                 if data and self.on_message_received:
