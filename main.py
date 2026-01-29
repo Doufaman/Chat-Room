@@ -1,5 +1,8 @@
 import time
 import uuid
+import sys
+import signal
+import threading
 
 from utills.logger import setup_logger
 import logging
@@ -9,6 +12,8 @@ from network.network_manager import NetworkManager
 from server.roles.leader import Leader
 from server.roles.follower import Follower
 from server.dynamic_discovery import dynamic_discovery
+from server.consensus import ConsensusManager
+from server.config import SERVERS, CLIENT_PORT_BASE
 
 DEBUG = True  # or False
 
@@ -17,86 +22,159 @@ if DEBUG:
 else:
     setup_logger(logging.INFO)
 
+# Global flag for graceful shutdown
+STOP_EVENT = threading.Event()
+
 class StartupEngine:
-    def __init__(self,
-                 self_ip,
-                 #config
-                 ):
-        # create unique server ID
+    def __init__(self, server_id, self_ip):
+        """
+        Initialize the server
+        :param server_id: Unique server ID (integer)
+        :param self_ip: IP address of this server
+        """
+        self.server_id = server_id
         self.self_ip = self_ip
-        self.server_id = str(uuid.uuid4())
-
-        # --- Core modules ---
-        # self.comm = Communication(config)
-        # self.discovery = Discovery(self.comm)
-        # self.membership = MembershipManager()
-        # self.heartbeat = HeartbeatManager(self)
-        # self.election = ElectionManager(self)
-        # self.recovery = RecoveryManager(self)
-        # self.chat = ChatroomManager(self)
-    
-    def start(self, self_ip):
-        # 1. 启动通信
-        # self.comm.start()
         
-        # 2. 进入 discovery
-        current_identity, leader_address = dynamic_discovery(ip_local = self_ip) #使用当前IP进行动态发现
-
-        # 生成对应的network manager
-        #network_manager, leader_address = NetworkManager(ip_local=self_ip)
-        network_manager = NetworkManager(ip_local=self_ip)
-
-        if current_identity == "follower":
-            Follower(self.server_id, network_manager, leader_address).start()
+        # Calculate client port
+        self.client_port = CLIENT_PORT_BASE + server_id
+        
+        # Core modules
+        self.consensus = None
+        self.role_instance = None
+        self.network_manager = None
+        self.chatroom_manager = None  # Shared chatroom manager
+    
+    def start(self):
+        """Start the server with consensus-based leader election"""
+        print(f"[Server] Starting Server {self.server_id} at {self.self_ip}")
+        
+        # 1. Start Chatroom Manager (shared across all roles)
+        from server.chatroom_manager import ChatroomManager
+        self.chatroom_manager = ChatroomManager(self.server_id, self.client_port)
+        threading.Thread(target=self.chatroom_manager.start, daemon=True).start()
+        print(f"[Server] ChatroomManager started on port {self.client_port}")
+        
+        # 2. Start Consensus Module (Bully Algorithm)
+        print(f"[Server] Starting Consensus Manager...")
+        self.consensus = ConsensusManager(
+            my_id=self.server_id,
+            my_ip=self.self_ip,
+            peers_config=SERVERS
+        )
+        self.consensus.start()
+        
+        # 3. Wait for leader election to complete
+        print(f"[Server] Waiting for leader election...")
+        time.sleep(5)  # Give time for election
+        
+        # 4. Initialize role based on consensus state
+        if self.consensus.state == "LEADER":
+            self.become_leader()
         else:
-            Leader(self.server_id, network_manager).start()
-    
-    # --------------------
-    # State transitions
-    # --------------------
-    
-    def become_follower(self, leader_addr):
-        self.state = "FOLLOWER"
-        self.leader_addr = leader_addr
+            leader_id = self.consensus.current_leader_id
+            self.become_follower(leader_id)
         
-        # 向 leader 注册: 要携带目前的load_info和address信息(?)
-        self.comm.send(leader_addr, {
-            "type": "JOIN_SERVER",
-            "server_id": self.server_id
-        })
+        # 5. Monitor for role changes
+        self.monitor_role_changes()
+    
+    def become_follower(self, leader_id):
+        """Transition to follower role"""
+        print(f"[Server] Becoming FOLLOWER. Leader is Server {leader_id}")
         
-        # 启动 follower 心跳
-        self.heartbeat.start_follower_heartbeat()
+        # Initialize network manager
+        if self.network_manager is None:
+            self.network_manager = NetworkManager(ip_local=self.self_ip)
+        
+        # Create follower instance with shared chatroom_manager
+        self.role_instance = Follower(
+            server_id=self.server_id,
+            network_manager=self.network_manager,
+            consensus_manager=self.consensus,
+            leader_address=leader_id,
+            chatroom_manager=self.chatroom_manager
+        )
+        self.role_instance.start()
     
     def become_leader(self):
-        self.state = "LEADER"
-        self.leader_addr = self.get_own_address()
+        """Transition to leader role"""
+        print(f"[Server] Becoming LEADER")
         
-        # 初始化 membership
-        self.membership.add_server(self.server_id, self.leader_addr)
+        # Initialize network manager
+        if self.network_manager is None:
+            self.network_manager = NetworkManager(ip_local=self.self_ip)
         
-        # 启动 leader 心跳与 timeout 检测
-        self.heartbeat.start_leader_heartbeat()
-        self.heartbeat.start_timeout_checker()
+        # Create leader instance with shared chatroom_manager
+        self.role_instance = Leader(
+            server_id=self.server_id,
+            network_manager=self.network_manager,
+            consensus_manager=self.consensus,
+            chatroom_manager=self.chatroom_manager
+        )
+        self.role_instance.start()
     
-    def become_candidate(self):
-        self.state = "CANDIDATE"
+    def monitor_role_changes(self):
+        """Monitor consensus state and handle role transitions"""
+        last_state = self.consensus.state
         
-        # 停止普通 heartbeat
-        self.heartbeat.stop()
-        
-        # 发起选举
-        self.election.start_election()
+        while not STOP_EVENT.is_set():
+            current_state = self.consensus.state
+            
+            # Detect state change
+            if current_state != last_state:
+                print(f"[Server] State changed: {last_state} -> {current_state}")
+                
+                # Shutdown current role
+                if self.role_instance:
+                    print(f"[Server] Shutting down old role...")
+                    self.role_instance.shutdown()
+                    # Wait for graceful shutdown
+                    time.sleep(1)
+                    self.role_instance = None
+                
+                # Transition to new role
+                if current_state == "LEADER":
+                    self.become_leader()
+                elif current_state == "FOLLOWER":
+                    leader_id = self.consensus.current_leader_id
+                    if leader_id:
+                        self.become_follower(leader_id)
+                
+                last_state = current_state
+            
+            time.sleep(1)
+
+def signal_handler(sig, frame):
+    """Handle Ctrl+C for graceful shutdown"""
+    print("\n[!] Ctrl+C pressed. Shutting down...")
+    STOP_EVENT.set()
+    sys.exit(0)
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python main.py <server_id>")
+        print("Example: python main.py 1")
+        print("\nAvailable servers:")
+        for server in SERVERS:
+            print(f"  Server {server['id']}: {server['host']} (TCP: {server['tcp_port']}, UDP: {server['udp_port']})")
+        sys.exit(1)
+
+    server_id = int(sys.argv[1])
     
-    # --------------------
-    # Helper methods
-    # --------------------
+    # Find server configuration
+    server_config = next((s for s in SERVERS if s['id'] == server_id), None)
+    if not server_config:
+        print(f"[!] Server ID {server_id} not found in configuration")
+        sys.exit(1)
     
-    def get_own_address(self):
-        """获取本服务器的地址"""
-        # 需要根据实际网络配置实现
-        # 这里返回一个占位符
-        return f"server_{self.server_id}_addr"
+    self_ip = server_config['host']
+    
+    # Setup signal handler
+    signal.signal(signal.SIGINT, signal_handler)
+    
+    # Start server
+    engine = StartupEngine(server_id, self_ip)
+    engine.start()
+
     
     # --------------------
     # Event handlers

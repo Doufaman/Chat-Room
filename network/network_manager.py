@@ -8,6 +8,7 @@ Implement the following functions:
 import socket
 import threading
 import json
+import struct
 
 PORT_UNICAST = 9001
 PORT_BROADCAST = 9000
@@ -15,6 +16,10 @@ PORT_MULTICAST = 9002
 
 IP_BROADCAST = '255.255.255.255'
 IP_MULTICAST = '224.0.0.1'
+
+# TCP message header for length-prefix framing
+HEADER_FORMAT = '!I'  
+HEADER_SIZE = struct.calcsize(HEADER_FORMAT)
 
 class NetworkManager:
     def __init__(self, 
@@ -62,14 +67,19 @@ class NetworkManager:
                      target_port, 
                      message_type,
                      message):
-        # TCP unicast send
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            s.bind((self.ip_local,target_port))
-            #s.connect((target_ip, self.port_unicast))
-            data = self.message_encode(message_type, message)
-            #s.sendall(data)
-            s.sendto(data, (target_ip, target_port))
+        """TCP unicast send with length-prefix framing"""
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                s.connect((target_ip, target_port))
+                data = self.message_encode(message_type, message)
+                # Add length prefix
+                pkg_header = struct.pack(HEADER_FORMAT, len(data))
+                pkg = pkg_header + data
+                s.sendall(pkg)
+        except Exception as e:
+            print(f"[NetworkManager] Error sending unicast to {target_ip}:{target_port}: {e}")
+            raise e
 
     def send_broadcast(self, 
                        message_type,
@@ -102,6 +112,7 @@ class NetworkManager:
         #threading.Thread(target=self.receive_multicast, daemon=True).start()
 
     def receive_unicast(self):
+        """TCP server receive with length-prefix framing"""
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
             server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             if hasattr(socket, 'SO_REUSEPORT'):
@@ -110,16 +121,50 @@ class NetworkManager:
             server.listen(5)
             while True:
                 conn, addr = server.accept()
-                with conn:
-                    data = conn.recv(1024)
-                    if data and self.on_message_received:
-                        msg_type, content, sender_ip = self.message_decode(data)
-                        # 触发回调给 Leader
-                        self.on_message_received(msg_type, addr)
+                threading.Thread(target=self._handle_tcp_connection, args=(conn, addr), daemon=True).start()
+
+    def _handle_tcp_connection(self, conn, addr):
+        """Handle a TCP connection in a separate thread"""
+        try:
+            with conn:
+                while True:
+                    # Read header (4 bytes for message length)
+                    header = self._read_exact(conn, HEADER_SIZE)
+                    if not header:
+                        break
+                    
+                    body_len = struct.unpack(HEADER_FORMAT, header)[0]
+                    
+                    # Read body
+                    body = self._read_exact(conn, body_len)
+                    if not body:
+                        break
+                    
+                    if self.on_message_received:
+                        msg_type, content, sender_ip = self.message_decode(body)
+                        self.on_message_received(msg_type, content, sender_ip)
+        except Exception as e:
+            print(f"[NetworkManager] TCP connection error from {addr}: {e}")
+
+    def _read_exact(self, sock, n):
+        """Helper to read exactly n bytes from socket"""
+        data = bytearray()
+        while len(data) < n:
+            try:
+                packet = sock.recv(n - len(data))
+                if not packet:
+                    return None
+                data.extend(packet)
+            except OSError:
+                return None
+        return bytes(data)
 
     def receive_broadcast(self):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            # For macOS/BSD: SO_REUSEPORT is required to bind multiple processes to same port
+            if hasattr(socket, 'SO_REUSEPORT'):
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
             sock.bind(('', self.port_broadcast))
             while True:
                 data, addr = sock.recvfrom(1024)
