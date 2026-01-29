@@ -9,10 +9,11 @@ class Follower(Role):
         super().__init__()
         self.server_id = server_id
         self.network_manager = network_manager
-        self._identity = "FOLLOWER"
+        self.identity = "FOLLOWER"
         self._running = True
         self.membership_list = {}
         self.leader_address = leader_address
+        self.leader_latest_heartbeat = time.time()
 
         self.network_manager.set_callback(self.handle_messages)
 
@@ -22,7 +23,7 @@ class Follower(Role):
         pass
         # 启动网络监听
         self.network_manager.start_listening()
-        print(f"[Server] Initialized role: {self._identity}, Server ID: {self.server_id}")
+        print(f"[Server] Initialized role: {self.identity}, Server ID: {self.server_id}")
 
         if self.leader_address:
             self.register(self.leader_address)

@@ -40,13 +40,13 @@ class StartupEngine:
         # self.comm.start()
         
         # 2. 进入 discovery
-        current_identity, leader_address = dynamic_discovery(ip_local = self_ip) #使用当前IP进行动态发现
+        currentidentity, leader_address = dynamic_discovery(ip_local = self_ip) #使用当前IP进行动态发现
 
         # 生成对应的network manager
         #network_manager, leader_address = NetworkManager(ip_local=self_ip)
         network_manager = NetworkManager(ip_local=self_ip)
 
-        if current_identity == "follower":
+        if currentidentity == "follower":
             Follower(self.server_id, network_manager, leader_address).start()
         else:
             Leader(self.server_id, network_manager).start()

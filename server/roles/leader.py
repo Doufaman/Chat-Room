@@ -8,12 +8,7 @@ class Leader(Role):
         super().__init__()
         self.server_id = server_id
         self.network_manager = network_manager
-        self._identity = "LEADER"
-        #服务器列表
-        self.menbership_list = {
-            self.server_id: self.network_manager.ip_local
-        }
-
+        self.identity = "LEADER"
         self.network_manager.set_callback(self.handle_messages)
         self._running = True
         #self.known_servers = set()
@@ -24,7 +19,7 @@ class Leader(Role):
         # 启动网络监听
         self.network_manager.start_listening()
         
-        print(f"[Server] Initialized role: {self._identity}, Server ID: {self.server_id}")
+        print(f"[Server] Initialized role: {self.identity}, Server ID: {self.server_id}")
         print("[Leader] Setting up leader role...")
          
 

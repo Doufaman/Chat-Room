@@ -5,6 +5,9 @@
 # ==================================================
 
 DEBUG = True
+ACTIVE = "ACTIVE"
+SUSPECT = "SUSPECT"
+DEAD = "DEAD"
 
 # ==================================================
 # Network / Communication
@@ -16,6 +19,9 @@ DEBUG = True
 # Heartbeat / Fault Tolerance
 # ==================================================
 
+HEARTBEAT_INTERVAL = 3  # seconds
+HEARTBEAT_LEADER_TIMEOUT = 6  # seconds
+HEARTBEAT_SERVER_TIMEOUT = 10  # seconds
 
 
 # ==================================================

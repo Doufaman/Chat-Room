@@ -3,14 +3,9 @@
 from typing import Dict, List, Optional
 import time
 from utills.logger import get_logger
-from config import MAX_SERVERS_PER_GROUP
+from config import MAX_SERVERS_PER_GROUP, ACTIVE, SUSPECT, DEAD
 
 logger = get_logger("membership")
-
-class ServerStatus:
-    ACTIVE = "ACTIVE"
-    SUSPECT = "SUSPECT"
-    DEAD = "DEAD"
 
 
 class MembershipManager:
@@ -71,7 +66,7 @@ class MembershipManager:
         
         # add server data
         self.servers[server_id] = {
-            "status": ServerStatus.ACTIVE,
+            "status": ACTIVE,
             "last_heartbeat_ts": time.time(),
             "load_info": load_info if load_info is not None else {},
             "address": address
@@ -110,9 +105,9 @@ class MembershipManager:
             return
 
         if status not in (
-            ServerStatus.ACTIVE,
-            ServerStatus.SUSPECT,
-            ServerStatus.DEAD,
+            ACTIVE,
+            SUSPECT,
+            DEAD,
         ):
             logger.error(f"invalid server status: {status}")
             return
@@ -125,7 +120,17 @@ class MembershipManager:
             f"{old_status} -> {status}"
         )      
 
-    def update_heartbeat(self, server_id: str):
+    def get_serrver_status(self, server_id: str):
+        """
+        Get server status.
+        """
+        pass
+        if not server_id in self.servers:
+            logger.warning(f"server {server_id} is not existed")
+            return ""
+        return self.servers[server_id]["status"]
+
+    def update_heartbeat(self, server_id: str, timestamp: float):
         """
         Update last heartbeat timestamp of a server.
         """
@@ -133,7 +138,7 @@ class MembershipManager:
         if not server_id in self.servers:
             logger.warning(f"server {server_id} is not existed")
             return 
-        self.servers[server_id]["last_heartbeat_ts"] = time.time()
+        self.servers[server_id]["last_heartbeat_ts"] = timestamp
 
         
 
@@ -153,9 +158,9 @@ class MembershipManager:
 
         
 
-    def get_active_servers(self) -> List[str]:
+    def get_active_servers(self) -> dict[str, float]:
         """
-        Return list of ACTIVE server_ids.
+        Return list of ACTIVE server_infos.
         """
         pass
         if not self.is_leader:
@@ -165,9 +170,8 @@ class MembershipManager:
         active_servers = []
 
         for server_id, info in self.servers.items():
-            if info.get("status") == ServerStatus.ACTIVE:
-                active_servers.append(server_id)
-
+            if info.get("status") == ACTIVE:
+                active_servers.append((server_id, info.get("last_heartbeat_ts")))
         return active_servers
 
     # ------------------------------------------------------------------
@@ -270,7 +274,7 @@ class MembershipManager:
         selected_server = None
         # bind chatroom to server: choose server based on load
         for srv_id in self.servers:
-            if self.servers[srv_id]["status"] != ServerStatus.ACTIVE:
+            if self.servers[srv_id]["status"] != ACTIVE:
                 continue
             load_info = self.servers[srv_id]["load_info"]
             chatroom_num = len(self.server_chatrooms.get(srv_id, []))
