@@ -36,10 +36,11 @@ class Leader(Role):
                 {"leader_id": self.server_id, "leader_ip": self.network_manager.ip_local}
             )
             #print(1)
+        # handle follower registration
         elif msg_type == "FOLLOWER_REGISTER":
             follower_id = message.get("follower_id")
             follower_ip = message.get("follower_ip")
-            print(f'[Leader] Follower {follower_id} at {follower_ip} registered.')
+            print(f'[Leader] Follower {follower_id} with IP: {follower_ip} registered.')
             self.menbership_list[follower_id] = follower_ip
             print(f'[Leader] Current membership list: {self.menbership_list}')
             self.network_manager.send_unicast(
@@ -48,6 +49,7 @@ class Leader(Role):
                 "REGISTER_ACK",
                 {"leader_id": self.server_id, "membership_list": self.menbership_list}
             )
+            #print('hhey')
 
     def run(self):
         pass

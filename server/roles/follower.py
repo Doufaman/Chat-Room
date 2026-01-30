@@ -28,16 +28,18 @@ class Follower(Role):
             self.register(self.leader_address)
 
     def register(self, leader_addr):
-        print(f"[Follower] Registering with leader at {leader_addr}...")
+        print(f"[Follower] Registering with leader at {leader_addr}")
         self.network_manager.send_unicast(
             leader_addr,
             9001,
             "FOLLOWER_REGISTER",
             {"follower_id": self.server_id, "follower_ip": self.network_manager.ip_local}
         )
+        #print(1)
 
     def handle_messages(self, msg_type, message, ip_sender):
         if msg_type == "REGISTER_ACK":
+            #print('hhey')
             leader_id = message.get("leader_id")
             self.membership_list = message.get("membership_list", {})
             print(f'[Follower] Registered with Leader {leader_id}. Current membership list: {self.membership_list}')
