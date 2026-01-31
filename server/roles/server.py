@@ -4,12 +4,12 @@ import time
 from .base import Role
 
 class Server(Role):
-    def __init__(self, server_id, network_manager, identity):
+    def __init__(self, server_id, network_manager, identity, leader_address=None):
         super().__init__()
         self.server_id = server_id
         self.network_manager = network_manager
         self._identity = identity
-        self.leader_address = None
+        self.leader_address = leader_address
         self.leader_id = None
         #服务器列表
         self.membership_list = {
@@ -40,8 +40,8 @@ class Server(Role):
         )
 
          
-    def handle_messages(self, msg_type, message, ip_sender, is_leader=True):
-        if is_leader:
+    def handle_messages(self, msg_type, message, ip_sender):
+        if self._identity == "LEADER":
             if msg_type == "WHO_IS_LEADER":
                 print(f'[{self._identity}] receive message from new PC {ip_sender}: {msg_type} {message}')
                 self.network_manager.send_broadcast(

@@ -6,8 +6,9 @@ import logging
 
 from network.network_manager import NetworkManager
 
-from server.roles.leader import Leader
-from server.roles.follower import Follower
+from server.roles.server import Server
+# from server.roles.leader import Leader
+# from server.roles.follower import Follower
 from server.dynamic_discovery import dynamic_discovery
 
 DEBUG = True  # or False
@@ -46,10 +47,13 @@ class StartupEngine:
         #network_manager, leader_address = NetworkManager(ip_local=self_ip)
         network_manager = NetworkManager(ip_local=self_ip)
 
-        if current_identity == "follower":
-            Follower(self.server_id, network_manager, leader_address).start()
-        else:
-            Leader(self.server_id, network_manager).start()
+        Server(self.server_id, network_manager, identity=current_identity, leader_address=leader_address).start()
+
+        # if current_identity == "follower":
+        #     Follower(self.server_id, network_manager, leader_address).start()
+        # else:
+        #     Leader(self.server_id, network_manager).start()
+
     
     # --------------------
     # State transitions
