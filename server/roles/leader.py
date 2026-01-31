@@ -18,8 +18,6 @@ class Leader(Role):
         self._running = True
         #self.known_servers = set()
 
-        self.start()
-
     def start(self):
         # 启动网络监听
         self.network_manager.start_listening()

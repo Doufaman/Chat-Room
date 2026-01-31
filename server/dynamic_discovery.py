@@ -12,6 +12,8 @@ def dynamic_discovery(ip_local, timeout = 3.0):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1) #允许广播
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) #允许端口复用
+    if hasattr(socket, 'SO_REUSEPORT'):
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
     sock.bind(('', 9000))  # 绑定到指定的本地IP
     sock.settimeout(timeout)
     try:

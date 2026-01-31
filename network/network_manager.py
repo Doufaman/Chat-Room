@@ -82,7 +82,7 @@ class NetworkManager:
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-            s.bind((self.ip_local,0)) # 让系统自动分配端口
+            s.bind(('',0)) # 让系统自动分配端口
             if hasattr(socket, 'SO_REUSEPORT'):
                 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
             data = self.message_encode(message_type, message)
@@ -127,15 +127,19 @@ class NetworkManager:
     def receive_broadcast(self):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            if hasattr(socket, 'SO_REUSEPORT'):
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
             sock.bind(('0.0.0.0', self.port_broadcast))
             #sock.bind((self.ip_local, self.port_broadcast))
             while True:
                 data, addr = sock.recvfrom(1024)
                 #print(addr)
-                if addr[0] == self.ip_local: # 忽略自己发出的广播
-                    continue
+                #if addr[0] == self.ip_local: # 忽略自己发出的广播
+                #    continue
                 if data and self.on_message_received:
                     msg_type, message, sender_ip = self.message_decode(data)
+                    if sender_ip == self.ip_local:
+                        continue
                     # 触发回调
                     self.on_message_received(msg_type, message, sender_ip)
 
