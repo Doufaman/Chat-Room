@@ -48,7 +48,7 @@ def dynamic_discovery(ip_local, timeout = 3.0):
                     # modify2: move initialization out of dynamic_discovery 
                     # current_server = RoleManager(ip_local=ip_local)
                     # current_server.initialize_role("follower")
-                    return "follower", sender_ip
+                    return "FOLLOWER", sender_ip
                 elif msg_type == "WHO_IS_LEADER":
                     # ignore other WHO_IS_LEADER messages
                     continue
@@ -59,7 +59,7 @@ def dynamic_discovery(ip_local, timeout = 3.0):
                 # initiallize as leader
                 # current_server = RoleManager(ip_local=ip_local)
                 # current_server.initialize_role("leader")
-                return "leader", None
+                return "LEADER", None
     finally:
         sock.close()
 
