@@ -15,6 +15,7 @@ logger = get_logger("fault_detection")
 # todo: invoke "are you alive" messages from other servers
 # todo: invoke "probe response" messages from other servers
 # todo: invoke "handle_heartbeat" from main event loop
+# todo: 所有和leader的通信带上对leader状态的检查
 class Heartbeat:
     def __init__(self, server):
         self.server = server
@@ -123,7 +124,7 @@ class Heartbeat:
                 # leader timeout detection
                 if time.time() - self.server.leader_latest_heartbeat > self.leader_timeout:
                     logger.warning("Leader heartbeat timeout detected.")
-                    #  todo: Handle leader timeout (e.g., start election and fault discovery)
+                    #  todo: Handle leader timeout (e.g., start election and servers send info to new leader)
 
     def get_suspected_servers(self, timeout):
         """Return a list of suspected servers."""

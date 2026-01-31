@@ -231,11 +231,12 @@ class MembershipManager:
         pass
         if server_id not in self.server_groups:
             logger.warning(f"server {server_id} is not assigned to any group")
-            return
+            return None
 
         group_id = self.server_groups[server_id]
         self.group_servers[group_id].remove(server_id)
         del self.server_groups[server_id]
+        return group_id
 
     def get_server_group(self, server_id: str) -> Optional[str]:
         """
@@ -296,30 +297,6 @@ class MembershipManager:
 
         return selected_server
 
-    def rebind_chatroom(self, chatroom_id: str, new_server_id: str):
-        """
-        Rebind chatroom to a new server (e.g., after crash).
-        Leader only.
-        """
-        pass
-        if not self.is_leader:
-            logger.error("illegal operation (not leader)")
-            return
-        if chatroom_id not in self.chatrooms:
-            logger.warning(f"chatroom {chatroom_id} is not bound to any server")
-            return
-
-        old_server_id = self.chatrooms[chatroom_id]
-        # update chatroom-server mapping
-        self.chatrooms[chatroom_id] = new_server_id
-        # remove from old server's chatroom list
-        if old_server_id in self.server_chatrooms:
-            self.server_chatrooms[old_server_id].remove(chatroom_id)
-        # add to new server's chatroom list
-        if new_server_id not in self.server_chatrooms:
-            self.server_chatrooms[new_server_id] = []
-        self.server_chatrooms[new_server_id].append(chatroom_id)
-        logger.info(f"chatroom {chatroom_id} rebound from server {old_server_id} to server {new_server_id}")
 
     def get_chatroom_server(self, chatroom_id: str):
         """
@@ -327,6 +304,13 @@ class MembershipManager:
         """
         pass
         return self.chatrooms.get(chatroom_id)
+    
+    def get_clients_of_chatroom(self, chatroom_id: str) -> List[str]:
+        """
+        Get all clients in a chatroom.
+        """
+        pass
+        return self.chatroom_clients.get(chatroom_id, [])
 
     def remove_chatrooms_of_server(self, server_id: str) -> List[str]:
         """
