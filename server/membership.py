@@ -7,8 +7,60 @@ from config import MAX_SERVERS_PER_GROUP, ACTIVE, SUSPECT, DEAD
 
 logger = get_logger("membership")
 
+# todo: after server resgister, notify other servers about new server(incluing group id)
+# todo: after server resgister, notify server about its group id, group members
+# todo: after chatroom bind, notify responsible server about new chatroom
+class BaseMembership:   
+    def __init__(self, is_leader: bool):
+        self.is_leader = is_leader
+        # chatroom_id -> [client_id]
+        self.chatroom_clients: Dict[str, List[str]] = {} 
+        # client_info
+        self.clients: Dict[str, Dict] = {} 
 
-class MembershipManager:
+    # ------------------------------------------------------------------
+    # Client management
+    # ------------------------------------------------------------------
+
+    def add_client(self, client_id: str, client_info: dict):
+        """
+        Add a client to the membership view.
+        Leader only.
+        """
+        pass
+        if not self.is_leader:
+            logger.error("illegal operation (not leader)")
+            return
+        if client_id in self.clients:
+            logger.warning(f"client {client_id} already exists")
+            return
+        self.clients[client_id] = client_info
+        logger.info(f"client added: {client_id}")
+
+    def remove_client(self, client_id: str):
+        """
+        Remove client from membership view.
+        """
+        pass
+        if not self.is_leader:
+            logger.error("illegal operation (not leader)")
+            return
+        if client_id not in self.clients:
+            logger.warning(f"client {client_id} does not exist")
+            return
+        del self.clients[client_id]
+        logger.info(f"client removed: {client_id}")
+
+    def get_clients_of_chatroom(self, chatroom_id: str) -> List[str]:
+        """
+        Get all clients in a chatroom.
+        """
+        pass
+        return self.chatroom_clients.get(chatroom_id, [])
+
+
+
+class LeaderMembershipManager(BaseMembership):
     """
     MembershipManager maintains the cluster view.
     It does NOT perform communication.
@@ -16,8 +68,7 @@ class MembershipManager:
     """
 
     def __init__(self, is_leader: bool):
-        self.is_leader = is_leader
-
+        super().__init__(is_leader)
         # server_id -> {
         #   status,
         #   last_heartbeat_ts,
@@ -27,7 +78,7 @@ class MembershipManager:
         self.servers: Dict[str, Dict] = {} # owner: leader
 
         # group_id -> [server_id]
-        self.groups: Dict[str, List[str]] = {} # owner: leader
+        self.group_servers: Dict[str, List[str]] = {} # owner: leader
 
         # server_id -> group_id
         self.server_groups: Dict[str, str] = {} # owner: leader
@@ -35,14 +86,9 @@ class MembershipManager:
         # server_id -> [chatroom_id]
         self.server_chatrooms: Dict[str, List[str]] = {} # owner: leader
 
-        # chatroom_id -> [client_id]
-        self.chatroom_clients: Dict[str, List[str]] = {} # owner: server
-
         # chatroom_id -> server_id
         self.chatrooms: Dict[str, str] = {} # owner: leader
 
-        # client_id -> client_info
-        self.clients: Dict[str, Dict] = {} # owner: leader
 
     # ------------------------------------------------------------------
     # Server lifecycle management
@@ -178,7 +224,7 @@ class MembershipManager:
     # Group (replication group) management
     # ------------------------------------------------------------------
 
-    def assign_group(self, server_id: str) -> str:
+    def assign_group(self, server_id: str):
         """
         Assign a server to a replication group.
         (acc to load balancing policy)
@@ -188,10 +234,11 @@ class MembershipManager:
         pass
         if not self.is_leader:
             logger.error("illegal operation (not leader)")
-            return ""
+            return "", []
         # assign group according to the number of servers and the sum of load in each group
         group_id = None
         min_load = float("inf")
+        existed_members = []
 
         for g_id, servers in self.group_servers.items():
             if len(servers) < MAX_SERVERS_PER_GROUP:
@@ -207,22 +254,23 @@ class MembershipManager:
             group_id = f"group_{len(self.group_servers)}"
             self.group_servers[group_id] = []
 
+        existed_members = self.group_servers[group_id]
         self.group_servers[group_id].append(server_id)
         self.server_groups[server_id] = group_id
 
         logger.info(f"server {server_id} assigned to group {group_id}")
 
-        return group_id
+        return group_id, existed_members
 
     def get_group_servers(self, group_id: str) -> List[str]:
         """
         Get all servers in a group.
         """
         pass
-        if group_id not in self.groups:
+        if group_id not in self.group_servers:
             logger.warning(f"group {group_id} does not exist")
             return []
-        return self.groups[group_id]
+        return self.group_servers[group_id]
 
     def remove_server_from_group(self, server_id: str):
         """
@@ -305,12 +353,7 @@ class MembershipManager:
         pass
         return self.chatrooms.get(chatroom_id)
     
-    def get_clients_of_chatroom(self, chatroom_id: str) -> List[str]:
-        """
-        Get all clients in a chatroom.
-        """
-        pass
-        return self.chatroom_clients.get(chatroom_id, [])
+
 
     def remove_chatrooms_of_server(self, server_id: str) -> List[str]:
         """
@@ -326,38 +369,6 @@ class MembershipManager:
         return affected_chatrooms
 
 
-    # ------------------------------------------------------------------
-    # Client management
-    # ------------------------------------------------------------------
-
-    def add_client(self,client_id: str, client_info: dict):
-        """
-        Add a client to the membership view.
-        Leader only.
-        """
-        pass
-        if not self.is_leader:
-            logger.error("illegal operation (not leader)")
-            return
-        if client_id in self.clients:
-            logger.warning(f"client {client_id} already exists")
-            return
-        self.clients[client_id] = client_info
-        logger.info(f"client added: {client_id}")
-
-    def remove_client(self,client_id: str):
-        """
-        Remove client from membership view.
-        """
-        pass
-        if not self.is_leader:
-            logger.error("illegal operation (not leader)")
-            return
-        if client_id not in self.clients:
-            logger.warning(f"client {client_id} does not exist")
-            return
-        del self.clients[client_id]
-        logger.info(f"client removed: {client_id}")
 
     # ------------------------------------------------------------------
     # View export / import (for leader crash or sync)
@@ -374,3 +385,48 @@ class MembershipManager:
         Import membership view (used by new leader).
         """
         pass
+
+
+class FollowerMembershipManager(BaseMembership):
+    def __init__(self, is_leader: bool):
+        super().__init__(is_leader)
+
+        self.group_id: str = ""  # assigned group_id
+        self.group_members: List[str] = []  # other servers in the group
+
+        self.chatrooms: List[str] = []  # chatrooms this server is responsible for
+
+    def set_group_info(self, group_id: str, group_members: List[str]):
+        """
+        Set group information.
+        """
+        pass
+        self.group_id = group_id
+        self.group_members = group_members
+
+    def add_group_member(self, server_id: str):
+        """
+        Add a server to group members.
+        """
+        pass
+        if server_id not in self.group_members:
+            self.group_members.append(server_id)
+
+    def remove_group_member(self, server_id: str):
+        """
+        Remove a server from group members.
+        """
+        pass
+        if server_id in self.group_members:
+            self.group_members.remove(server_id)
+
+    def bind_chatroom(self, chatroom_id: str):
+        """
+        Bind a chatroom to this server.
+        """
+        pass
+        if chatroom_id not in self.chatrooms:
+            self.chatrooms.append(chatroom_id)
+    
+
+    
