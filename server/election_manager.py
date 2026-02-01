@@ -11,6 +11,7 @@ from network.network_manager import create_udp_socket, send_udp_message, receive
 
 # --- Message Types for Election ---
 TYPE_HEARTBEAT = 'HEARTBEAT'
+TYPE_HEARTBEAT_ACK = 'HEARTBEAT_ACK'
 TYPE_ELECTION = 'ELECTION'
 TYPE_ANSWER = 'ANSWER'
 TYPE_COORDINATOR = 'COORDINATOR'
@@ -302,6 +303,8 @@ class ElectionManager:
             
             try:
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                sock.bind((self.local_ip, 0))  # Bind to our IP with any available port
                 sock.settimeout(5.0)  # Increased from 3.0 to 5.0 for initial connection
                 sock.connect((leader_ip, PORT_HEARTBEAT))
                 connection_successful = True
@@ -323,6 +326,16 @@ class ElectionManager:
                         m_type, message, _ = msg
                         if m_type == TYPE_HEARTBEAT:
                             consecutive_timeouts = 0  # Reset timeout counter
+                            
+                            # Send ACK back to leader with our identity
+                            try:
+                                self.network_manager.send_TCP_message(sock, TYPE_HEARTBEAT_ACK, {
+                                    'server_id': self.my_id,
+                                    'server_ip': self.local_ip
+                                })
+                            except Exception as e:
+                                print(f"[{self._get_identity()}] Failed to send HEARTBEAT_ACK: {e}")
+                            
                             membership_raw = message.get('membership_list', {})
                             if membership_raw:
                                 if hasattr(self, '_server_ref') and self._server_ref:
@@ -374,10 +387,14 @@ class ElectionManager:
 
     def handle_leader(self):
         """As leader, start TCP server and send heartbeats to followers."""
+        import select
+        
         print(f"[{self._get_identity()}] Starting heartbeat server")
         self.current_leader_id = self.my_id
         
         PORT_HEARTBEAT = 9004
+        ACK_TIMEOUT = 2.0  # Wait up to 2 seconds for ACKs
+        
         server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         if hasattr(socket, 'SO_REUSEPORT'):
@@ -388,26 +405,132 @@ class ElectionManager:
             server_sock.listen(5)
             server_sock.settimeout(1.0)
             
-            followers = []
+            followers = {}  # {conn: (server_id, ip)} - only populated after ACK
+            pending_conns = []  # Connections not yet identified
             heartbeat_counter = 0
             
             while self.state == STATE_LEADER and not self.stop_event.is_set():
+                # Accept new connections
                 try:
                     conn, addr = server_sock.accept()
-                    print(f"[{self._get_identity()}] Follower connected: {addr[0]}")
-                    followers.append(conn)
+                    conn.setblocking(False)
+                    print(f"[{self._get_identity()}] New connection from: {addr[0]}")
+                    pending_conns.append(conn)
                 except socket.timeout:
                     pass
                 
-                full_membership = self._get_full_membership()
-                membership_for_broadcast = {sid: sip for sid, sip in full_membership.items() if sid != self.my_id}
+                # Build current membership for broadcast (leader + known followers)
+                membership_for_broadcast = {self.my_id: self.local_ip}
+                for conn, (sid, sip) in followers.items():
+                    membership_for_broadcast[sid] = sip
                 
-                for conn in followers[:]:
+                # Send HEARTBEAT to all connections (pending + known)
+                all_conns = pending_conns + list(followers.keys())
+                dead_conns = []
+                
+                for conn in all_conns:
                     try:
+                        conn.setblocking(True)
+                        conn.settimeout(1.0)
                         self.network_manager.send_TCP_message(conn, TYPE_HEARTBEAT, {'membership_list': membership_for_broadcast})
-                    except:
+                        conn.setblocking(False)
+                    except Exception as e:
+                        dead_conns.append(conn)
+                
+                # Remove dead connections
+                for conn in dead_conns:
+                    if conn in pending_conns:
+                        pending_conns.remove(conn)
+                    if conn in followers:
+                        sid, sip = followers.pop(conn)
+                        print(f"[{self._get_identity()}] Follower {sid} ({sip}) disconnected")
+                    try:
                         conn.close()
-                        followers.remove(conn)
+                    except:
+                        pass
+                
+                # Collect ACKs using select (parallel wait)
+                all_conns = pending_conns + list(followers.keys())
+                if all_conns:
+                    new_followers = {}
+                    ack_start = time.time()
+                    
+                    while time.time() - ack_start < ACK_TIMEOUT and all_conns:
+                        try:
+                            readable, _, errored = select.select(all_conns, [], all_conns, 0.1)
+                            
+                            for conn in errored:
+                                if conn in pending_conns:
+                                    pending_conns.remove(conn)
+                                if conn in followers:
+                                    followers.pop(conn)
+                                if conn in all_conns:
+                                    all_conns.remove(conn)
+                                try:
+                                    conn.close()
+                                except:
+                                    pass
+                            
+                            for conn in readable:
+                                try:
+                                    conn.setblocking(True)
+                                    conn.settimeout(1.0)
+                                    msg = self.network_manager.receive_TCP_message(conn)
+                                    conn.setblocking(False)
+                                    
+                                    if msg is None:
+                                        # Connection closed
+                                        if conn in all_conns:
+                                            all_conns.remove(conn)
+                                        continue
+                                    
+                                    m_type, message, _ = msg
+                                    if m_type == TYPE_HEARTBEAT_ACK:
+                                        sid = message.get('server_id')
+                                        sip = message.get('server_ip')
+                                        if sid and sip:
+                                            new_followers[conn] = (sid, sip)
+                                            # Remove from pending if it was there
+                                            if conn in pending_conns:
+                                                pending_conns.remove(conn)
+                                            if conn in all_conns:
+                                                all_conns.remove(conn)
+                                except Exception as e:
+                                    pass
+                        except select.error:
+                            break
+                    
+                    # Update followers with those who responded
+                    # Close connections that didn't respond
+                    old_followers = followers
+                    followers = new_followers
+                    
+                    for conn, (sid, sip) in old_followers.items():
+                        if conn not in followers:
+                            print(f"[{self._get_identity()}] Follower {sid} ({sip}) timed out, removing")
+                            try:
+                                conn.close()
+                            except:
+                                pass
+                    
+                    # Close pending connections that didn't respond
+                    for conn in pending_conns[:]:
+                        if conn not in followers:
+                            pending_conns.remove(conn)
+                            try:
+                                conn.close()
+                            except:
+                                pass
+                    
+                    pending_conns = []  # All pending should have responded or be closed
+                
+                # Update Server's membership list
+                if hasattr(self, '_server_ref') and self._server_ref:
+                    new_membership = {self.my_id: self.local_ip}
+                    for conn, (sid, sip) in followers.items():
+                        new_membership[sid] = sip
+                    self._server_ref.membership_list = new_membership
+                    print(f"[{self._get_identity()}] Current Membership: {new_membership}")
                 
                 heartbeat_counter += 1
                 if heartbeat_counter % 5 == 0:
@@ -417,12 +540,14 @@ class ElectionManager:
                 
         except Exception as e:
             print(f"[{self._get_identity()}] Error: {e}")
+            import traceback
+            traceback.print_exc()
             self.state = STATE_FOLLOWER
         finally:
             server_sock.close()
-            for f in followers:
+            for conn in list(followers.keys()) + pending_conns:
                 try:
-                    f.close()
+                    conn.close()
                 except:
                     pass
 
