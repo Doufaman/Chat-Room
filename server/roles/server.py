@@ -70,6 +70,32 @@ class Server(Role):
                 self.leader_id = message.get("leader_id")
                 self.membership_list = message.get("membership_list", {})
                 print(f'[Follower] Registered with Leader {self.leader_id}. Current membership list: {self.membership_list}')
+    
+    def change_role(self, new_role, leader_id):
+        """Handle role change triggered by ElectionManager."""
+        print(f"[Server] Role change: {self._identity} -> {new_role} (Leader ID: {leader_id})")
+        old_role = self._identity
+        self._identity = new_role
+        
+        if new_role == TYPE_LEADER:
+            print(f"[Server] Becoming LEADER (ID: {self.server_id})")
+            self.leader_id = self.server_id
+            self.leader_address = self.network_manager.ip_local
+            # Leader takes over membership management
+            
+        elif new_role == TYPE_FOLLOWER:
+            print(f"[Server] Becoming FOLLOWER (Leader ID: {leader_id})")
+            self.leader_id = leader_id
+            # Find leader's IP from membership list
+            self.leader_address = self.membership_list.get(leader_id)
+            if self.leader_address:
+                # Re-register with new leader if needed
+                # self.register(self.leader_address)
+                pass
+    
+    def get_membership_list(self):
+        """Return current membership list for ElectionManager."""
+        return self.membership_list.copy()
 
     def run(self):
         pass

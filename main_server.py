@@ -1,5 +1,6 @@
 import time
 import uuid
+import threading
 
 from utills.logger import setup_logger
 import logging
@@ -50,10 +51,32 @@ class StartupEngine:
         #network_manager, leader_address = NetworkManager(ip_local=self_ip)
         network_manager = NetworkManager(ip_local=self_ip)
 
-        Server(self.server_id, network_manager, identity=current_identity, leader_address=leader_address).start()
+        # Create Server instance
+        server = Server(self.server_id, network_manager, identity=current_identity, leader_address=leader_address)
+        server.start()
 
-        # Start the Election Manager 
-        election_manager = ElectionManager(self.server_id, network_manager)
+        # Create ElectionManager with state change callback
+        def on_election_state_change(new_role, leader_id):
+            """Callback when election changes role."""
+            server.change_role(new_role, leader_id)
+        
+        election_manager = ElectionManager(
+            self.server_id, 
+            network_manager, 
+            on_state_change=on_election_state_change
+        )
+        
+        # Populate peers from server's membership list
+        def populate_election_peers():
+            """Periodically update election manager's peers list."""
+            while True:
+                membership = server.get_membership_list()
+                # Convert to peers dict (exclude self)
+                peers = {sid: sip for sid, sip in membership.items() if sid != self.server_id}
+                election_manager.peers = peers
+                time.sleep(5)  # Update every 5 seconds
+        
+        threading.Thread(target=populate_election_peers, daemon=True).start()
         election_manager.start()
         # if current_identity == "follower":
         #     Follower(self.server_id, network_manager, leader_address).start()
