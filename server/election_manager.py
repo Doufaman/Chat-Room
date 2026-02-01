@@ -284,6 +284,10 @@ class ElectionManager:
             self.state = STATE_LEADER
             return
         
+        # Give newly elected leader time to start TCP server
+        # This prevents connection timeout when leader just won election
+        time.sleep(0.5)
+        
         # Retry connection before giving up
         for attempt in range(MAX_RECONNECT_ATTEMPTS):
             if attempt > 0:
@@ -298,7 +302,7 @@ class ElectionManager:
             
             try:
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.settimeout(3.0)
+                sock.settimeout(5.0)  # Increased from 3.0 to 5.0 for initial connection
                 sock.connect((leader_ip, PORT_HEARTBEAT))
                 connection_successful = True
                 print(f"[{self._get_identity()}] Connected to Leader {leader_id}")

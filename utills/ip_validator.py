@@ -28,31 +28,17 @@ def validate_ip_address(ip_str):
     except ValueError as e:
         return False, f"IP地址格式无效: {str(e)}"
     
-    # 2. 检查是否是回环地址（允许整个127.0.0.0/8段）
+    # 2. 检查是否是保留地址或多播地址（回环地址除外）
     if ip_obj.is_loopback:
         logger.debug(f"IP {ip_str} 是回环地址（本地测试用）")
-        # 回环地址直接允许，跳过后续检查
-        return True, ""
-    
-    # 3. 检查是否是保留地址或多播地址
-    if ip_obj.is_reserved:
+        # 继续验证，不跳过绑定测试
+    elif ip_obj.is_reserved:
         return False, f"IP地址 {ip_str} 是保留地址，不能使用"
     
     if ip_obj.is_multicast:
         return False, f"IP地址 {ip_str} 是多播地址，不能使用"
     
-    # 4. 检查是否是本机的有效网络接口IP
-    try:
-        local_ips = get_local_ips()
-        if ip_str not in local_ips:
-            logger.warning(f"IP {ip_str} 不在本机网络接口列表中")
-            logger.warning(f"本机可用IP: {', '.join(local_ips)}")
-            return False, (f"IP地址 {ip_str} 不属于本机网络接口。\n"
-                          f"本机可用IP: {', '.join(local_ips)}")
-    except Exception as e:
-        logger.warning(f"无法检查本机网络接口: {e}")
-    
-    # 4. 验证是否可以绑定到该IP
+    # 3. 验证是否可以绑定到该IP（最重要的检查）
     try:
         test_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         test_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -60,7 +46,25 @@ def validate_ip_address(ip_str):
         test_sock.bind((ip_str, 0))
         test_sock.close()
     except OSError as e:
-        return False, f"无法绑定到IP地址 {ip_str}: {str(e)}"
+        if ip_obj.is_loopback:
+            return False, (f"回环地址 {ip_str} 无法绑定: {str(e)}\n"
+                          f"在macOS上，可能需要先添加别名：\n"
+                          f"  sudo ifconfig lo0 alias {ip_str}\n"
+                          f"或者使用 127.0.0.1")
+        else:
+            return False, f"无法绑定到IP地址 {ip_str}: {str(e)}"
+    
+    # 4. 对于非回环地址，检查是否是本机的有效网络接口IP
+    if not ip_obj.is_loopback:
+        try:
+            local_ips = get_local_ips()
+            if ip_str not in local_ips:
+                logger.warning(f"IP {ip_str} 不在本机网络接口列表中")
+                logger.warning(f"本机可用IP: {', '.join(local_ips)}")
+                return False, (f"IP地址 {ip_str} 不属于本机网络接口。\n"
+                              f"本机可用IP: {', '.join(local_ips)}")
+        except Exception as e:
+            logger.warning(f"无法检查本机网络接口: {e}")
     
     return True, ""
 
