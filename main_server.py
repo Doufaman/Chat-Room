@@ -77,8 +77,13 @@ class StartupEngine:
             """Periodically update election manager's peers list."""
             while True:
                 membership = server.get_membership_list()
-                # Convert to peers dict (exclude self)
-                peers = {sid: sip for sid, sip in membership.items() if sid != self.server_id}
+                # Convert to peers dict (exclude self, ensure IDs are integers)
+                peers = {}
+                for sid, sip in membership.items():
+                    # Convert string IDs to int for comparison
+                    sid_int = int(sid) if isinstance(sid, str) else sid
+                    if sid_int != self.server_id:
+                        peers[sid_int] = sip
                 election_manager.peers = peers
                 time.sleep(5)  # Update every 5 seconds
         

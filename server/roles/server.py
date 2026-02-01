@@ -54,6 +54,8 @@ class Server(Role):
             elif msg_type == "FOLLOWER_REGISTER":
                 follower_id = message.get("follower_id")
                 follower_ip = message.get("follower_ip")
+                # Ensure follower_id is integer
+                follower_id = int(follower_id) if isinstance(follower_id, str) else follower_id
                 print(f'[{self._identity}] Follower {follower_id} with IP: {follower_ip} registered.')
                 self.membership_list[follower_id] = follower_ip
                 print(f'[{self._identity}] Current membership list: {self.membership_list}')
@@ -68,7 +70,12 @@ class Server(Role):
             if msg_type == "REGISTER_ACK":
                 #print('hhey')
                 self.leader_id = message.get("leader_id")
-                self.membership_list = message.get("membership_list", {})
+                membership_raw = message.get("membership_list", {})
+                # Ensure all server_ids are integers
+                self.membership_list = {}
+                for sid, sip in membership_raw.items():
+                    sid_int = int(sid) if isinstance(sid, str) else sid
+                    self.membership_list[sid_int] = sip
                 print(f'[Follower] Registered with Leader {self.leader_id}. Current membership list: {self.membership_list}')
     
     def change_role(self, new_role, leader_id):
