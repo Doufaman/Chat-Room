@@ -50,7 +50,7 @@ class Heartbeat:
             except Exception as e:
                 logger.error(f"leader heartbeat broadcast failed: {e}")
         else:
-            heartbeat_msg["message"]["load_info"] = self.server.load_info
+            heartbeat_msg["message"]["load_info"] = self.server.get_current_load()
             # If follower -> send only to current leader
             leader_addr = getattr(self.server, "leader_address", None)
             if not leader_addr:

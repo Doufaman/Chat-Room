@@ -17,6 +17,7 @@ import json
 from typing import Dict, List, Optional
 from utills.logger import get_logger
 from server.config import ACTIVE, DEAD
+from roles.leader import Leader
 
 logger = get_logger("fault_discovery")
 
@@ -24,18 +25,17 @@ logger = get_logger("fault_discovery")
 # todo: handle "TAKE_OVER_CHATROOM" : load historical messages from responsible group if needed
 
 class ServerCrashDiscovery:
-    def __init__(self, server):
+    def __init__(self, server : Leader):
         self.server = server
-        self.membership = server.membership
-        self.network = server.network  
 
     def handle_dead_server(self, dead_server_id: str):
         logger.info(f"Handling dead server {dead_server_id}")
         # 1) remove dead server from responding membership maps
         try:
-            self.membership.remove_server(dead_server_id)
-            affected_group_id = self.membership.remove_server_from_group(dead_server_id)
-            affected_chatrooms = self.membership.remove_chatrooms_of_server(dead_server_id)
+            self.server.membership.remove_server(dead_server_id)
+            affected_group_id = self.server.membership.remove_server_from_group(dead_server_id)
+            remained_group_members = self.server.membership.get_group_servers(affected_group_id)
+            affected_chatrooms = self.server.membership.remove_chatrooms_of_server(dead_server_id)
         except Exception as e:
             logger.debug(f"failed to remove dead server {dead_server_id} from membership: {e}")
             return
@@ -43,13 +43,13 @@ class ServerCrashDiscovery:
 
         # 2) collect affected chatrooms and clients
         for affected_chatroom in affected_chatrooms:
-            affected_clients = self.membership.get_clients_of_chatroom([affected_chatroom])
+            affected_clients = self.server.membership.get_clients_of_chatroom([affected_chatroom])
             if len(affected_clients) == 0:
                 continue
             logger.info(f"Affected chatrooms: {affected_chatroom}, affected_clients: {len(affected_clients)}")
 
             # 3) reassign chatrooms
-            new_server_id = self.membership.bind_chatroom(affected_chatroom, operation_type="rebind")
+            new_server_id = self.server.membership.bind_chatroom(affected_chatroom, operation_type="rebind")
             # 4) notify new responsible server about chatroom
             if new_server_id:
                 logger.info(f"Chatroom {affected_chatroom} reassigned to server {new_server_id}")
@@ -59,7 +59,7 @@ class ServerCrashDiscovery:
                         "message": {
                             "chatroom_id": affected_chatroom,
                             "from_dead_server": dead_server_id,
-                            "group_id": affected_group_id,
+                            "group_mem": remained_group_members,
                             "timestamp": time.time()
                         }
                     }
@@ -74,7 +74,7 @@ class ServerCrashDiscovery:
             # 5) notify affected clients to reconnect to new server
             for client_id in affected_clients:
                 try:
-                    new_addr = self.membership.servers[new_server_id]["address"]
+                    new_addr = self.server.membership.servers[new_server_id]["address"]
                     notification = {
                         "type": "RECONNECT",
                         "chatroom_id": affected_chatroom,
@@ -104,5 +104,5 @@ class ServerCrashDiscovery:
         Helper to get client's last-known address.
         """
         pass
-        return self.membership.server_clients.get(prev_server_id, {}).get(client_id)
+        return self.server.membership.server_clients.get(prev_server_id, {}).get(client_id)
 

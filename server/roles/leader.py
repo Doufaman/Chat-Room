@@ -3,6 +3,7 @@ import time
 
 from server.membership import LeaderMembershipManager
 from .base import Role
+from server.fault_detection import Heartbeat
 
 class Leader(Role):
     def __init__(self, server_id, network_manager):
@@ -11,6 +12,7 @@ class Leader(Role):
         self.network_manager = network_manager
         self.membership = LeaderMembershipManager(True)
         self.identity = "LEADER"
+        self.heartbeat = Heartbeat(self)
         self.network_manager.set_callback(self.handle_messages)
         self._running = True
         #self.known_servers = set()
@@ -53,6 +55,12 @@ class Leader(Role):
             # todo: notidy other followers about the new member
             
             #print('hhey')
+        # handle heartbeat messages from followers
+        elif msg_type == "HEARTBEAT":
+            self.heartbeat.handle_heartbeat(message)
+        # handle alive probe responses from followers
+        elif msg_type == "PROBE_RESPONSE":
+            self.heartbeat.handle_probe_response(message)
 
     def run(self):
         pass

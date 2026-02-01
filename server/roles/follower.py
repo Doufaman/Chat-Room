@@ -5,15 +5,22 @@ import time
 import psutil
 
 from server.membership import FollowerMembershipManager
+from utills.logger import get_logger
 from .base import Role
+from server.fault_detection import Heartbeat
+
+logger = get_logger("follower")
 
 class Follower(Role):
     def __init__(self, server_id, network_manager, leader_address=None):
         super().__init__()
         self.server_id = server_id
         self.network_manager = network_manager
-        self.membership = FollowerMembershipManager(False)                                
+        self.membership = FollowerMembershipManager(False)  
+        
+
         self.identity = "FOLLOWER"
+        self.heartbeat = Heartbeat(self)
         self._running = True
 
         self.leader_address = leader_address
@@ -45,12 +52,34 @@ class Follower(Role):
         #print(1)
 
     def handle_messages(self, msg_type, message, ip_sender):
+        # register ack from leader
         if msg_type == "REGISTER_ACK":
             #print('hhey')
             leader_id = message.get("leader_id")
             group_id = message.get("group_id")
             self.membership.set_group_info(group_id, message.get("membership_list", {}))
             print(f'[Follower] Registered with Leader {leader_id}. Current membership list: {self.membership.get_group_members()}')
+        # receiving mssage about some server is removed
+        elif msg_type == "SERVER_REMOVED":
+            removed_server_id = message.get("server_id")
+            self.membership.remove_group_member(removed_server_id)
+            print(f'[Follower] Server {removed_server_id} removed. Updated membership list: {self.membership.get_group_members()}')
+        # receiveing notification to take over chatroom
+        elif msg_type == "TAKE_OVER_CHATROOM":
+            chatroom_id = message.get("chatroom_id")
+            group_mem = message.get("group_mem", {})
+            self.membership.bind_chatroom(chatroom_id)
+            # todo: load historical messages from responsible group if needed
+            logger.info(f"[Follower] Taking over chatroom {chatroom_id}.")
+        # heartbeat from leader
+        elif msg_type =="HEARTBEAT":
+            self.heartbeat.handle_heartbeat(message)
+        # handle alive probe from leader
+        elif msg_type == "ARE_YOU_ALIVE":
+            # todo: check sending method
+            self.heartbeat.handle_probe_request(message)
+            
+
 
     def run(self):
         pass
