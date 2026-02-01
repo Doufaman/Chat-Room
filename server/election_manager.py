@@ -4,6 +4,7 @@ Implementing the Bully Election Algorithm for leader selection among servers.
 """
 import threading
 import time
+import socket
 from server.config import TYPE_LEADER, TYPE_FOLLOWER
 from network.network_manager import create_udp_socket, send_udp_message, receive_udp_message, PORT_ELECTION
 
@@ -48,7 +49,12 @@ class ElectionManager:
         # State Variables
         self.state = STATE_FOLLOWER
         self.current_leader_id = None
+        self.leader_ip = None  # Leader's IP address
         self.stop_event = threading.Event()
+        
+        # TCP heartbeat connection to leader
+        self.heartbeat_socket = None
+        self.heartbeat_thread = None
         
         # Known peers {server_id: ip_address}
         self.peers = {}
@@ -77,10 +83,13 @@ class ElectionManager:
         threading.Thread(target=self._udp_listener, daemon=True).start()
         # Start state machine
         threading.Thread(target=self.run_state_machine, daemon=True).start()
+        # Start heartbeat monitoring (will connect when leader is known)
+        threading.Thread(target=self._heartbeat_monitor, daemon=True).start()
 
     def stop(self):
         """Stop the election manager."""
         self.stop_event.set()
+        self._close_heartbeat_connection()
         if self.udp_socket:
             self.udp_socket.close()
 
@@ -135,13 +144,17 @@ class ElectionManager:
 
         elif msg_type == TYPE_COORDINATOR:
             # Someone declared victory
-            print(f"[BullyElection] {sender_id} declared COORDINATOR.")
+            sender_id = message.get('sender_id')
+            print(f"[BullyElection] {sender_id} declared COORDINATOR from {sender_ip}.")
             with self.lock:
                 self.current_leader_id = sender_id
+                self.leader_ip = sender_ip  # Update leader IP
                 if self.state != STATE_LEADER:  # Don't demote myself
                     self.state = STATE_FOLLOWER
                     self._notify_state_change()
                 self.election_trigger.set()
+            # Close old heartbeat, monitor will reconnect
+            self._close_heartbeat_connection()
 
         elif msg_type == TYPE_HEARTBEAT:
             # Heartbeat from leader (handled elsewhere)
@@ -253,12 +266,92 @@ class ElectionManager:
         with self.lock:
             self.state = STATE_ELECTION
 
+    # =================================================================
+    #  TCP Heartbeat Monitoring (Leader Failure Detection)
+    # =================================================================
+    
+    def _heartbeat_monitor(self):
+        """Monitor TCP connection to leader for failure detection."""
+        print(f"[BullyElection] Heartbeat monitor started")
+        PORT_HEARTBEAT = 9004  # Dedicated port for heartbeat
+        
+        while not self.stop_event.is_set():
+            # Only connect if I'm a follower and leader is known
+            if self.state == STATE_FOLLOWER and self.leader_ip and self.leader_ip != self.local_ip:
+                try:
+                    # Close existing connection if any
+                    self._close_heartbeat_connection()
+                    
+                    # Establish TCP connection to leader
+                    print(f"[BullyElection] Connecting to leader at {self.leader_ip}:{PORT_HEARTBEAT}")
+                    self.heartbeat_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    self.heartbeat_socket.settimeout(5)  # 5 second timeout
+                    self.heartbeat_socket.connect((self.leader_ip, PORT_HEARTBEAT))
+                    
+                    # Keep connection alive and detect disconnection
+                    while not self.stop_event.is_set():
+                        try:
+                            # Try to receive (this will block until disconnect or timeout)
+                            data = self.heartbeat_socket.recv(1)
+                            if not data:
+                                # Connection closed by leader
+                                print(f"[BullyElection] Leader connection closed, triggering election")
+                                self._trigger_election("LEADER_DISCONNECTED")
+                                break
+                        except socket.timeout:
+                            # Timeout is OK, just means no data
+                            continue
+                        except Exception as e:
+                            print(f"[BullyElection] Leader connection error: {e}, triggering election")
+                            self._trigger_election("LEADER_CONNECTION_ERROR")
+                            break
+                    
+                except Exception as e:
+                    print(f"[BullyElection] Failed to connect to leader: {e}")
+                    # If can't connect, trigger election after a delay
+                    time.sleep(2)
+                    if self.state == STATE_FOLLOWER:  # Still follower after delay
+                        self._trigger_election("LEADER_UNREACHABLE")
+            
+            time.sleep(1)  # Check state every second
+    
+    def _close_heartbeat_connection(self):
+        """Close the heartbeat TCP connection."""
+        if self.heartbeat_socket:
+            try:
+                self.heartbeat_socket.close()
+            except:
+                pass
+            self.heartbeat_socket = None
+    
+    def _update_leader_info(self, leader_id, leader_ip):
+        """Update leader information and reset heartbeat connection."""
+        with self.lock:
+            self.current_leader_id = leader_id
+            self.leader_ip = leader_ip
+        print(f"[BullyElection] Leader updated: ID={leader_id}, IP={leader_ip}")
+        # Close old connection, monitor will establish new one
+        self._close_heartbeat_connection()
+
+    def _trigger_election(self, reason):
+        """Trigger a new election."""
+        print(f"[BullyElection] Triggering Election: {reason}")
+        with self.lock:
+            self.state = STATE_ELECTION
+
     def _become_leader(self):
         """Become the leader and broadcast victory."""
         with self.lock:
             self.state = STATE_LEADER
             self.current_leader_id = self.my_id
+            self.leader_ip = self.local_ip
             self._notify_state_change()
+        
+        # Close heartbeat connection (leaders don't monitor)
+        self._close_heartbeat_connection()
+        
+        # Start heartbeat server for followers
+        threading.Thread(target=self._start_heartbeat_server, daemon=True).start()
         
         # Broadcast Victory (retry 3 times)
         peers_copy = self.peers.copy()
@@ -266,6 +359,9 @@ class ElectionManager:
             for peer_id, peer_ip in peers_copy.items():
                 self._send_to_ip(peer_ip, TYPE_COORDINATOR, {})
             time.sleep(0.05)
+    
+    def _start_heartbeat_server(self):
+        """As leader, listen for follower heartbeat connections.\"\"\"\n        PORT_HEARTBEAT = 9004\n        try:\n            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n            server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n            if hasattr(socket, 'SO_REUSEPORT'):\n                server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)\n            server_socket.bind(('0.0.0.0', PORT_HEARTBEAT))\n            server_socket.listen(5)\n            server_socket.settimeout(1)  # Allow periodic checks\n            \n            print(f\"[BullyElection] Leader heartbeat server started on port {PORT_HEARTBEAT}\")\n            \n            active_connections = []\n            \n            while self.state == STATE_LEADER and not self.stop_event.is_set():\n                try:\n                    conn, addr = server_socket.accept()\n                    print(f\"[BullyElection] Heartbeat connection from {addr}\")\n                    active_connections.append(conn)\n                    # Keep connection alive (follower will detect disconnect)\n                except socket.timeout:\n                    continue\n                except Exception as e:\n                    if self.state == STATE_LEADER:\n                        print(f\"[BullyElection] Heartbeat server error: {e}\")\n                    break\n            \n            # Clean up when no longer leader\n            for conn in active_connections:\n                try:\n                    conn.close()\n                except:\n                    pass\n            server_socket.close()\n            print(f\"[BullyElection] Leader heartbeat server stopped\")\n            \n        except Exception as e:\n            print(f\"[BullyElection] Failed to start heartbeat server: {e}\")
 
     def _send_to_ip(self, target_ip, msg_type, extra_data):
         """Send election message to a specific IP via independent UDP socket."""

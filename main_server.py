@@ -12,6 +12,7 @@ from server.roles.server import Server
 # from server.roles.follower import Follower
 from server.dynamic_discovery import dynamic_discovery
 from server.election_manager import ElectionManager
+from server.config import TYPE_FOLLOWER
 
 DEBUG = True  # or False
 
@@ -65,6 +66,11 @@ class StartupEngine:
             network_manager, 
             on_state_change=on_election_state_change
         )
+        
+        # Set initial leader info if follower
+        if current_identity == TYPE_FOLLOWER and leader_address:
+            election_manager.leader_ip = leader_address
+            print(f"[StartupEngine] Initial leader set to {leader_address}")
         
         # Populate peers from server's membership list
         def populate_election_peers():
