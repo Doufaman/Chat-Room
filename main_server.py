@@ -61,11 +61,20 @@ class StartupEngine:
             """Callback when election changes role."""
             server.change_role(new_role, leader_id)
         
+        # Map Server identity to ElectionManager state
+        from server.election_manager import STATE_LEADER, STATE_FOLLOWER
+        from server.config import TYPE_LEADER
+        initial_election_state = STATE_LEADER if current_identity == TYPE_LEADER else STATE_FOLLOWER
+        
         election_manager = ElectionManager(
             self.server_id, 
             network_manager, 
-            on_state_change=on_election_state_change
+            on_state_change=on_election_state_change,
+            initial_state=initial_election_state
         )
+        
+        # Set server reference for membership access
+        election_manager.set_server_reference(server)
         
         # Set initial leader info if follower
         if current_identity == TYPE_FOLLOWER and leader_address:
@@ -79,24 +88,14 @@ class StartupEngine:
                 if sip == leader_address:
                     election_manager.current_leader_id = sid
                     print(f"[StartupEngine] Initial leader set to ID={sid}, IP={leader_address}")
+                    # Initialize peers from membership (excluding leader and self)
+                    election_manager.update_peers_from_server()
                     break
+        else:
+            # Leader: initialize peers from membership
+            time.sleep(0.5)
+            election_manager.update_peers_from_server()
         
-        # Populate peers from server's membership list
-        def populate_election_peers():
-            """Periodically update election manager's peers list."""
-            while True:
-                membership = server.get_membership_list()
-                # Convert to peers dict (exclude self, ensure IDs are integers)
-                peers = {}
-                for sid, sip in membership.items():
-                    # Convert string IDs to int for comparison
-                    sid_int = int(sid) if isinstance(sid, str) else sid
-                    if sid_int != self.server_id:
-                        peers[sid_int] = sip
-                election_manager.peers = peers
-                time.sleep(5)  # Update every 5 seconds
-        
-        threading.Thread(target=populate_election_peers, daemon=True).start()
         election_manager.start()
         # if current_identity == "follower":
         #     Follower(self.server_id, network_manager, leader_address).start()

@@ -59,11 +59,15 @@ class Server(Role):
                 print(f'[{self._identity}] Follower {follower_id} with IP: {follower_ip} registered.')
                 self.membership_list[follower_id] = follower_ip
                 print(f'[{self._identity}] Current membership list: {self.membership_list}')
+                
+                # Send membership excluding self (leader should not include itself for followers)
+                membership_for_follower = {sid: sip for sid, sip in self.membership_list.items() if sid != self.server_id}
+                
                 self.network_manager.send_unicast(
                     follower_ip,
                     9001,
                     "REGISTER_ACK",
-                    {"leader_id": self.server_id, "membership_list": self.membership_list}
+                    {"leader_id": self.server_id, "membership_list": membership_for_follower}
                 )
                 #print('hhey')
         else:
@@ -80,6 +84,17 @@ class Server(Role):
     
     def change_role(self, new_role, leader_id):
         """Handle role change triggered by ElectionManager."""
+        # Only log if role actually changes
+        if self._identity == new_role:
+            print(f"[Server] Role confirmed: {new_role} (Leader ID: {leader_id})")
+            # Still update leader info even if role doesn't change
+            if new_role == TYPE_FOLLOWER and leader_id != self.leader_id:
+                self.leader_id = leader_id
+                leader_ip = self.membership_list.get(leader_id)
+                if leader_ip:
+                    self.leader_address = leader_ip
+            return
+        
         print(f"[Server] Role change: {self._identity} -> {new_role} (Leader ID: {leader_id})")
         old_role = self._identity
         self._identity = new_role
@@ -94,15 +109,31 @@ class Server(Role):
             print(f"[Server] Becoming FOLLOWER (Leader ID: {leader_id})")
             self.leader_id = leader_id
             # Find leader's IP from membership list
-            self.leader_address = self.membership_list.get(leader_id)
-            if self.leader_address:
-                # Re-register with new leader if needed
-                # self.register(self.leader_address)
-                pass
+            leader_ip = self.membership_list.get(leader_id)
+            if leader_ip:
+                self.leader_address = leader_ip
+                print(f"[Server] Leader address set to: {leader_ip}")
+            else:
+                # Leader not in membership yet - will be set when we receive heartbeat
+                print(f"[Server] Leader {leader_id} not in membership list yet")
     
     def get_membership_list(self):
         """Return current membership list for ElectionManager."""
         return self.membership_list.copy()
+    
+    def update_membership_from_leader(self, membership_dict, leader_id):
+        """Update membership list from leader's heartbeat (Follower only)."""
+        # Convert all IDs to int
+        self.membership_list = {}
+        for sid, sip in membership_dict.items():
+            sid_int = int(sid) if isinstance(sid, str) else sid
+            self.membership_list[sid_int] = sip
+        # Add leader (not included in broadcast)
+        if leader_id not in self.membership_list:
+            self.membership_list[leader_id] = self.leader_address
+        # Add myself
+        if self.server_id not in self.membership_list:
+            self.membership_list[self.server_id] = self.network_manager.ip_local
 
     def run(self):
         pass
