@@ -1,6 +1,7 @@
 import time
 import socket
 import json
+from server.config import TYPE_LEADER, TYPE_FOLLOWER
 #import threading
 #from typing import Type, Dict, Optional
 
@@ -48,7 +49,7 @@ def dynamic_discovery(ip_local, timeout = 3.0):
                     # modify2: move initialization out of dynamic_discovery 
                     # current_server = RoleManager(ip_local=ip_local)
                     # current_server.initialize_role("follower")
-                    return "FOLLOWER", sender_ip
+                    return TYPE_FOLLOWER, sender_ip
                 elif msg_type == "WHO_IS_LEADER":
                     # ignore other WHO_IS_LEADER messages
                     continue
@@ -59,7 +60,7 @@ def dynamic_discovery(ip_local, timeout = 3.0):
                 # initiallize as leader
                 # current_server = RoleManager(ip_local=ip_local)
                 # current_server.initialize_role("leader")
-                return "LEADER", None
+                return TYPE_LEADER, None
     finally:
         sock.close()
 

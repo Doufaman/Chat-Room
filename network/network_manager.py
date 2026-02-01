@@ -8,6 +8,7 @@ Implement the following functions:
 import socket
 import threading
 import json
+import struct
 
 # these ports only uesd for receiving messages
 PORT_UNICAST = 9001
@@ -56,6 +57,55 @@ class NetworkManager:
         sender_ip = data_dic.get("sender_ip")
         return message_type, message, sender_ip
 
+    # TCP message header to prevent packet sticking problem
+    HEADER_FORMAT = '!I'  # 4-byte unsigned integer for message length
+    HEADER_SIZE = struct.calcsize(HEADER_FORMAT)
+
+    def send_TCP_message(self, sock, message_type, message):
+        """Send TCP message with length prefix to prevent sticking."""
+        try:
+            pkg_body = self.message_encode(message_type, message)
+            pkg_header = struct.pack(self.HEADER_FORMAT, len(pkg_body))
+            pkg = pkg_header + pkg_body
+            sock.sendall(pkg)
+        except Exception as e:
+            print(f"[NetworkManager] TCP send error: {e}")
+            raise e
+
+    def receive_TCP_message(self, sock):
+        """Receive TCP message with length prefix."""
+        try:
+            # Read header (4 bytes)
+            pkg_header = self._read_exact(sock, self.HEADER_SIZE)
+            if not pkg_header:
+                return None  # Connection closed
+            
+            # Unpack message length
+            body_len = struct.unpack(self.HEADER_FORMAT, pkg_header)[0]
+            
+            # Read exact message body
+            pkg_body = self._read_exact(sock, body_len)
+            if not pkg_body:
+                return None  # Connection closed
+            
+            # Decode and return
+            return self.message_decode(pkg_body)
+        except Exception as e:
+            print(f"[NetworkManager] TCP receive error: {e}")
+            raise e
+
+    def _read_exact(self, sock, n):
+        """Helper to read exactly n bytes from socket."""
+        data = bytearray()
+        while len(data) < n:
+            try:
+                packet = sock.recv(n - len(data))
+                if not packet:
+                    return None  # Connection closed
+                data.extend(packet)
+            except OSError:
+                return None
+        return bytes(data)
 
     # send message functions
     def send_unicast(self, 
@@ -66,12 +116,10 @@ class NetworkManager:
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                #s.bind((self.ip_local,target_port))
                 s.bind((self.ip_local,0)) # 让系统自动分配端口
                 s.connect((target_ip, target_port))
-                data = self.message_encode(message_type, message)
-                s.sendall(data)
-                #s.sendto(data, (target_ip, target_port))
+                # Use TCP message with length header to prevent sticking
+                self.send_TCP_message(s, message_type, message)
         except Exception as e:
             print(f"[NetworkManager] Unicast send error: {e}")
 
@@ -111,18 +159,29 @@ class NetworkManager:
             server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             if hasattr(socket, 'SO_REUSEPORT'):
                 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-            #server.bind(('0.0.0.0', self.port_unicast)) # 绑定所有网卡
             server.bind((self.ip_local, self.port_unicast)) 
             server.listen(5)
             while True:
                 conn, addr = server.accept()
-                with conn:
-                    data = conn.recv(1024)
-                    if data and self.on_message_received:
-                        msg_type, message, sender_ip = self.message_decode(data)
-                        # 触发回调给 Leader，传递正确的参数
+                print(f"[NetworkManager] TCP connection from {addr}")
+                # Handle connection in separate thread to support multiple clients
+                threading.Thread(target=self._handle_tcp_connection, args=(conn, addr), daemon=True).start()
+
+    def _handle_tcp_connection(self, conn, addr):
+        """Handle a single TCP connection."""
+        try:
+            with conn:
+                while True:
+                    # Use TCP message receive with length header
+                    result = self.receive_TCP_message(conn)
+                    if result is None:
+                        break  # Connection closed
+                    
+                    msg_type, message, sender_ip = result
+                    if self.on_message_received:
                         self.on_message_received(msg_type, message, sender_ip)
-                print(addr)
+        except Exception as e:
+            print(f"[NetworkManager] Connection {addr} error: {e}")
 
     def receive_broadcast(self):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:

@@ -2,6 +2,7 @@ import threading
 import time
 
 from .base import Role
+from server.config import TYPE_LEADER, TYPE_FOLLOWER
 
 class Server(Role):
     def __init__(self, server_id, network_manager, identity, leader_address=None):
@@ -25,7 +26,7 @@ class Server(Role):
         self.network_manager.start_listening()
         
         print(f"[Server] Initialized role: {self._identity}, Server ID: {self.server_id}")
-        if self._identity == "LEADER":
+        if self._identity == TYPE_LEADER:
             print(f"[{self._identity}] Setting up {self._identity.lower()} role...")
         elif self.leader_address:
             self.register(self.leader_address)
@@ -41,7 +42,7 @@ class Server(Role):
 
          
     def handle_messages(self, msg_type, message, ip_sender):
-        if self._identity == "LEADER":
+        if self._identity == TYPE_LEADER:
             if msg_type == "WHO_IS_LEADER":
                 print(f'[{self._identity}] receive message from new PC {ip_sender}: {msg_type} {message}')
                 self.network_manager.send_broadcast(
