@@ -361,7 +361,45 @@ class ElectionManager:
             time.sleep(0.05)
     
     def _start_heartbeat_server(self):
-        """As leader, listen for follower heartbeat connections.\"\"\"\n        PORT_HEARTBEAT = 9004\n        try:\n            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n            server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n            if hasattr(socket, 'SO_REUSEPORT'):\n                server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)\n            server_socket.bind(('0.0.0.0', PORT_HEARTBEAT))\n            server_socket.listen(5)\n            server_socket.settimeout(1)  # Allow periodic checks\n            \n            print(f\"[BullyElection] Leader heartbeat server started on port {PORT_HEARTBEAT}\")\n            \n            active_connections = []\n            \n            while self.state == STATE_LEADER and not self.stop_event.is_set():\n                try:\n                    conn, addr = server_socket.accept()\n                    print(f\"[BullyElection] Heartbeat connection from {addr}\")\n                    active_connections.append(conn)\n                    # Keep connection alive (follower will detect disconnect)\n                except socket.timeout:\n                    continue\n                except Exception as e:\n                    if self.state == STATE_LEADER:\n                        print(f\"[BullyElection] Heartbeat server error: {e}\")\n                    break\n            \n            # Clean up when no longer leader\n            for conn in active_connections:\n                try:\n                    conn.close()\n                except:\n                    pass\n            server_socket.close()\n            print(f\"[BullyElection] Leader heartbeat server stopped\")\n            \n        except Exception as e:\n            print(f\"[BullyElection] Failed to start heartbeat server: {e}\")
+        """As leader, listen for follower heartbeat connections."""
+        PORT_HEARTBEAT = 9004
+        try:
+            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            if hasattr(socket, 'SO_REUSEPORT'):
+                server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+            server_socket.bind(('0.0.0.0', PORT_HEARTBEAT))
+            server_socket.listen(5)
+            server_socket.settimeout(1)  # Allow periodic checks
+            
+            print(f"[BullyElection] Leader heartbeat server started on port {PORT_HEARTBEAT}")
+            
+            active_connections = []
+            
+            while self.state == STATE_LEADER and not self.stop_event.is_set():
+                try:
+                    conn, addr = server_socket.accept()
+                    print(f"[BullyElection] Heartbeat connection from {addr}")
+                    active_connections.append(conn)
+                    # Keep connection alive (follower will detect disconnect)
+                except socket.timeout:
+                    continue
+                except Exception as e:
+                    if self.state == STATE_LEADER:
+                        print(f"[BullyElection] Heartbeat server error: {e}")
+                    break
+            
+            # Clean up when no longer leader
+            for conn in active_connections:
+                try:
+                    conn.close()
+                except:
+                    pass
+            server_socket.close()
+            print(f"[BullyElection] Leader heartbeat server stopped")
+            
+        except Exception as e:
+            print(f"[BullyElection] Failed to start heartbeat server: {e}")
 
     def _send_to_ip(self, target_ip, msg_type, extra_data):
         """Send election message to a specific IP via independent UDP socket."""
