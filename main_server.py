@@ -10,7 +10,7 @@ from server.roles.server import Server
 # from server.roles.leader import Leader
 # from server.roles.follower import Follower
 from server.dynamic_discovery import dynamic_discovery
-from server.bully_selection import BullyElection
+from server.election_manager import ElectionManager
 
 DEBUG = True  # or False
 
@@ -26,7 +26,9 @@ class StartupEngine:
                  ):
         # create unique server ID
         self.self_ip = self_ip
-        self.server_id = str(uuid.uuid4())
+        
+        #self.server_id = str(uuid.uuid4())
+        self.server_id = uuid.uuid4().int % (10**9)  # using 9-digit number to identify server
 
         # --- Core modules ---
         # self.comm = Communication(config)
@@ -50,6 +52,9 @@ class StartupEngine:
 
         Server(self.server_id, network_manager, identity=current_identity, leader_address=leader_address).start()
 
+        # Start the Election Manager 
+        election_manager = ElectionManager(self.server_id, network_manager)
+        election_manager.start()
         # if current_identity == "follower":
         #     Follower(self.server_id, network_manager, leader_address).start()
         # else:
