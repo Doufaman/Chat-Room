@@ -5,6 +5,7 @@ Implementing the Bully Election Algorithm for leader selection among servers.
 import threading
 import time
 from server.config import TYPE_LEADER, TYPE_FOLLOWER
+from network.network_manager import create_udp_socket, send_udp_message, receive_udp_message, PORT_ELECTION
 
 
 # --- Message Types for Election ---
@@ -37,8 +38,12 @@ class ElectionManager:
             on_state_change: Callback function(new_state, leader_id) when role changes
         """
         self.my_id = server_id
-        self.network_manager = network_manager
+        self.network_manager = network_manager  # Only for IP info
         self.on_state_change = on_state_change
+        
+        # Create independent UDP socket for election messages
+        self.udp_socket = create_udp_socket('0.0.0.0', PORT_ELECTION)
+        self.local_ip = network_manager.ip_local
         
         # State Variables
         self.state = STATE_FOLLOWER
@@ -68,14 +73,37 @@ class ElectionManager:
     def start(self):
         """Start the election manager's state machine in a background thread."""
         print(f"[BullyElection] Manager starting for server {self.my_id}...")
+        # Start independent UDP listener
+        threading.Thread(target=self._udp_listener, daemon=True).start()
+        # Start state machine
         threading.Thread(target=self.run_state_machine, daemon=True).start()
 
     def stop(self):
         """Stop the election manager."""
         self.stop_event.set()
+        if self.udp_socket:
+            self.udp_socket.close()
 
     # =================================================================
-    #  Message Handler (Called by NetworkManager)
+    #  UDP Listener (Independent from NetworkManager)
+    # =================================================================
+    def _udp_listener(self):
+        """Listen for election messages on dedicated UDP port."""
+        print(f"[BullyElection] UDP listener started on port {PORT_ELECTION}")
+        while not self.stop_event.is_set():
+            message, addr = receive_udp_message(self.udp_socket)
+            if not message:
+                continue
+            
+            msg_type = message.get('msg_type')
+            msg_body = message.get('message', {})
+            sender_ip = message.get('sender_ip')
+            
+            # Forward to message handler
+            self.handle_election_messages(msg_type, msg_body, sender_ip)
+
+    # =================================================================
+    #  Message Handler
     # =================================================================
     def handle_election_messages(self, msg_type, message, sender_ip):
         """
@@ -240,13 +268,16 @@ class ElectionManager:
             time.sleep(0.05)
 
     def _send_to_ip(self, target_ip, msg_type, extra_data):
-        """Send election message to a specific IP."""
+        """Send election message to a specific IP via independent UDP socket."""
         message = {
-            'sender_id': self.my_id,
-            **extra_data
+            'msg_type': msg_type,
+            'message': {
+                'sender_id': self.my_id,
+                **extra_data
+            },
+            'sender_ip': self.local_ip
         }
-        # Use broadcast for simplicity (can be optimized to unicast)
-        self.network_manager.send_broadcast(msg_type, message)
+        send_udp_message(self.udp_socket, message, target_ip, PORT_ELECTION)
 
     def _notify_state_change(self):
         """Notify callback about state change."""

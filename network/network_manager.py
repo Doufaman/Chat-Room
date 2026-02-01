@@ -14,9 +14,40 @@ import struct
 PORT_UNICAST = 9001
 PORT_BROADCAST = 9000
 PORT_MULTICAST = 9002
+PORT_ELECTION = 9003  # Dedicated port for election messages
 
 IP_BROADCAST = '255.255.255.255'
 IP_MULTICAST = '224.0.0.1'
+
+# independent UDP socket functions 
+def create_udp_socket(bind_ip, bind_port):
+    """Create and bind a UDP socket."""
+    udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    if hasattr(socket, 'SO_REUSEPORT'):
+        udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+    udp_socket.bind((bind_ip, bind_port))
+    return udp_socket
+
+def send_udp_message(udp_socket, message_dict, dest_ip, dest_port):
+    """Send a dictionary message via UDP socket (JSON encoded)."""
+    try:
+        pkg = json.dumps(message_dict, ensure_ascii=False).encode('utf-8')
+        udp_socket.sendto(pkg, (dest_ip, dest_port))
+    except Exception as e:
+        print(f"[UDP] Send error: {e}")
+        raise e
+
+def receive_udp_message(udp_socket, buffer_size=4096):
+    """Receive a JSON message from UDP socket."""
+    try:
+        pkg, addr = udp_socket.recvfrom(buffer_size)
+        message_dict = json.loads(pkg.decode('utf-8'))
+        return message_dict, addr
+    except Exception as e:
+        print(f"[UDP] Receive error: {e}")
+        return None, None
+
 
 class NetworkManager:
     def __init__(self, 
