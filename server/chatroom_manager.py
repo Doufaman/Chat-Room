@@ -1,8 +1,14 @@
 """
 This module manages chat rooms and client connections for a server.
 Each server can have multiple chat rooms, each running in its own thread.
+Each server has ONE ChatroomManager
+ChatroomManager manages multiple ChatRoom instances
+Only Leader's ChatroomManager listens for Client discovery requests
+ElectionManager calls get_chatroom_info_callback() during heartbeat
 """
 import threading
+import socket
+import json
 
 from server.chatroom import ChatRoom
 
@@ -10,6 +16,9 @@ from server.chatroom import ChatRoom
 # Port calculation: BASE_PORT + (server_id * 100) + room_id
 CHAT_PORT_BASE = 8000
 CHAT_PORT_OFFSET = 100  # Each server gets 100 ports
+
+# Discovery port (Leader listens here for client requests)
+PORT_CLIENT_DISCOVERY = 9005
 
 
 class ChatroomManager:
@@ -38,6 +47,14 @@ class ChatroomManager:
         
         # Next room ID to assign
         self.next_room_id = 1
+        
+        # === Leader-only: aggregated chatroom list from all servers ===
+        self.all_servers_chatrooms = []  # [{server_id, server_ip, chatrooms}, ...]
+        self.all_servers_lock = threading.Lock()
+        
+        # === Discovery listener (Leader only) ===
+        self.discovery_running = False
+        self.discovery_thread = None
     
     def _calculate_port(self, room_id):
         """Calculate port for a room based on server_id and room_id"""
@@ -126,7 +143,8 @@ class ChatroomManager:
             return len(self.rooms)
     
     def stop_all(self):
-        """Stop all chat rooms"""
+        """Stop all chat rooms and discovery listener"""
+        self.stop_discovery_listener()
         with self.lock:
             for room_id, room in list(self.rooms.items()):
                 room.stop()
@@ -137,6 +155,7 @@ class ChatroomManager:
     def get_server_chat_info(self):
         """
         Get this server's chat info for HEARTBEAT_ACK.
+        This is the CALLBACK function for ElectionManager.
         
         Returns:
             dict: {
@@ -150,3 +169,92 @@ class ChatroomManager:
             "server_ip": self.local_ip,
             "chatrooms": self.get_all_room_info()
         }
+    
+    # =================================================================
+    #  Leader-only: Aggregate chatroom info from followers
+    # =================================================================
+    
+    def update_all_servers_chatrooms(self, servers_list):
+        """
+        Called by ElectionManager when it aggregates chatroom info.
+        
+        Args:
+            servers_list: List of {server_id, server_ip, chatrooms}
+        """
+        with self.all_servers_lock:
+            self.all_servers_chatrooms = servers_list
+    
+    def get_all_servers_chatrooms(self):
+        """Get the aggregated chatroom list (Leader only)"""
+        with self.all_servers_lock:
+            return list(self.all_servers_chatrooms)
+    
+    # =================================================================
+    #  Leader-only: Discovery Listener for Client requests
+    # =================================================================
+    
+    def start_discovery_listener(self):
+        """
+        Start listening for Client discovery requests (Leader only).
+        Clients send REQUEST_CHATROOMS, Leader responds with CHATROOM_LIST.
+        """
+        if self.discovery_running:
+            return
+        
+        self.discovery_running = True
+        self.discovery_thread = threading.Thread(
+            target=self._discovery_listener_loop, 
+            daemon=True
+        )
+        self.discovery_thread.start()
+        print(f"[ChatroomManager] Discovery listener started on port {PORT_CLIENT_DISCOVERY}")
+    
+    def stop_discovery_listener(self):
+        """Stop the discovery listener"""
+        self.discovery_running = False
+    
+    def _discovery_listener_loop(self):
+        """Listen for Client REQUEST_CHATROOMS on UDP"""
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        if hasattr(socket, 'SO_REUSEPORT'):
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        sock.settimeout(1.0)
+        
+        try:
+            sock.bind(('0.0.0.0', PORT_CLIENT_DISCOVERY))
+            
+            while self.discovery_running:
+                try:
+                    data, addr = sock.recvfrom(4096)
+                    message = json.loads(data.decode('utf-8'))
+                    
+                    msg_type = message.get('msg_type')
+                    if msg_type == 'REQUEST_CHATROOMS':
+                        client_port = message.get('message', {}).get('client_port', PORT_CLIENT_DISCOVERY)
+                        print(f"[ChatroomManager] Client {addr[0]}:{client_port} requesting chatroom list")
+                        
+                        # Respond with aggregated chatroom list
+                        response = {
+                            'msg_type': 'CHATROOM_LIST',
+                            'message': {
+                                'servers': self.get_all_servers_chatrooms()
+                            },
+                            'sender_ip': self.local_ip
+                        }
+                        sock.sendto(
+                            json.dumps(response).encode('utf-8'),
+                            (addr[0], client_port)
+                        )
+                        print(f"[ChatroomManager] Sent CHATROOM_LIST to {addr[0]}:{client_port}")
+                        
+                except socket.timeout:
+                    continue
+                except json.JSONDecodeError:
+                    continue
+                except Exception as e:
+                    if self.discovery_running:
+                        print(f"[ChatroomManager] Discovery error: {e}")
+        finally:
+            sock.close()
+            print("[ChatroomManager] Discovery listener stopped")

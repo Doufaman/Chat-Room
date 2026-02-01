@@ -12,7 +12,8 @@ from server.roles.server import Server
 # from server.roles.follower import Follower
 from server.dynamic_discovery import dynamic_discovery
 from server.election_manager import ElectionManager
-from server.config import TYPE_FOLLOWER
+from server.chatroom_manager import ChatroomManager
+from server.config import TYPE_FOLLOWER, TYPE_LEADER
 from utills.ip_validator import prompt_valid_ip
 
 DEBUG = True  # or False
@@ -57,14 +58,23 @@ class StartupEngine:
         server = Server(self.server_id, network_manager, identity=current_identity, leader_address=leader_address)
         server.start()
 
+        # === Create ChatroomManager (independent of election) ===
+        chatroom_manager = ChatroomManager(self.server_id, self_ip)
+        # Create a default chat room
+        chatroom_manager.create_room("General")
+
         # Create ElectionManager with state change callback
         def on_election_state_change(new_role, leader_id):
             """Callback when election changes role."""
             server.change_role(new_role, leader_id)
+            # When becoming Leader, start discovery listener
+            if new_role == TYPE_LEADER:
+                chatroom_manager.start_discovery_listener()
+            else:
+                chatroom_manager.stop_discovery_listener()
         
         # Map Server identity to ElectionManager state
         from server.election_manager import STATE_LEADER, STATE_FOLLOWER
-        from server.config import TYPE_LEADER
         initial_election_state = STATE_LEADER if current_identity == TYPE_LEADER else STATE_FOLLOWER
         
         election_manager = ElectionManager(
@@ -76,6 +86,16 @@ class StartupEngine:
         
         # Set server reference for membership access
         election_manager.set_server_reference(server)
+        
+        # === Set chatroom callbacks (the ONLY coupling point) ===
+        election_manager.set_chatroom_callbacks(
+            get_info_callback=chatroom_manager.get_server_chat_info,
+            on_list_updated_callback=chatroom_manager.update_all_servers_chatrooms
+        )
+        
+        # If starting as Leader, start discovery listener immediately
+        if current_identity == TYPE_LEADER:
+            chatroom_manager.start_discovery_listener()
         
         # Set initial leader info if follower
         if current_identity == TYPE_FOLLOWER and leader_address:

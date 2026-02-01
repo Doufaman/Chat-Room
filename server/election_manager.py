@@ -73,6 +73,12 @@ class ElectionManager:
         # Track if this server joined as Follower (should not self-elect initially)
         self.joined_as_follower = (initial_state == STATE_FOLLOWER)
         
+        # === Chatroom callbacks (decoupled from ChatroomManager) ===
+        # Called to get local chatroom info for HEARTBEAT_ACK
+        self.get_chatroom_info_callback = None
+        # Called when Leader aggregates chatroom info from all servers
+        self.on_chatroom_list_updated_callback = None
+        
         # WARNING: Do NOT set callback here - it will override Server's callback
         # Instead, Server should call handle_election_messages manually
 
@@ -81,6 +87,17 @@ class ElectionManager:
         with self.lock:
             self.peers = peers_dict.copy()
             self.peers.pop(self.my_id, None)
+    
+    def set_chatroom_callbacks(self, get_info_callback, on_list_updated_callback):
+        """
+        Set chatroom-related callbacks (called by main_server.py).
+        
+        Args:
+            get_info_callback: Function that returns this server's chatroom info dict
+            on_list_updated_callback: Function(servers_list) called when Leader aggregates info
+        """
+        self.get_chatroom_info_callback = get_info_callback
+        self.on_chatroom_list_updated_callback = on_list_updated_callback
     
     def update_peers_from_server(self):
         """Update peers from Server's membership list (for Leader to initialize)."""
@@ -327,12 +344,18 @@ class ElectionManager:
                         if m_type == TYPE_HEARTBEAT:
                             consecutive_timeouts = 0  # Reset timeout counter
                             
-                            # Send ACK back to leader with our identity
+                            # Build ACK with our identity and chatroom info
+                            ack_data = {
+                                'server_id': self.my_id,
+                                'server_ip': self.local_ip
+                            }
+                            # Add chatroom info via callback (decoupled)
+                            if self.get_chatroom_info_callback:
+                                ack_data['chatroom_info'] = self.get_chatroom_info_callback()
+                            
+                            # Send ACK back to leader
                             try:
-                                self.network_manager.send_TCP_message(sock, TYPE_HEARTBEAT_ACK, {
-                                    'server_id': self.my_id,
-                                    'server_ip': self.local_ip
-                                })
+                                self.network_manager.send_TCP_message(sock, TYPE_HEARTBEAT_ACK, ack_data)
                             except Exception as e:
                                 print(f"[{self._get_identity()}] Failed to send HEARTBEAT_ACK: {e}")
                             
@@ -405,7 +428,7 @@ class ElectionManager:
             server_sock.listen(5)
             server_sock.settimeout(1.0)
             
-            followers = {}  # {conn: (server_id, ip)} - only populated after ACK
+            followers = {}  # {conn: (server_id, ip, chatroom_info)} - only populated after ACK
             pending_conns = []  # Connections not yet identified
             heartbeat_counter = 0
             
@@ -421,7 +444,7 @@ class ElectionManager:
                 
                 # Build current membership for broadcast (leader + known followers)
                 membership_for_broadcast = {self.my_id: self.local_ip}
-                for conn, (sid, sip) in followers.items():
+                for conn, (sid, sip, _) in followers.items():
                     membership_for_broadcast[sid] = sip
                 
                 # Send HEARTBEAT to all connections (pending + known)
@@ -488,8 +511,9 @@ class ElectionManager:
                                     if m_type == TYPE_HEARTBEAT_ACK:
                                         sid = message.get('server_id')
                                         sip = message.get('server_ip')
+                                        chatroom_info = message.get('chatroom_info')
                                         if sid and sip:
-                                            new_followers[conn] = (sid, sip)
+                                            new_followers[conn] = (sid, sip, chatroom_info)
                                             # Remove from pending if it was there
                                             if conn in pending_conns:
                                                 pending_conns.remove(conn)
@@ -505,7 +529,7 @@ class ElectionManager:
                     old_followers = followers
                     followers = new_followers
                     
-                    for conn, (sid, sip) in old_followers.items():
+                    for conn, (sid, sip, _) in old_followers.items():
                         if conn not in followers:
                             print(f"[{self._get_identity()}] Follower {sid} ({sip}) timed out, removing")
                             try:
@@ -527,10 +551,22 @@ class ElectionManager:
                 # Update Server's membership list
                 if hasattr(self, '_server_ref') and self._server_ref:
                     new_membership = {self.my_id: self.local_ip}
-                    for conn, (sid, sip) in followers.items():
+                    for conn, (sid, sip, _) in followers.items():
                         new_membership[sid] = sip
                     self._server_ref.membership_list = new_membership
                     print(f"[{self._get_identity()}] Current Membership: {new_membership}")
+                
+                # Aggregate chatroom info from all servers and notify ChatroomManager
+                if self.on_chatroom_list_updated_callback:
+                    all_servers = []
+                    # Add Leader's own chatroom info
+                    if self.get_chatroom_info_callback:
+                        all_servers.append(self.get_chatroom_info_callback())
+                    # Add followers' chatroom info
+                    for conn, (sid, sip, chatroom_info) in followers.items():
+                        if chatroom_info:
+                            all_servers.append(chatroom_info)
+                    self.on_chatroom_list_updated_callback(all_servers)
                 
                 heartbeat_counter += 1
                 if heartbeat_counter % 5 == 0:

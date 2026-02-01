@@ -1,1 +1,0 @@
-"""For defining the communication protocol between clients and server"""
