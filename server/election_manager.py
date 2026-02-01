@@ -197,10 +197,14 @@ class ElectionManager:
             self.election_trigger.clear()
             peers_copy = self.peers.copy()
 
+        print(f"[Election Manager] Known peers: {peers_copy}")
+        
         # 1. Find higher ID peers
         # WARNING: If using UUID strings, comparison is lexicographic, not numeric
         # Consider using numeric IDs or IP-based comparison for Bully algorithm
         higher_peers = {pid: ip for pid, ip in peers_copy.items() if pid > self.my_id}
+        
+        print(f"[Election Manager] Higher peers: {higher_peers}")
         
         if not higher_peers:
             print("[Election Manager] No higher peers. I am the winner!")
@@ -208,6 +212,7 @@ class ElectionManager:
             return
 
         # 2. Send ELECTION to all higher nodes
+        print(f"[Election Manager] Sending ELECTION to {len(higher_peers)} higher peers")
         for peer_id, peer_ip in higher_peers.items():
             self._send_to_ip(peer_ip, TYPE_ELECTION, {})
 
@@ -335,12 +340,6 @@ class ElectionManager:
         print(f"[Election Manager] Leader updated: ID={leader_id}, IP={leader_ip}")
         # Close old connection, monitor will establish new one
         self._close_heartbeat_connection()
-
-    def _trigger_election(self, reason):
-        """Trigger a new election."""
-        print(f"[Election Manager] Triggering Election: {reason}")
-        with self.lock:
-            self.state = STATE_ELECTION
 
     def _become_leader(self):
         """Become the leader and broadcast victory."""
