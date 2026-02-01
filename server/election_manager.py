@@ -89,10 +89,8 @@ class ElectionManager:
 
     def start(self):
         """Start the election manager's state machine in a background thread."""
-        print(f"[Election Manager] Manager starting for server {self.my_id}...")
-        # Start independent UDP listener
+        print(f"[{self._get_identity()}] Election Manager starting")
         threading.Thread(target=self._udp_listener, daemon=True).start()
-        # Start state machine (Main Logic)
         threading.Thread(target=self.run_state_machine, daemon=True).start()
 
     def stop(self):
@@ -106,7 +104,7 @@ class ElectionManager:
     # =================================================================
     def _udp_listener(self):
         """Listen for election messages on dedicated UDP port."""
-        print(f"[Election Manager] UDP listener started on port {PORT_ELECTION}")
+        print(f"[{self._get_identity()}] UDP listener started")
         while not self.stop_event.is_set():
             message, addr = receive_udp_message(self.udp_socket)
             if not message:
@@ -121,9 +119,9 @@ class ElectionManager:
             if sender_id == self.my_id:
                 continue
             
-            # Debug: log received messages
-            if msg_type in [TYPE_ELECTION, TYPE_ANSWER, TYPE_COORDINATOR]:
-                print(f"[{self.state}] UDP received {msg_type} from {sender_id}")
+            # Only log important messages (COORDINATOR)
+            if msg_type == TYPE_COORDINATOR:
+                print(f"[{self._get_identity()}] Received COORDINATOR from {sender_id}")
             
             # Forward to message handler
             self.handle_election_messages(msg_type, msg_body, sender_ip)
@@ -142,56 +140,37 @@ class ElectionManager:
         sender_id = message.get('sender_id')
         if sender_id == self.my_id:
             return  # Ignore my own messages
-        
-        # Debug: show current state when handling message
-        with self.lock:
-            current_state = self.state
-        
-        # Only log non-heartbeat messages to reduce noise
-        if msg_type != TYPE_HEARTBEAT:
-            print(f"[Election Manager] Handling {msg_type} from {sender_id} (my state: {current_state})")
 
         if msg_type == TYPE_ELECTION:
-            # Someone lower wants to be leader - bully them back
-            print(f"[Election Manager] Received ELECTION from {sender_id} at {sender_ip}. Sending ANSWER.")
+            print(f"[{self._get_identity()}] Challenged by {sender_id}, sending ANSWER")
             self._send_to_ip(sender_ip, TYPE_ANSWER, {})
             
-            # If I'm not already in election or leader, start election
-            # If I'm already leader, the ANSWER is enough (don't restart election)
             with self.lock:
                 if self.state != STATE_LEADER and self.state != STATE_ELECTION:
                     self._trigger_election("Challenged by lower node")
 
         elif msg_type == TYPE_ANSWER:
-            # Someone higher is alive
-            print(f"[Election Manager] Received ANSWER from {sender_id} at {sender_ip}.")
             with self.lock:
                 self.received_answer = True
 
         elif msg_type == TYPE_COORDINATOR:
-            # Someone declared victory
             sender_id = message.get('sender_id')
-            print(f"[Election Manager] {sender_id} declared COORDINATOR from {sender_ip}.")
             
             with self.lock:
                 old_state = self.state
-                # If sender has higher ID, or I'm not leader, accept them as leader
                 if sender_id > self.my_id or self.state != STATE_LEADER:
                     self.current_leader_id = sender_id
                     self.leader_ip = sender_ip
                     if self.state != STATE_FOLLOWER:
-                        print(f"[Election Manager] Demoting to FOLLOWER. New Leader: {sender_id}")
+                        print(f"[{self._get_identity()}] Demoting to Follower, new Leader: {sender_id}")
                         self.state = STATE_FOLLOWER
                         self._notify_state_change_if_changed(old_state)
                     self.election_trigger.set()
                 elif sender_id < self.my_id and self.state == STATE_LEADER:
-                    # I have higher ID and I'm leader - send COORDINATOR back
-                    print(f"[Election Manager] Rejecting lower ID {sender_id}'s COORDINATOR (I am {self.my_id})")
+                    print(f"[{self._get_identity()}] Rejecting lower ID {sender_id}'s claim")
                     self._send_to_ip(sender_ip, TYPE_COORDINATOR, {})
-            # Election trigger will interrupt follower loop
 
         elif msg_type == TYPE_HEARTBEAT:
-            # Heartbeat from leader (handled in handle_follower via TCP)
             pass
 
     # =================================================================
@@ -199,17 +178,13 @@ class ElectionManager:
     # =================================================================
     def run_state_machine(self):
         """Main state machine loop."""
-        # Only trigger election if this is the first server (no leader known)
         if self.current_leader_id is None and self.leader_ip is None:
-            print(f"[Election Manager] No existing leader. Waiting for discovery...")
-            time.sleep(1.5)  # Wait for potential COORDINATOR messages
-            
-            # Still no leader after waiting - I must be the first server
+            time.sleep(1.5)
             if self.current_leader_id is None:
-                print(f"[Election Manager] Still no leader. Starting election as first server.")
+                print(f"[{self._get_identity()}] First server, starting election")
                 self._trigger_election("First server startup")
         else:
-            print(f"[Election Manager] Leader already known (ID={self.current_leader_id}, IP={self.leader_ip}). Skipping election.")
+            print(f"[{self._get_identity()}] Leader known: {self.current_leader_id}")
 
         while not self.stop_event.is_set():
             state = self.state  # Local copy
@@ -226,129 +201,99 @@ class ElectionManager:
     # --- Election Logic ---
     def handle_election(self):
         """Handle CANDIDATE state - run Bully election."""
-        print(f"[Election Manager] Election started. My ID={self.my_id}")
+        print(f"[{self._get_identity()}] Election started")
         
         with self.lock:
             self.received_answer = False
             self.election_trigger.clear()
             peers_copy = self.peers.copy()
-            # Clear current leader since we're in election
             self.current_leader_id = None
             self.leader_ip = None
-
-        print(f"[Election Manager] Known peers: {peers_copy}")
         
-        # 1. Find higher ID peers
-        # WARNING: If using UUID strings, comparison is lexicographic, not numeric
-        # Consider using numeric IDs or IP-based comparison for Bully algorithm
         higher_peers = {pid: ip for pid, ip in peers_copy.items() if pid > self.my_id}
         
-        print(f"[Election Manager] Higher peers: {higher_peers}")
-        
         if not higher_peers:
-            print("[Election Manager] No higher peers. I am the winner!")
+            print(f"[{self._get_identity()}] No higher peers, becoming Leader")
             self._become_leader()
             return
 
-        # 2. Send ELECTION to all higher nodes
-        print(f"[Election Manager] Sending ELECTION to {len(higher_peers)} higher peers")
+        print(f"[{self._get_identity()}] Challenging {len(higher_peers)} higher peers")
         for peer_id, peer_ip in higher_peers.items():
             self._send_to_ip(peer_ip, TYPE_ELECTION, {})
 
-        # 3. Wait for ANSWER
-        print(f"[Election Manager] Waiting {TIMEOUT_ELECTION}s for ANSWER...")
         start_time = time.time()
         while time.time() - start_time < TIMEOUT_ELECTION:
             with self.lock:
                 if self.received_answer:
-                    print(f"[Election Manager] ANSWER received after {time.time() - start_time:.2f}s")
                     break
                 if self.state != STATE_ELECTION:
-                    print(f"[Election Manager] State changed to {self.state}, exiting election")
                     return
             time.sleep(0.1)
 
-        # 4. Check results
         with self.lock:
             if self.state != STATE_ELECTION:
-                return  # Someone else became leader
+                return
 
             if not self.received_answer:
-                # No one replied - I win
-                print("[Election Manager] Timeout. No ANSWER received. I am taking over.")
-                # DON'T call _become_leader inside lock - it will deadlock
                 should_become_leader = True
             else:
-                # Received Answer - wait for Coordinator
-                print("[Election Manager] Received ANSWER. Waiting for Coordinator...")
                 should_become_leader = False
         
-        # Call _become_leader OUTSIDE the lock
         if should_become_leader:
+            print(f"[{self._get_identity()}] No response, becoming Leader")
             self._become_leader()
             return
         
-        # Wait for Coordinator message
+        # Wait for Coordinator
         start_time = time.time()
         while time.time() - start_time < TIMEOUT_COORDINATOR:
             with self.lock:
                 if self.state != STATE_ELECTION:
-                    return  # Coordinator arrived
+                    return
             time.sleep(0.1)
         
-        # Coordinator timeout - restart election
-        print("[Election Manager] Coordinator timeout. Restarting election.")
+        print(f"[{self._get_identity()}] Coordinator timeout, restarting election")
         self._trigger_election("Coordinator timeout")
 
     def handle_follower(self):
         """As follower, connect to leader and monitor heartbeats."""
-        # Get latest leader info with lock
         with self.lock:
             leader_id = self.current_leader_id
             leader_ip = self.leader_ip
         
         if not leader_ip or not leader_id:
-            print(f"[Follower] No leader known (ID={leader_id}, IP={leader_ip}). Triggering election.")
             self._trigger_election("No leader known")
             return
         
         if leader_id == self.my_id:
-            print(f"[Follower] I am the leader. Changing to LEADER state.")
             self.state = STATE_LEADER
             return
         
-        print(f"[Follower] Connecting to Leader {leader_id} at {leader_ip}:9004")
+        print(f"[{self._get_identity()}] Connecting to Leader {leader_id}")
         
         PORT_HEARTBEAT = 9004
         sock = None
         try:
-            # Connect to leader's TCP heartbeat server
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(3.0)
             sock.connect((leader_ip, PORT_HEARTBEAT))
-            print(f"[Follower] Connected to Leader {leader_id} (TCP)")
             
-            # Listen for heartbeats
             while self.state == STATE_FOLLOWER and not self.stop_event.is_set():
-                sock.settimeout(HEARTBEAT_INTERVAL * 3)  # 3 second timeout
+                sock.settimeout(HEARTBEAT_INTERVAL * 3)
                 msg = self.network_manager.receive_TCP_message(sock)
                 
                 if msg is None:
-                    raise Exception("Connection closed by Leader")
+                    raise Exception("Connection closed")
                 
                 m_type, message, _ = msg
                 if m_type == TYPE_HEARTBEAT:
-                    # Heartbeat contains membership_list (excluding leader)
                     membership_raw = message.get('membership_list', {})
                     if membership_raw:
-                        # Update Server's membership
                         if hasattr(self, '_server_ref') and self._server_ref:
                             self._server_ref.update_membership_from_leader(membership_raw, leader_id)
                         
-                        # Update election peers
                         with self.lock:
                             self.peers = {}
-                            # Add the current leader explicitly
                             self.peers[leader_id] = leader_ip
                             
                             for sid, sip in membership_raw.items():
@@ -357,24 +302,19 @@ class ElectionManager:
                                     self.peers[sid_int] = sip
                     
         except Exception as e:
-            print(f"[Follower] Leader {leader_id} failed: {e}")
+            print(f"[{self._get_identity()}] Leader connection failed: {e}")
         finally:
             if sock:
                 sock.close()
         
-        # If we exit the loop and still a follower, leader died
         if self.state == STATE_FOLLOWER and not self.stop_event.is_set():
-            # Don't remove leader from peers - we might need to challenge them later
-            # with self.lock:
-            #     if self.current_leader_id in self.peers:
-            #         del self.peers[self.current_leader_id]
             self.current_leader_id = None
             self.leader_ip = None
             self._trigger_election("Leader failed")
 
     def handle_leader(self):
         """As leader, start TCP server and send heartbeats to followers."""
-        print(f"[Leader] I am LEADER. Starting TCP Server on port 9004...")
+        print(f"[{self._get_identity()}] Starting heartbeat server")
         self.current_leader_id = self.my_id
         
         PORT_HEARTBEAT = 9004
@@ -386,50 +326,38 @@ class ElectionManager:
         try:
             server_sock.bind(('0.0.0.0', PORT_HEARTBEAT))
             server_sock.listen(5)
-            server_sock.settimeout(1.0)  # Non-blocking accept
+            server_sock.settimeout(1.0)
             
             followers = []
             heartbeat_counter = 0
             
             while self.state == STATE_LEADER and not self.stop_event.is_set():
-                # A. Accept new followers
                 try:
                     conn, addr = server_sock.accept()
-                    print(f"[Leader] Follower connected: {addr}")
+                    print(f"[{self._get_identity()}] Follower connected: {addr[0]}")
                     followers.append(conn)
                 except socket.timeout:
-                    pass  # Just loop to send heartbeats
+                    pass
                 
-                # B. Send Heartbeats to all (with membership_list)
-                # Get membership from server (includes all members)
                 full_membership = self._get_full_membership()
-                # Exclude myself from the broadcast list
                 membership_for_broadcast = {sid: sip for sid, sip in full_membership.items() if sid != self.my_id}
                 
                 for conn in followers[:]:
                     try:
-                        # Send heartbeat with membership_list (excluding leader)
                         self.network_manager.send_TCP_message(conn, TYPE_HEARTBEAT, {'membership_list': membership_for_broadcast})
                     except:
-                        # Follower disconnected - remove from Server's membership
                         conn.close()
                         followers.remove(conn)
-                        # Notify Server to remove disconnected follower
-                        if hasattr(self, '_server_ref') and self._server_ref:
-                            # Find which follower disconnected by checking membership
-                            # This is handled by Server's connection management
-                            pass
                 
-                # C. Periodically broadcast COORDINATOR via UDP (for new servers joining and split brain resolution)
                 heartbeat_counter += 1
-                if heartbeat_counter % 5 == 0:  # Every 5 heartbeats (5 seconds)
+                if heartbeat_counter % 5 == 0:
                     self._send_to_ip('<broadcast>', TYPE_COORDINATOR, {})
                         
                 time.sleep(HEARTBEAT_INTERVAL)
                 
         except Exception as e:
-            print(f"[Leader] Error: {e}")
-            self.state = STATE_FOLLOWER  # Demote myself on error
+            print(f"[{self._get_identity()}] Error: {e}")
+            self.state = STATE_FOLLOWER
         finally:
             server_sock.close()
             for f in followers:
@@ -437,9 +365,13 @@ class ElectionManager:
                     f.close()
                 except:
                     pass
-            print("[Leader] TCP Server stopped.")
 
     # --- Helpers ---
+    def _get_identity(self):
+        """Get current identity string for logging."""
+        role = "Leader" if self.state == STATE_LEADER else "Follower" if self.state == STATE_FOLLOWER else "Election"
+        return f"I'm {role} - ({self.my_id}, {self.local_ip})"
+    
     def _get_full_membership(self):
         """Get full membership list including leader (for broadcast purposes)."""
         # This will be set by Server through set_server_reference
@@ -453,9 +385,9 @@ class ElectionManager:
     
     def _trigger_election(self, reason):
         """Trigger a new election."""
-        print(f"[{self.state}] Triggering Election: {reason}")
+        print(f"[{self._get_identity()}] Election triggered: {reason}")
         self.state = STATE_ELECTION
-        self.election_trigger.set()  # Wake up any sleeping threads
+        self.election_trigger.set()
 
     def _become_leader(self):
         """Become the leader and broadcast victory."""
@@ -465,8 +397,7 @@ class ElectionManager:
             self.leader_ip = self.local_ip
             self._notify_state_change()
         
-        # Broadcast Victory (retry 3 times) to EVERYONE (Broadcast IP)
-        print(f"[Election Manager] Broadcasting COORDINATOR to Network")
+        print(f"[{self._get_identity()}] Broadcasting victory")
         for _ in range(3):
             self._send_to_ip('<broadcast>', TYPE_COORDINATOR, {})
             time.sleep(0.1)
@@ -488,7 +419,6 @@ class ElectionManager:
         if self.on_state_change:
             role = TYPE_LEADER if self.state == STATE_LEADER else TYPE_FOLLOWER
             leader_id = self.current_leader_id if self.current_leader_id else self.my_id
-            print(f"[Election Manager] Notifying role change: {role}, Leader ID: {leader_id}")
             self.on_state_change(role, leader_id)
     
     def _notify_state_change_if_changed(self, old_state):

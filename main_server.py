@@ -13,6 +13,7 @@ from server.roles.server import Server
 from server.dynamic_discovery import dynamic_discovery
 from server.election_manager import ElectionManager
 from server.config import TYPE_FOLLOWER
+from utills.ip_validator import prompt_valid_ip
 
 DEBUG = True  # or False
 
@@ -188,7 +189,8 @@ class StartupEngine:
 
 # modify1: move startup code into main.py
 if __name__ == '__main__':
-    MY_IP = input("请输入服务器 IP 地址: ")
+    # MY_IP = input("请输入服务器 IP 地址: ")
+    MY_IP = prompt_valid_ip()
     print(f"[Server] Starting server with IP: {MY_IP}")
 
     startup_engine = StartupEngine(MY_IP)
