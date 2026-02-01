@@ -2,6 +2,9 @@ import socket
 import threading
 import time
 
+import psutil
+
+from server.membership import FollowerMembershipManager
 from .base import Role
 
 class Follower(Role):
@@ -9,9 +12,10 @@ class Follower(Role):
         super().__init__()
         self.server_id = server_id
         self.network_manager = network_manager
+        self.membership = FollowerMembershipManager(False)                                
         self.identity = "FOLLOWER"
         self._running = True
-        self.membership_list = {}
+
         self.leader_address = leader_address
         self.leader_latest_heartbeat = time.time()
 
@@ -34,7 +38,9 @@ class Follower(Role):
             leader_addr,
             9001,
             "FOLLOWER_REGISTER",
-            {"follower_id": self.server_id, "follower_ip": self.network_manager.ip_local}
+            {"follower_id": self.server_id, 
+             "load_info": self.get_current_load(),
+             "follower_ip": self.network_manager.ip_local}
         )
         #print(1)
 
@@ -42,12 +48,24 @@ class Follower(Role):
         if msg_type == "REGISTER_ACK":
             #print('hhey')
             leader_id = message.get("leader_id")
-            self.membership_list = message.get("membership_list", {})
-            print(f'[Follower] Registered with Leader {leader_id}. Current membership list: {self.membership_list}')
+            group_id = message.get("group_id")
+            self.membership.set_group_info(group_id, message.get("membership_list", {}))
+            print(f'[Follower] Registered with Leader {leader_id}. Current membership list: {self.membership.get_group_members()}')
 
     def run(self):
         pass
 
     def shutdown(self):
         pass
+
+    def get_current_load(self):
+        """获取当前负载信息"""
+        pass
+        cpu_percent = psutil.cpu_percent(interval=1)
+        memory_percent = psutil.virtual_memory().percent
+        memory_available = psutil.virtual_memory().available
+        return {
+            "cpu_percent": cpu_percent,
+            "memory_percent": memory_percent
+        }
 

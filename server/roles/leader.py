@@ -1,6 +1,7 @@
 import threading
 import time
 
+from server.membership import LeaderMembershipManager
 from .base import Role
 
 class Leader(Role):
@@ -8,6 +9,7 @@ class Leader(Role):
         super().__init__()
         self.server_id = server_id
         self.network_manager = network_manager
+        self.membership = LeaderMembershipManager(True)
         self.identity = "LEADER"
         self.network_manager.set_callback(self.handle_messages)
         self._running = True
@@ -35,15 +37,21 @@ class Leader(Role):
         elif msg_type == "FOLLOWER_REGISTER":
             follower_id = message.get("follower_id")
             follower_ip = message.get("follower_ip")
+            load_info = message.get("load_info")
             print(f'[Leader] Follower {follower_id} with IP: {follower_ip} registered.')
-            self.menbership_list[follower_id] = follower_ip
-            print(f'[Leader] Current membership list: {self.menbership_list}')
+            self.membership.add_server(follower_id, follower_ip, load_info)
+            group_id, existed_members = self.membership.assign_group(follower_id)
+
             self.network_manager.send_unicast(
                 follower_ip,
                 9001,
                 "REGISTER_ACK",
-                {"leader_id": self.server_id, "membership_list": self.menbership_list}
+                {"leader_id": self.server_id,
+                  "group_id": group_id,
+                  "membership_list": existed_members}
             )
+            # todo: notidy other followers about the new member
+            
             #print('hhey')
 
     def run(self):

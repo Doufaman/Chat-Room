@@ -72,7 +72,9 @@ class LeaderMembershipManager(BaseMembership):
         # server_id -> {
         #   status,
         #   last_heartbeat_ts,
-        #   load_info,
+        #   load_info {
+        #     cpu_percent,
+        #     memory_percent},
         #   address
         # }
         self.servers: Dict[str, Dict] = {} # owner: leader
@@ -94,7 +96,7 @@ class LeaderMembershipManager(BaseMembership):
     # Server lifecycle management
     # ------------------------------------------------------------------
 
-    def add_server(self, server_id: str, address: str, load_info: Optional[dict] = None):
+    def add_server(self, server_id: str, address: str, load_info: dict = None):
         """
         Add a new server to membership.
         Leader only.
@@ -238,12 +240,12 @@ class LeaderMembershipManager(BaseMembership):
         # assign group according to the number of servers and the sum of load in each group
         group_id = None
         min_load = float("inf")
-        existed_members = []
+        existed_members = {}
 
         for g_id, servers in self.group_servers.items():
             if len(servers) < MAX_SERVERS_PER_GROUP:
                 total_load = sum(
-                    self.servers[s_id]["load_info"]["cpu"] for s_id in servers
+                    self.servers[s_id]["load_info"]["cpu_percent"] + self.servers[s_id]["load_info"]["memory_percent"] for s_id in servers
                 )
                 if total_load < min_load:
                     min_load = total_load
@@ -254,7 +256,9 @@ class LeaderMembershipManager(BaseMembership):
             group_id = f"group_{len(self.group_servers)}"
             self.group_servers[group_id] = []
 
-        existed_members = self.group_servers[group_id]
+        existed_members_id = self.group_servers[group_id]
+        for sid in existed_members_id:
+            existed_members[sid] = self.servers[sid]["address"]
         self.group_servers[group_id].append(server_id)
         self.server_groups[server_id] = group_id
 
@@ -326,8 +330,11 @@ class LeaderMembershipManager(BaseMembership):
             if self.servers[srv_id]["status"] != ACTIVE:
                 continue
             load_info = self.servers[srv_id]["load_info"]
+                    #   load_info {
+                    #     cpu_percent,
+                    #     memory_percent},
             chatroom_num = len(self.server_chatrooms.get(srv_id, []))
-            load_metric = load_info.get("cpu", 0) + chatroom_num * 0.1  # simple load metric
+            load_metric = load_info.get("cpu_percent", 0) + load_info.get("memory_percent", 0) + chatroom_num * 0.1  # simple load metric
             if load_metric <= min_load and chatroom_num < min_chatroom_num:
                 min_load = load_metric
                 min_chatroom_num = chatroom_num
@@ -392,11 +399,11 @@ class FollowerMembershipManager(BaseMembership):
         super().__init__(is_leader)
 
         self.group_id: str = ""  # assigned group_id
-        self.group_members: List[str] = []  # other servers in the group
+        self.group_members: dict[str, str] = {}  # other servers in the group
 
         self.chatrooms: List[str] = []  # chatrooms this server is responsible for
 
-    def set_group_info(self, group_id: str, group_members: List[str]):
+    def set_group_info(self, group_id: str, group_members: dict[str, str]):
         """
         Set group information.
         """
@@ -404,13 +411,14 @@ class FollowerMembershipManager(BaseMembership):
         self.group_id = group_id
         self.group_members = group_members
 
-    def add_group_member(self, server_id: str):
+    def add_group_member(self, server_id: str, server_ip: str):
         """
         Add a server to group members.
         """
         pass
         if server_id not in self.group_members:
-            self.group_members.append(server_id)
+            self.group_members[server_id] = server_ip
+        
 
     def remove_group_member(self, server_id: str):
         """
@@ -418,7 +426,7 @@ class FollowerMembershipManager(BaseMembership):
         """
         pass
         if server_id in self.group_members:
-            self.group_members.remove(server_id)
+            del self.group_members[server_id]
 
     def bind_chatroom(self, chatroom_id: str):
         """
