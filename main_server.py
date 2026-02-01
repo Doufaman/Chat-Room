@@ -70,7 +70,16 @@ class StartupEngine:
         # Set initial leader info if follower
         if current_identity == TYPE_FOLLOWER and leader_address:
             election_manager.leader_ip = leader_address
-            print(f"[StartupEngine] Initial leader set to {leader_address}")
+            # Get leader_id from server's membership list after registration
+            # Give server time to register and get membership
+            time.sleep(0.5)
+            membership = server.get_membership_list()
+            # Find leader_id by matching IP
+            for sid, sip in membership.items():
+                if sip == leader_address:
+                    election_manager.current_leader_id = sid
+                    print(f"[StartupEngine] Initial leader set to ID={sid}, IP={leader_address}")
+                    break
         
         # Populate peers from server's membership list
         def populate_election_peers():
