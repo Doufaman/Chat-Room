@@ -54,11 +54,13 @@ class StartupEngine:
         #network_manager, leader_address = NetworkManager(ip_local=self_ip)
         network_manager = NetworkManager(ip_local=self_ip)
 
-        # Create Server instance
+        #合并了leader和follower的server类
         server = Server(self.server_id, network_manager, identity=current_identity, leader_address=leader_address)
         server.start()
 
-        # === Create ChatroomManager (independent of election) ===
+        # ------------------------------------------------#
+        # 以下部分是启动chatroom manager和election manager:  #
+        # ------------------------------------------------#
         chatroom_manager = ChatroomManager(self.server_id, self_ip)
         # Create a default chat room
         chatroom_manager.create_room("General")
