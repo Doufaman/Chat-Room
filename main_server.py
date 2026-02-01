@@ -190,7 +190,7 @@ class StartupEngine:
 # modify1: move startup code into main.py
 if __name__ == '__main__':
     # MY_IP = input("请输入服务器 IP 地址: ")
-    MY_IP = prompt_valid_ip()
+    MY_IP = prompt_valid_ip()  # For MACOS system test
     print(f"[Server] Starting server with IP: {MY_IP}")
 
     startup_engine = StartupEngine(MY_IP)

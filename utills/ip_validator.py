@@ -1,3 +1,7 @@
+"""
+IP address validating for MACOS, as MACOS 
+ have issues binding to certain IPs. 
+"""
 import socket
 import ipaddress
 import logging
@@ -108,6 +112,20 @@ def prompt_valid_ip():
     Returns:
         str: 有效的IP地址
     """
+    # 显示可用的 IP 地址
+    print("\n" + "="*50)
+    print("可用的 IP 地址:")
+    print("="*50)
+    
+    local_ips = get_local_ips()
+    for i, ip in enumerate(local_ips, 1):
+        print(f"  {i}. {ip}")
+    
+    print("\n回环地址 :")
+    print("  - 127.0.0.1 (默认可用)")
+    print("  - 127.0.0.x ( MACOS 需要先添加别名: sudo ifconfig lo0 alias 127.0.0.x)")
+    print("="*50 + "\n")
+    
     while True:
         ip_str = input("请输入服务器 IP 地址: ").strip()
         
