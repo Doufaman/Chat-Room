@@ -48,7 +48,7 @@ class StartupEngine:
         # self.comm.start()
         
         # 2. 进入 discovery
-        currentidentity, leader_address = dynamic_discovery(ip_local = self_ip) #使用当前IP进行动态发现
+        current_identity, leader_address = dynamic_discovery(ip_local = self_ip) #使用当前IP进行动态发现
 
         # 生成对应的network manager
         #network_manager, leader_address = NetworkManager(ip_local=self_ip)
@@ -61,7 +61,7 @@ class StartupEngine:
         # ------------------------------------------------#
         # 以下部分是启动chatroom manager和election manager:  #
         # ------------------------------------------------#
-        chatroom_manager = ChatroomManager(self.server_id, self_ip)
+        chatroom_manager = ChatroomManager(self.server_id, self_ip, membership_manager=server.membership_manager)
         # Create a default chat room
         chatroom_manager.create_room("General")
 

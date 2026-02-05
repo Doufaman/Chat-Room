@@ -2,13 +2,21 @@ import threading
 import time
 
 from .base import Role
-from server.config import TYPE_LEADER, TYPE_FOLLOWER
+from server.config import TYPE_LEADER, TYPE_FOLLOWER, HEARTBEAT_INTERVAL
+from server.heartbeat import Heartbeat
 
 class Server(Role):
     def __init__(self, server_id, network_manager, identity, leader_address=None):
         super().__init__()
         self.server_id = server_id
         self.network_manager = network_manager
+        self.membership_manager = None  
+        if identity == TYPE_LEADER:
+            from server.membership import LeaderMembershipManager
+            self.membership_manager = LeaderMembershipManager(True)
+        else:
+            from server.membership import BaseMembershipManger
+            self.membership_manager = BaseMembershipManger(False)
         self._identity = identity
         self.leader_address = leader_address
         self.leader_id = None
@@ -24,7 +32,11 @@ class Server(Role):
     def start(self):
         # 启动网络监听
         self.network_manager.start_listening()
-        
+
+        # start heartbeat manager
+        self.heartbeat = Heartbeat(self, interval=HEARTBEAT_INTERVAL)
+        self.heartbeat.start()
+
         print(f"[Server] Initialized role: {self._identity}, Server ID: {self.server_id}")
         if self._identity == TYPE_LEADER:
             print(f"[{self._identity}] Setting up {self._identity.lower()} role...")
