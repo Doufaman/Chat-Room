@@ -4,7 +4,7 @@ import time
 
 import psutil
 
-from server.membership import FollowerMembershipManager
+from server.membership import BaseMembershipManger
 from utills.logger import get_logger
 from .base import Role
 from server.fault_detection import Heartbeat
@@ -16,7 +16,7 @@ class Follower(Role):
         super().__init__()
         self.server_id = server_id
         self.network_manager = network_manager
-        self.membership = FollowerMembershipManager(False)  
+        self.membership = BaseMembershipManger(False)  
         
 
         self.identity = "FOLLOWER"

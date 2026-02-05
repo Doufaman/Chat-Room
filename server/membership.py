@@ -10,13 +10,51 @@ logger = get_logger("membership")
 # todo: after server resgister, notify other servers about new server(incluing group id)
 # todo: after server resgister, notify server about its group id, group members
 # todo: after chatroom bind, notify responsible server about new chatroom
-class BaseMembership:   
+class BaseMembershipManger:   
     def __init__(self, is_leader: bool):
         self.is_leader = is_leader
         # chatroom_id -> [client_id]
         self.chatroom_clients: Dict[str, List[str]] = {} 
         # client_info
         self.clients: Dict[str, Dict] = {} 
+
+        self.group_id: str = ""  # assigned group_id
+        self.group_members: dict[str, str] = {}  # other servers in the group
+
+        self.chatrooms: List[str] = []  # chatrooms this server is responsible for
+
+    def set_group_info(self, group_id: str, group_members: dict[str, str]):
+        """
+        Set group information.
+        """
+        pass
+        self.group_id = group_id
+        self.group_members = group_members
+
+    def add_group_member(self, server_id: str, server_ip: str):
+        """
+        Add a server to group members.
+        """
+        pass
+        if server_id not in self.group_members:
+            self.group_members[server_id] = server_ip
+        
+
+    def remove_group_member(self, server_id: str):
+        """
+        Remove a server from group members.
+        """
+        pass
+        if server_id in self.group_members:
+            del self.group_members[server_id]
+
+    def bind_chatroom(self, chatroom_id: str):
+        """
+        Bind a chatroom to this server.
+        """
+        pass
+        if chatroom_id not in self.chatrooms:
+            self.chatrooms.append(chatroom_id)
 
     # ------------------------------------------------------------------
     # Client management
@@ -60,7 +98,7 @@ class BaseMembership:
 
 
 
-class LeaderMembershipManager(BaseMembership):
+class LeaderMembershipManager(BaseMembershipManger):
     """
     MembershipManager maintains the cluster view.
     It does NOT perform communication.
@@ -266,15 +304,15 @@ class LeaderMembershipManager(BaseMembership):
 
         return group_id, existed_members
 
-    def get_group_servers(self, group_id: str) -> List[str]:
+    def get_group_servers(self, group_id: str) -> dict[str, str]:
         """
         Get all servers in a group.
         """
         pass
         if group_id not in self.group_servers:
             logger.warning(f"group {group_id} does not exist")
-            return []
-        return self.group_servers[group_id]
+            return {}
+        return {sid: self.servers[sid]["address"] for sid in self.group_servers[group_id]}
 
     def remove_server_from_group(self, server_id: str):
         """
@@ -394,47 +432,10 @@ class LeaderMembershipManager(BaseMembership):
         pass
 
 
-class FollowerMembershipManager(BaseMembership):
-    def __init__(self, is_leader: bool):
-        super().__init__(is_leader)
 
-        self.group_id: str = ""  # assigned group_id
-        self.group_members: dict[str, str] = {}  # other servers in the group
 
-        self.chatrooms: List[str] = []  # chatrooms this server is responsible for
 
-    def set_group_info(self, group_id: str, group_members: dict[str, str]):
-        """
-        Set group information.
-        """
-        pass
-        self.group_id = group_id
-        self.group_members = group_members
 
-    def add_group_member(self, server_id: str, server_ip: str):
-        """
-        Add a server to group members.
-        """
-        pass
-        if server_id not in self.group_members:
-            self.group_members[server_id] = server_ip
-        
-
-    def remove_group_member(self, server_id: str):
-        """
-        Remove a server from group members.
-        """
-        pass
-        if server_id in self.group_members:
-            del self.group_members[server_id]
-
-    def bind_chatroom(self, chatroom_id: str):
-        """
-        Bind a chatroom to this server.
-        """
-        pass
-        if chatroom_id not in self.chatrooms:
-            self.chatrooms.append(chatroom_id)
     
 
     
