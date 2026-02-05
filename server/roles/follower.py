@@ -28,8 +28,6 @@ class Follower(Role):
 
         self.network_manager.set_callback(self.handle_messages)
 
-        self.start()
-
     def start(self):
         pass
         # 启动网络监听

@@ -1,6 +1,7 @@
 import time
 import socket
 import json
+from server.config import TYPE_LEADER, TYPE_FOLLOWER
 #import threading
 #from typing import Type, Dict, Optional
 
@@ -12,6 +13,8 @@ def dynamic_discovery(ip_local, timeout = 3.0):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1) #允许广播
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) #允许端口复用
+    if hasattr(socket, 'SO_REUSEPORT'):
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
     sock.bind(('', 9000))  # 绑定到指定的本地IP
     sock.settimeout(timeout)
     try:
@@ -46,7 +49,7 @@ def dynamic_discovery(ip_local, timeout = 3.0):
                     # modify2: move initialization out of dynamic_discovery 
                     # current_server = RoleManager(ip_local=ip_local)
                     # current_server.initialize_role("follower")
-                    return "follower", sender_ip
+                    return TYPE_FOLLOWER, sender_ip
                 elif msg_type == "WHO_IS_LEADER":
                     # ignore other WHO_IS_LEADER messages
                     continue
@@ -57,7 +60,7 @@ def dynamic_discovery(ip_local, timeout = 3.0):
                 # initiallize as leader
                 # current_server = RoleManager(ip_local=ip_local)
                 # current_server.initialize_role("leader")
-                return "leader", None
+                return TYPE_LEADER, None
     finally:
         sock.close()
 

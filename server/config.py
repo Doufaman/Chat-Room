@@ -4,6 +4,9 @@
 # General
 # ==================================================
 
+TYPE_LEADER = "LEADER"
+TYPE_FOLLOWER = "FOLLOWER"
+
 DEBUG = True
 ACTIVE = "ACTIVE"
 SUSPECT = "SUSPECT"
