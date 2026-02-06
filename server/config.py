@@ -31,7 +31,7 @@ HEARTBEAT_SERVER_TIMEOUT = 10  # seconds
 # Group / Replication
 # ==================================================
 
-MAX_SERVERS_PER_GROUP = 3
+MAX_SERVERS_PER_GROUP = 2
 
 
 # ==================================================

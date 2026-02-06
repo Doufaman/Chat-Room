@@ -31,14 +31,16 @@ class ChatroomManager:
         Server 2, Room 1 → 8000 + 200 + 1 = 8201
     """
     
-    def __init__(self, server_id, local_ip):
+    def __init__(self, server_id, local_ip, membership_manager=None):
         """
         Args:
             server_id: This server's ID
             local_ip: Local IP address to bind chat rooms
+            membership_manager: manage membership info
         """
         self.server_id = server_id
         self.local_ip = local_ip
+        self.membership_manager = membership_manager
         
         # Chat rooms: {room_id: ChatRoom}
         self.rooms = {}

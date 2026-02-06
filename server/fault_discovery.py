@@ -30,7 +30,7 @@ class ServerCrashDiscovery:
 
     def handle_dead_server(self, dead_server_id: str):
         logger.info(f"Handling dead server {dead_server_id}")
-        # 1) remove dead server from responding membership maps
+'''        # 1) remove dead server from responding membership maps
         try:
             self.server.membership.remove_server(dead_server_id)
             affected_group_id = self.server.membership.remove_server_from_group(dead_server_id)
@@ -105,4 +105,4 @@ class ServerCrashDiscovery:
         """
         pass
         return self.server.membership.server_clients.get(prev_server_id, {}).get(client_id)
-
+'''

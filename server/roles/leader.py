@@ -48,6 +48,7 @@ class Leader(Role):
                 "REGISTER_ACK",
                 {"leader_id": self.server_id,
                   "group_id": group_id,
+                  "members_in_group": existed_members,
                   "membership_list": existed_members}
             )
             # todo: notidy other followers about the new member
