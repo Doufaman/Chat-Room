@@ -15,6 +15,7 @@ PORT_UNICAST = 9001
 PORT_BROADCAST = 9000
 PORT_MULTICAST = 9002
 PORT_ELECTION = 9003  # Dedicated port for election messages
+PORT_LONG_LIVED = 9004  # Dedicated port for long-lived TCP connections (leader <-> followers)
 
 IP_BROADCAST = '255.255.255.255'
 IP_MULTICAST = '224.0.0.1'
@@ -55,16 +56,28 @@ class NetworkManager:
                  port_unicast=PORT_UNICAST, 
                  port_broadcast=PORT_BROADCAST, 
                  ip_multicast= IP_MULTICAST, 
-                 port_multicast=PORT_MULTICAST):
+                 port_multicast=PORT_MULTICAST,
+                 port_long_lived=PORT_LONG_LIVED,
+                 server_id=None
+                 ):
+        self.server_id = server_id
         
         self.ip_local = ip_local
         self.port_unicast = port_unicast
         self.port_broadcast = port_broadcast
         self.ip_multicast = ip_multicast
         self.port_multicast = port_multicast
+        self.port_long_lived = port_long_lived   # for long-lived TCP connections (leader <-> followers)
 
         # 消息回调映射（业务层通过这个获取数据）
         self.on_message_received = None 
+
+        # long-lived connection registries (server_id -> socket)
+        self._conn_lock = threading.RLock()
+        self.serverid_to_conn: Dict[int, socket.socket] = {}    # registered by leader after identification
+        self.conn_to_addr: Dict[socket.socket, Tuple[str,int]] = {}  # conn -> peer addr
+        self.server_sock = None  # TCP server socket for leader to accept long-lived connections
+ 
 
     def set_callback(self, callback_func):
         """供 RoleManager 或 Leader 调用，设置消息回掉"""
@@ -247,3 +260,239 @@ class NetworkManager:
             if self.on_message_received:
                 self.on_message_received('MULTICAST', addr, data.decode())
     
+
+
+    # -----------------------
+    # Long-lived TCP helpers
+    # -----------------------
+    def start_leader_long_lived_listener(self):
+        # 1. create TCP server socket for accepting long-lived connections from followers
+        self.server_sock = self.create_tcp_server_socket('0.0.0.0', self.port_long_lived)
+
+        # 2. start ACCEPT thread to accept new long-lived connections from followers
+        self.accept_thread = threading.Thread(target=self._listen_for_followers, daemon=True)
+        self.accept_thread.start()
+
+        # 3. start MONITOR thread to monitor messages from followers
+        self.monitor_thread = threading.Thread(target=self._process_follower_messages, daemon=True)
+        self.monitor_thread.start()
+
+        logger.debug("Leader long-lived connection listener started")
+
+    def start_follower_long_lived_connector(self, leader_ip):
+        """For followers to establish long-lived TCP connection to leader."""
+        try:
+            conn = self.connect_tcp(leader_ip, self.port_long_lived, timeout=3.0)
+            # Send IDENTIFY message with follower's server_id (could be None if not assigned yet)
+            identify_msg = {"msg_type": "IDENTIFY", "message": {"server_id": getattr(self, "server_id", None)}}
+            self.send_tcp_message(conn, "IDENTIFY", identify_msg["message"])
+            logger.debug(f"Follower established long-lived connection to leader at {leader_ip}")
+            # start monitoring this connection for incoming messages (e.g., heartbeats, commands)
+            threading.Thread(target=self._process_follower_messages, daemon=True).start()
+        except Exception as e:
+            logger.error(f"Failed to establish long-lived connection to leader at {leader_ip}: {e}")
+
+    def _listen_for_followers(self):
+        """Accept loop for long-lived TCP connections from followers. Leader only."""
+        print("Leader TCP Accept Thread started...")
+        while True:
+            try:
+                # try non-blocking accept; if we get a connection, perform identification handshake and register
+                result = self.accept_nonblocking(self.server_sock)
+                if result:
+                    conn, addr = result
+                    # 接收身份消息
+                    msg = self.receive_tcp_message(conn, timeout=1.0)
+                    if msg and msg[0] == "IDENTIFY":
+                        f_id = msg[1].get("server_id")
+                        self.register_connection(conn, server_id=f_id)
+                        logger.debug(f"Registered long-lived connection from follower {f_id} at {addr}")
+                        # 这里可以触发发送 REGISTER_ACK 的逻辑
+                    else:
+                        conn.close()
+            except Exception as e:
+                print(f"Accept 线程异常: {e}")
+            time.sleep(0.1) # 避免 CPU 占用过高
+
+    def _process_follower_messages(self):
+        """Monitor loop to read messages from all registered follower connections."""
+        print("Leader Message Polling Thread 启动...")
+        while True:
+            # 获取当前所有已注册的连接快照
+            with self._conn_lock:
+                current_conns = list(self.serverid_to_conn.items())
+
+            for f_id, conn in current_conns:
+                try:
+                    # 非阻塞读取消息，timeout 设为 0 或极小
+                    msg = self.receive_tcp_message(conn, timeout=0.01)
+                    if msg:
+                        msg_type, payload, _ = msg
+                        self.handle_logic(f_id, msg_type, payload) # 你的业务逻辑处理函数
+                    
+                except Exception:
+                    # 如果读取失败，说明连接可能断开，进行注销
+                    logger.debug(f"Follower {f_id} connection error, unregistering")
+                    self.unregister_connection(server_id=f_id)
+            
+            time.sleep(0.01) # 消息处理循环可以快一点
+
+    def create_tcp_server_socket(self, bind_ip: str, port: int, backlog: int = 5) -> socket.socket:
+        """Create a non-blocking TCP server socket ready to accept long-lived connections."""
+        srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        if hasattr(socket, "SO_REUSEPORT"):
+            try:
+                srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+            except Exception:
+                pass
+        srv.bind((bind_ip, port))
+        srv.listen(backlog)
+        srv.setblocking(False)
+        return srv
+
+    def accept_nonblocking(self, server_sock: socket.socket) -> Optional[Tuple[socket.socket, Tuple[str,int]]]:
+        """Non-blocking accept. Caller will perform identification/registration."""
+        try:
+            conn, addr = server_sock.accept()
+            conn.setblocking(False)
+            with self._conn_lock:
+                self.conn_to_addr[conn] = addr
+            return conn, addr
+        except BlockingIOError:
+            return None
+        except Exception as e:
+            # swallow to keep accept loop robust
+            return None
+
+    def connect_tcp(self, target_ip: str, target_port: int, timeout: float = 5.0, bind_ip: Optional[str] = None) -> socket.socket:
+        """Create a long-lived outbound TCP connection (follower -> leader). Returns non-blocking socket."""
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        if bind_ip:
+            sock.bind((bind_ip, 0))
+        sock.settimeout(timeout)
+        sock.connect((target_ip, target_port))
+        sock.settimeout(None)
+        sock.setblocking(False)
+        with self._conn_lock:
+            self.conn_to_addr[sock] = (target_ip, target_port)
+        return sock
+
+    # -----------------------
+    # Framed JSON send/recv
+    # -----------------------
+    def send_tcp_message(self, conn_or_server_id, msg_type: str, payload: dict):
+        """
+        Send length-prefixed JSON message. Accepts either a socket or registered server_id.
+        """
+        conn = None
+        if isinstance(conn_or_server_id, socket.socket):
+            conn = conn_or_server_id
+        else:
+            # assume server_id
+            with self._conn_lock:
+                conn = self.serverid_to_conn.get(int(conn_or_server_id))
+        if not conn:
+            raise RuntimeError("no connection available for send")
+
+        try:
+            msg = {"msg_type": msg_type, "message": payload}
+            b = json.dumps(msg).encode("utf-8")
+            header = struct.pack(">I", len(b))
+            conn.sendall(header + b)
+        except Exception:
+            # on failure unregister to avoid stale entries
+            try:
+                self.unregister_connection(conn=conn)
+            except:
+                pass
+            raise
+
+    def _recv_exact(self, conn: socket.socket, n: int, timeout: Optional[float] = None) -> Optional[bytes]:
+        """Read exactly n bytes or return None on EOF. Caller manages blocking/timeout."""
+        data = b""
+        start = time.time()
+        while len(data) < n:
+            try:
+                chunk = conn.recv(n - len(data))
+                if not chunk:
+                    return None
+                data += chunk
+            except BlockingIOError:
+                # non-blocking socket has no data yet
+                if timeout is None:
+                    time.sleep(0.01)
+                    continue
+                if time.time() - start > timeout:
+                    return None
+                time.sleep(0.01)
+                continue
+            except Exception:
+                return None
+        return data
+
+    def receive_tcp_message(self, conn: socket.socket, timeout: Optional[float] = None) -> Optional[Tuple[str, dict, Tuple[str,int]]]:
+        """
+        Receive one framed message. Returns (msg_type, payload_dict, peer_addr) or None on timeout/closed.
+        Non-blocking sockets supported with timeout parameter.
+        """
+        try:
+            # read 4 byte header
+            header = self._recv_exact(conn, 4, timeout)
+            if not header:
+                return None
+            length = struct.unpack(">I", header)[0]
+            body = self._recv_exact(conn, length, timeout)
+            if not body:
+                return None
+            msg = json.loads(body.decode("utf-8"))
+            return msg.get("msg_type"), msg.get("message", {}), self.conn_to_addr.get(conn)
+        except Exception:
+            return None
+
+    # -----------------------
+    # Connection registry
+    # -----------------------
+    def register_connection(self, conn: socket.socket, server_id: Optional[int] = None, ):
+        """Register a long-lived connection with optional server_id. Leader calls this after identification."""
+        with self._conn_lock:
+            if server_id is not None:
+                self.serverid_to_conn[int(server_id)] = conn
+            self.conn_to_addr[conn] = self.conn_to_addr.get(conn, conn.getpeername())
+
+    def unregister_connection(self, conn: Optional[socket.socket] = None, server_id: Optional[int] = None):
+        """Unregister and close a connection by conn or server_id."""
+        with self._conn_lock:
+            if server_id is not None:
+                conn = self.serverid_to_conn.pop(int(server_id), None)
+            if conn:
+                self.conn_to_addr.pop(conn, None)
+                # remove from serverid map if present
+                for sid, c in list(self.serverid_to_conn.items()):
+                    if c is conn:
+                        self.serverid_to_conn.pop(sid, None)
+                try:
+                    conn.close()
+                except:
+                    pass
+
+    def get_conn_by_server_id(self, server_id: int) -> Optional[socket.socket]:
+        with self._conn_lock:
+            return self.serverid_to_conn.get(int(server_id))
+
+    def list_registered_connections(self) -> Dict[int, Tuple[str,int]]:
+        """Return mapping server_id -> peer addr for registered connections."""
+        with self._conn_lock:
+            return {sid: self.conn_to_addr.get(conn) for sid, conn in self.serverid_to_conn.items()}
+
+    def close_all_connections(self):
+        with self._conn_lock:
+            for conn in list(self.conn_to_addr.keys()):
+                try:
+                    conn.close()
+                except:
+                    pass
+            self.serverid_to_conn.clear()
+            self.conn_to_addr.clear()
+
