@@ -99,8 +99,8 @@ class Server(Role):
                 print(f'[{self.identity}] Current membership list: {self.membership_list}')
 
                             
-                self.membership.add_server(follower_id, follower_ip, load_info)
-                group_id, existed_members = self.membership.assign_group(follower_id)
+                self.membership_manager.add_server(follower_id, follower_ip, load_info)
+                group_id, existed_members = self.membership_manager.assign_group(follower_id)
                
                 # Send membership excluding self (leader should not include itself for followers)
                 membership_for_follower = {sid: sip for sid, sip in self.membership_list.items() if sid != self.server_id}
@@ -122,9 +122,9 @@ class Server(Role):
                 #print('hhey')
                 self.leader_id = message.get("leader_id")
                 membership_raw = message.get("membership_list", {})
-                self.membership.set_group_info(message.get("group_id"), message.get("existed_members", {}))
+                self.membership_manager.set_group_info(message.get("group_id"), message.get("existed_members", {}))
                 # start long-lived TCP connection to leader 
-                self.network_manager.start_follower_long_lived_connector(self.leader_id, self.leader_address)
+                self.network_manager.start_follower_long_lived_connector(self.leader_address,self.leader_id)
 
                 # start heartbeat manager
                 self.heartbeat = Heartbeat(self, interval=HEARTBEAT_INTERVAL)

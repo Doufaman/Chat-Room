@@ -13,7 +13,7 @@ class Heartbeat:
 
         self.nm = getattr(server, "network_manager", None)
         if self.nm:
-            self.nm.set_callback(self.handle_incoming)
+            self.nm.set_long_lived_msg_callback(self.handle_incoming)
 
     def start(self):
         """start the heartbeat sending loop in a separate thread."""

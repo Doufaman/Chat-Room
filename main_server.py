@@ -42,8 +42,8 @@ class StartupEngine:
         # self.election = ElectionManager(self)
         # self.recovery = RecoveryManager(self)
         # self.chat = ChatroomManager(self)
-    
-    def start(self, self_ip):
+
+    def start(self, self_ip):     
         # 1. 启动通信
         # self.comm.start()
         
@@ -120,7 +120,8 @@ class StartupEngine:
             election_manager.update_peers_from_server()
         
         election_manager.start()
-        # if current_identity == "follower":
+        
+        # # if current_identity == "follower":
         #     Follower(self.server_id, network_manager, leader_address).start()
         # else:
         #     Leader(self.server_id, network_manager).start()
