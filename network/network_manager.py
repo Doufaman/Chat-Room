@@ -87,6 +87,10 @@ class NetworkManager:
 
     def set_callback(self, callback_func):
         """供 RoleManager 或 Leader 调用，设置消息回掉"""
+        self.on_message_received = callback_func
+
+    def set_long_lived_msg_callback(self, callback_func):
+        """供 RoleManager 或 Leader 调用，设置长连接消息回掉"""
         self._msg_callback = callback_func
 
     # message encode/decode functions
