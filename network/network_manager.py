@@ -393,9 +393,11 @@ class NetworkManager:
     # -----------------------
     def send_tcp_msg_to_all_followers(self, msg_type: str, payload: dict):
         """Helper for leader to broadcast a message to all registered followers via long-lived TCP connections."""
+        logger.debug(f"Leader broadcasting message to followers: {msg_type} {payload}")
         # get all current connections snapshot to avoid holding lock during sends
         with self._conn_lock:
             current_conns = list(self.serverid_to_conn.items())
+        logger.debug(f"there are currently {len(current_conns)} followers to send to: {[sid for sid, _ in current_conns]}")
         for server_id, conn in current_conns:
             try:
                 self.send_tcp_message(conn, msg_type, payload)

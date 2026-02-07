@@ -3,7 +3,7 @@
 from typing import Dict, List, Optional
 import time
 from utills.logger import get_logger
-from config import MAX_SERVERS_PER_GROUP, ACTIVE, SUSPECT, DEAD
+from server.config import MAX_SERVERS_PER_GROUP, ACTIVE, SUSPECT, DEAD
 
 logger = get_logger("membership")
 

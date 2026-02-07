@@ -16,10 +16,10 @@ class Server(Role):
         self.server_id = server_id
         self.network_manager = network_manager
 
-        self._identity = identity
+        self.identity = identity
 
         # create membership manager according to identity
-        self.membership_manager = MembershipManager(is_leader=(self._identity == TYPE_LEADER))
+        self.membership_manager = MembershipManager(is_leader=(self.identity == TYPE_LEADER))
         self.leader_address = leader_address
         self.leader_id = None
         self.leader_latest_heartbeat = time.time()
@@ -38,8 +38,8 @@ class Server(Role):
         self.network_manager.start_listening()
 
         # leader role needs to initialize membership management immediately, while follower will initialize later
-        if self._identity == TYPE_LEADER:
-            print(f"[{self._identity}] Setting up {self._identity.lower()} role...")
+        if self.identity == TYPE_LEADER:
+            print(f"[{self.identity}] Setting up {self.identity.lower()} role...")
             self.membership_manager.initialize_for_leader(True, {
                 "server_id": self.server_id,
                 "load_info": self.get_current_load(),
@@ -57,7 +57,7 @@ class Server(Role):
 
 
 
-        print(f"[Server] Initialized role: {self._identity}, Server ID: {self.server_id}")
+        print(f"[Server] Initialized role: {self.identity}, Server ID: {self.server_id}")
         
             
 
@@ -79,9 +79,9 @@ class Server(Role):
             self.heartbeat.handle_incoming(message, msg_type, sender_addr=ip_sender)
             return
         
-        if self._identity == TYPE_LEADER:
+        if self.identity == TYPE_LEADER:
             if msg_type == "WHO_IS_LEADER":
-                print(f'[{self._identity}] receive message from new PC {ip_sender}: {msg_type} {message}')
+                print(f'[{self.identity}] receive message from new PC {ip_sender}: {msg_type} {message}')
                 self.network_manager.send_broadcast(
                     "I_AM_LEADER", 
                     {"leader_id": self.server_id, "leader_ip": self.network_manager.ip_local}
@@ -94,9 +94,9 @@ class Server(Role):
                 load_info = message.get("load_info")
                 # Ensure follower_id is integer
                 follower_id = int(follower_id) if isinstance(follower_id, str) else follower_id
-                print(f'[{self._identity}] Follower {follower_id} with IP: {follower_ip} registered.')
+                print(f'[{self.identity}] Follower {follower_id} with IP: {follower_ip} registered.')
                 self.membership_list[follower_id] = follower_ip
-                print(f'[{self._identity}] Current membership list: {self.membership_list}')
+                print(f'[{self.identity}] Current membership list: {self.membership_list}')
 
                             
                 self.membership.add_server(follower_id, follower_ip, load_info)
@@ -141,7 +141,7 @@ class Server(Role):
     def change_role(self, new_role, leader_id):
         """Handle role change triggered by ElectionManager."""
         # Only log if role actually changes
-        if self._identity == new_role:
+        if self.identity == new_role:
             print(f"[Server] Role confirmed: {new_role} (Leader ID: {leader_id})")
             # Still update leader info even if role doesn't change
             if new_role == TYPE_FOLLOWER and leader_id != self.leader_id:
@@ -151,9 +151,9 @@ class Server(Role):
                     self.leader_address = leader_ip
             return
         
-        print(f"[Server] Role change: {self._identity} -> {new_role} (Leader ID: {leader_id})")
-        old_role = self._identity
-        self._identity = new_role
+        print(f"[Server] Role change: {self.identity} -> {new_role} (Leader ID: {leader_id})")
+        old_role = self.identity
+        self.identity = new_role
         
         if new_role == TYPE_LEADER:
             print(f"[Server] Becoming LEADER (ID: {self.server_id})")

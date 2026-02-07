@@ -20,13 +20,10 @@ class Heartbeat:
         self._thread = threading.Thread(target=self._run_loop, daemon=True)
         self._thread.start()
 
-    def stop(self):
-        self.running = False
-
     def _run_loop(self):
         # record next scheduled time
         next_time = time.time()
-        while self.running:
+        while True:
             # execute heartbeat send
             self.send_heartbeat()
             

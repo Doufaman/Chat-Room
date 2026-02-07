@@ -5,7 +5,6 @@
 import threading
 import time
 from utills.logger import get_logger
-from server.roles.server import Server
 from server.config import HEARTBEAT_INTERVAL, HEARTBEAT_LEADER_TIMEOUT, HEARTBEAT_SERVER_TIMEOUT  
 from server.config import SUSPECT, DEAD, ACTIVE
 
@@ -21,7 +20,7 @@ class HeartbeatMonitor:
       - self.server.network_manager (or network) to send probes (we mark sends as TODO)
       - heartbeat.Heartbeat handles periodic sending and basic incoming dispatch
     """
-    def __init__(self, server: Server):
+    def __init__(self, server):
         self.server = server    
         self.leader_timeout = HEARTBEAT_LEADER_TIMEOUT
         self.server_timeout = HEARTBEAT_SERVER_TIMEOUT

@@ -42,7 +42,7 @@ class StartupEngine:
         # self.election = ElectionManager(self)
         # self.recovery = RecoveryManager(self)
         # self.chat = ChatroomManager(self)
-    
+
     def start(self, self_ip):     
         # 1. 启动通信
         # self.comm.start()
@@ -61,66 +61,67 @@ class StartupEngine:
         # ------------------------------------------------#
         # 以下部分是启动chatroom manager和election manager:  #
         # ------------------------------------------------#
-        chatroom_manager = ChatroomManager(self.server_id, self_ip, membership_manager=server.membership_manager)
-        # Create a default chat room
-        chatroom_manager.create_room("General")
+        # chatroom_manager = ChatroomManager(self.server_id, self_ip, membership_manager=server.membership_manager)
+        # # Create a default chat room
+        # chatroom_manager.create_room("General")
 
-        # Create ElectionManager with state change callback
-        def on_election_state_change(new_role, leader_id):
-            """Callback when election changes role."""
-            server.change_role(new_role, leader_id)
-            # When becoming Leader, start discovery listener
-            if new_role == TYPE_LEADER:
-                chatroom_manager.start_discovery_listener()
-            else:
-                chatroom_manager.stop_discovery_listener()
+        # # Create ElectionManager with state change callback
+        # def on_election_state_change(new_role, leader_id):
+        #     """Callback when election changes role."""
+        #     server.change_role(new_role, leader_id)
+        #     # When becoming Leader, start discovery listener
+        #     if new_role == TYPE_LEADER:
+        #         chatroom_manager.start_discovery_listener()
+        #     else:
+        #         chatroom_manager.stop_discovery_listener()
         
         # Map Server identity to ElectionManager state
-        from server.election_manager import STATE_LEADER, STATE_FOLLOWER
-        initial_election_state = STATE_LEADER if current_identity == TYPE_LEADER else STATE_FOLLOWER
+        # from server.election_manager import STATE_LEADER, STATE_FOLLOWER
+        # initial_election_state = STATE_LEADER if current_identity == TYPE_LEADER else STATE_FOLLOWER
         
-        election_manager = ElectionManager(
-            self.server_id, 
-            network_manager, 
-            on_state_change=on_election_state_change,
-            initial_state=initial_election_state
-        )
+        # election_manager = ElectionManager(
+        #     self.server_id, 
+        #     network_manager, 
+        #     on_state_change=on_election_state_change,
+        #     initial_state=initial_election_state
+        # )
         
-        # Set server reference for membership access
-        election_manager.set_server_reference(server)
+        # # Set server reference for membership access
+        # election_manager.set_server_reference(server)
         
-        # === Set chatroom callbacks (the ONLY coupling point) ===
-        election_manager.set_chatroom_callbacks(
-            get_info_callback=chatroom_manager.get_server_chat_info,
-            on_list_updated_callback=chatroom_manager.update_all_servers_chatrooms
-        )
+        # # === Set chatroom callbacks (the ONLY coupling point) ===
+        # election_manager.set_chatroom_callbacks(
+        #     get_info_callback=chatroom_manager.get_server_chat_info,
+        #     on_list_updated_callback=chatroom_manager.update_all_servers_chatrooms
+        # )
         
-        # If starting as Leader, start discovery listener immediately
-        if current_identity == TYPE_LEADER:
-            chatroom_manager.start_discovery_listener()
+        # # If starting as Leader, start discovery listener immediately
+        # if current_identity == TYPE_LEADER:
+        #     chatroom_manager.start_discovery_listener()
         
-        # Set initial leader info if follower
-        if current_identity == TYPE_FOLLOWER and leader_address:
-            election_manager.leader_ip = leader_address
-            # Get leader_id from server's membership list after registration
-            # Give server time to register and get membership
-            time.sleep(0.5)
-            membership = server.get_membership_list()
-            # Find leader_id by matching IP
-            for sid, sip in membership.items():
-                if sip == leader_address:
-                    election_manager.current_leader_id = sid
-                    print(f"[StartupEngine] Initial leader set to ID={sid}, IP={leader_address}")
-                    # Initialize peers from membership (excluding leader and self)
-                    election_manager.update_peers_from_server()
-                    break
-        else:
-            # Leader: initialize peers from membership
-            time.sleep(0.5)
-            election_manager.update_peers_from_server()
+        # # Set initial leader info if follower
+        # if current_identity == TYPE_FOLLOWER and leader_address:
+        #     election_manager.leader_ip = leader_address
+        #     # Get leader_id from server's membership list after registration
+        #     # Give server time to register and get membership
+        #     time.sleep(0.5)
+        #     membership = server.get_membership_list()
+        #     # Find leader_id by matching IP
+        #     for sid, sip in membership.items():
+        #         if sip == leader_address:
+        #             election_manager.current_leader_id = sid
+        #             print(f"[StartupEngine] Initial leader set to ID={sid}, IP={leader_address}")
+        #             # Initialize peers from membership (excluding leader and self)
+        #             election_manager.update_peers_from_server()
+        #             break
+        # else:
+        #     # Leader: initialize peers from membership
+        #     time.sleep(0.5)
+        #     election_manager.update_peers_from_server()
         
-        election_manager.start()
-        # if current_identity == "follower":
+        # election_manager.start()
+        
+        # # if current_identity == "follower":
         #     Follower(self.server_id, network_manager, leader_address).start()
         # else:
         #     Leader(self.server_id, network_manager).start()
