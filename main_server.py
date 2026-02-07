@@ -43,7 +43,7 @@ class StartupEngine:
         # self.recovery = RecoveryManager(self)
         # self.chat = ChatroomManager(self)
     
-    def start(self, self_ip):
+    def start(self, self_ip):     
         # 1. 启动通信
         # self.comm.start()
         
