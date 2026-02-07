@@ -83,11 +83,11 @@ class NetworkManager:
         self.serverid_to_conn: Dict[int, socket.socket] = {}    # registered by leader after identification
         self.conn_to_addr: Dict[socket.socket, Tuple[str,int]] = {}  # conn -> peer addr
         self.server_sock = None  # TCP server socket for leader to accept long-lived connections
- 
+        self._msg_callback = None  # callback for incoming messages from long-lived connections
 
     def set_callback(self, callback_func):
         """供 RoleManager 或 Leader 调用，设置消息回掉"""
-        self.on_message_received = callback_func
+        self._msg_callback = callback_func
 
     # message encode/decode functions
     def message_encode(self,  
@@ -272,6 +272,7 @@ class NetworkManager:
     # Long-lived TCP helpers
     # -----------------------
     def start_leader_long_lived_listener(self):
+        logger.debug("Starting leader long-lived connection listener...")
         # 1. create TCP server socket for accepting long-lived connections from followers
         self.server_sock = self.create_tcp_server_socket('0.0.0.0', self.port_long_lived)
 
@@ -280,21 +281,22 @@ class NetworkManager:
         self.accept_thread.start()
 
         # 3. start MONITOR thread to monitor messages from followers
-        self.monitor_thread = threading.Thread(target=self._process_follower_messages, daemon=True)
+        self.monitor_thread = threading.Thread(target=self._process_messages, daemon=True)
         self.monitor_thread.start()
 
         logger.debug("Leader long-lived connection listener started")
 
-    def start_follower_long_lived_connector(self, leader_ip):
+    def start_follower_long_lived_connector(self, leader_ip, leader_id):
         """For followers to establish long-lived TCP connection to leader."""
+        logger.debug(f"Starting follower long-lived connection to leader at {leader_ip}...")
         try:
-            conn = self.connect_tcp(leader_ip, self.port_long_lived, timeout=3.0)
+            conn = self.connect_tcp(leader_id, leader_ip, self.port_long_lived, timeout=3.0)
             # Send IDENTIFY message with follower's server_id (could be None if not assigned yet)
             identify_msg = {"msg_type": "IDENTIFY", "message": {"server_id": getattr(self, "server_id", None)}}
             self.send_tcp_message(conn, "IDENTIFY", identify_msg["message"])
             logger.debug(f"Follower established long-lived connection to leader at {leader_ip}")
             # start monitoring this connection for incoming messages (e.g., heartbeats, commands)
-            threading.Thread(target=self._process_follower_messages, daemon=True).start()
+            threading.Thread(target=self._process_messages, daemon=True).start()
         except Exception as e:
             logger.error(f"Failed to establish long-lived connection to leader at {leader_ip}: {e}")
 
@@ -320,7 +322,7 @@ class NetworkManager:
                 print(f"Accept 线程异常: {e}")
             time.sleep(0.1) # 避免 CPU 占用过高
 
-    def _process_follower_messages(self):
+    def _process_messages(self):
         """Monitor loop to read messages from all registered follower connections."""
         print("Leader Message Polling Thread 启动...")
         while True:
@@ -334,7 +336,7 @@ class NetworkManager:
                     msg = self.receive_tcp_message(conn, timeout=0.01)
                     if msg:
                         msg_type, payload, _ = msg
-                        self.handle_logic(f_id, msg_type, payload) # 你的业务逻辑处理函数
+                        self._msg_callback(msg_type, payload, f_id) # trigger higher-level callback for processing
                     
                 except Exception:
                     # 如果读取失败，说明连接可能断开，进行注销
@@ -371,7 +373,7 @@ class NetworkManager:
             # swallow to keep accept loop robust
             return None
 
-    def connect_tcp(self, target_ip: str, target_port: int, timeout: float = 5.0, bind_ip: Optional[str] = None) -> socket.socket:
+    def connect_tcp(self, target_server_id, target_ip: str, target_port: int, timeout: float = 5.0, bind_ip: Optional[str] = None) -> socket.socket:
         """Create a long-lived outbound TCP connection (follower -> leader). Returns non-blocking socket."""
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
@@ -383,11 +385,24 @@ class NetworkManager:
         sock.setblocking(False)
         with self._conn_lock:
             self.conn_to_addr[sock] = (target_ip, target_port)
+            self.serverid_to_conn[target_server_id] = sock
         return sock
 
     # -----------------------
     # Framed JSON send/recv
     # -----------------------
+    def send_tcp_msg_to_all_followers(self, msg_type: str, payload: dict):
+        """Helper for leader to broadcast a message to all registered followers via long-lived TCP connections."""
+        # get all current connections snapshot to avoid holding lock during sends
+        with self._conn_lock:
+            current_conns = list(self.serverid_to_conn.items())
+        for server_id, conn in current_conns:
+            try:
+                self.send_tcp_message(conn, msg_type, payload)
+            except Exception as e:
+                logger.debug(f"Failed to send message to follower {server_id}, unregistering: {e}")
+                # self.unregister_connection(server_id=server_id)
+
     def send_tcp_message(self, conn_or_server_id, msg_type: str, payload: dict):
         """
         Send length-prefixed JSON message. Accepts either a socket or registered server_id.

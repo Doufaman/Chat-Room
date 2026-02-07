@@ -94,14 +94,11 @@ class HeartbeatMonitor:
                     if suspected:
                         logger.info(f"Suspected servers: {suspected}. Sending probes.")
                     for sid in suspected:
-                        addr = self.server.membership.servers.get(sid, {}).get("address")
                         probe_msg = {
-                            "msg_type": "ARE_YOU_ALIVE",
-                            "message": {"server_id": getattr(self.server, "server_id", None), "timestamp": time.time()}
+                            "server_id": getattr(self.server, "server_id", None), 
+                            "timestamp": time.time()
                         }
-                        # TODO: send probe via TCP long-lived connection if exists:
-                        # if addr: self.server.network_manager.send_unicast(addr, json.dumps(probe_msg))
-                        # else: fallbacks (skip)
+                        self.server.network_manager.send_udp_message(sid, "ARE_YOU_ALIVE", probe_msg)
                     time.sleep(probe_wait)
                     still = self.get_suspected_servers(self.server_timeout)
                     for sid in still:
@@ -129,6 +126,8 @@ class HeartbeatMonitor:
         try:
             active = self.server.membership.get_active_servers()
             for sid, last in active.items():
+                if sid == getattr(self.server, "server_id", None):
+                    continue
                 if time.time() - last > timeout:
                     suspected.append(sid)
                     self.server.membership.update_server_status(sid, SUSPECT)
@@ -149,14 +148,12 @@ class HandleAbnormalStateReport:
         self.server.membership.update_server_status(server_id, SUSPECT)
         # 2. send probe to the reported server
         probe_msg = {
-            "msg_type": "ARE_YOU_ALIVE",
-            "message": {"server_id": self.server.server_id, 
-                        "timestamp": time.time(),
-                        "sender": getattr(self.server, "identity", None)
-                        }
+            "server_id": self.server.server_id, 
+            "timestamp": time.time(),
+            "sender": getattr(self.server, "identity", None)
         }
         try:
-            pass # todo: sending via network manager: udp socket
+            self.server.network_manager.send_udp_message(server_id, "ARE_YOU_ALIVE", probe_msg)
             logger.info(f"Sent probe to reported server {server_id}.")
         except Exception as e:
             logger.debug(f"Failed to send probe to reported server {server_id} {e}")

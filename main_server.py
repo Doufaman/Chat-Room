@@ -52,7 +52,7 @@ class StartupEngine:
 
         # 生成对应的network manager
         #network_manager, leader_address = NetworkManager(ip_local=self_ip)
-        network_manager = NetworkManager(ip_local=self_ip)
+        network_manager = NetworkManager(ip_local=self_ip, server_id=self.server_id)
 
         #合并了leader和follower的server类
         server = Server(self.server_id, network_manager, identity=current_identity, leader_address=leader_address)

@@ -3,6 +3,8 @@ import time
 
 import psutil
 
+from server.fault_detection import HeartbeatMonitor
+
 from .base import Role
 from server.config import TYPE_LEADER, TYPE_FOLLOWER, HEARTBEAT_INTERVAL
 from server.heartbeat import Heartbeat
@@ -27,16 +29,13 @@ class Server(Role):
         }
 
         self.network_manager.set_callback(self.handle_messages)
+
         self._running = True
         #self.known_servers = set()
 
     def start(self):
         # 启动网络监听
         self.network_manager.start_listening()
-
-        # start heartbeat manager
-        self.heartbeat = Heartbeat(self, interval=HEARTBEAT_INTERVAL)
-        self.heartbeat.start()
 
         # leader role needs to initialize membership management immediately, while follower will initialize later
         if self._identity == TYPE_LEADER:
@@ -45,9 +44,18 @@ class Server(Role):
                 "server_id": self.server_id,
                 "load_info": self.get_current_load(),
                 "address": self.network_manager.ip_local
-            })        
+            })  
+            # start listening for long-lived TCP connections from followers
+            self.network_manager.start_leader_long_lived_listener()
+            # start heartbeat manager
+            self.heartbeat = Heartbeat(self, interval=HEARTBEAT_INTERVAL)
+            self.heartbeat.start()
+            # start fault detection monitor
+            self.heartbeat_monitor = HeartbeatMonitor(self)
         elif self.leader_address:
             self.register(self.leader_address)
+
+
 
         print(f"[Server] Initialized role: {self._identity}, Server ID: {self.server_id}")
         
@@ -115,6 +123,14 @@ class Server(Role):
                 self.leader_id = message.get("leader_id")
                 membership_raw = message.get("membership_list", {})
                 self.membership.set_group_info(message.get("group_id"), message.get("existed_members", {}))
+                # start long-lived TCP connection to leader 
+                self.network_manager.start_follower_long_lived_connector(self.leader_id, self.leader_address)
+
+                # start heartbeat manager
+                self.heartbeat = Heartbeat(self, interval=HEARTBEAT_INTERVAL)
+                self.heartbeat.start()
+                self.heartbeat_monitor = HeartbeatMonitor(self)
+
                 # Ensure all server_ids are integers
                 self.membership_list = {}
                 for sid, sip in membership_raw.items():
