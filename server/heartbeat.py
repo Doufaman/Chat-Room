@@ -95,18 +95,18 @@ class Heartbeat:
 
         # dispatch to server-side handlers (fault_detection expected to provide these)
         if msg_type == "HEARTBEAT":
-            if hasattr(self.server, "handle_heartbeat"):
+            if hasattr(self.server, "heartbeat_monitor"):
                 try:
                     self.server.heartbeat_monitor.handle_heartbeat(msg, sender_addr=sender_addr)
                 except Exception as e:
-                    logger.debug(f"server.handle_heartbeat error: {e}")
+                    logger.debug(f"server.heartbeat_monitor.handle_heartbeat error: {e}")
         elif msg_type == "ARE_YOU_ALIVE":
             # reply immediately (use same network manager / connection)
-            if hasattr(self.server, "handle_probe_request"):
+            if hasattr(self.server, "heartbeat_monitor"):
                 try:
                     self.server.heartbeat_monitor.handle_probe_request(msg, sender_addr=sender_addr)
                 except Exception as e:
-                    logger.debug(f"server.handle_probe_request error: {e}")
+                    logger.debug(f"server.heartbeat_monitor.handle_probe_request error: {e}")
             # also send a probe response on same connection
             try:
                 if self.nm and sender_addr:
@@ -119,11 +119,11 @@ class Heartbeat:
             except Exception as e:
                 logger.debug(f"failed sending probe response: {e}")
         elif msg_type  == "I_AM_ALIVE":
-            if hasattr(self.server, "handle_probe_response"):
+            if hasattr(self.server, "heartbeat_monitor"):
                 try:
                     self.server.heartbeat_monitor.handle_probe_response(msg, sender_addr=sender_addr)
                 except Exception as e:
-                    logger.debug(f"server.handle_probe_response error: {e}")
+                    logger.debug(f"server.heartbeat_monitor.handle_probe_response error: {e}")
         else:
             # ignore here; main.handle_event / role logic may handle other types
             return

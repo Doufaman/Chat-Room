@@ -52,6 +52,7 @@ class Server(Role):
             self.heartbeat.start()
             # start fault detection monitor
             self.heartbeat_monitor = HeartbeatMonitor(self)
+            self.heartbeat_monitor.start_timeout_checker()
         elif self.leader_address:
             self.register(self.leader_address)
 
@@ -130,6 +131,7 @@ class Server(Role):
                 self.heartbeat = Heartbeat(self, interval=HEARTBEAT_INTERVAL)
                 self.heartbeat.start()
                 self.heartbeat_monitor = HeartbeatMonitor(self)
+                self.heartbeat_monitor.start_timeout_checker()
 
                 # Ensure all server_ids are integers
                 self.membership_list = {}

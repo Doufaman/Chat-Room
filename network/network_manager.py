@@ -340,7 +340,7 @@ class NetworkManager:
                     msg = self.receive_tcp_message(conn, timeout=0.01)
                     if msg:
                         msg_type, payload, _ = msg
-                        self._msg_callback(msg_type, payload, f_id) # trigger higher-level callback for processing
+                        self._msg_callback(payload, msg_type, f_id) # trigger higher-level callback for processing
                     
                 except Exception:
                     # 如果读取失败，说明连接可能断开，进行注销
@@ -421,7 +421,8 @@ class NetworkManager:
             with self._conn_lock:
                 conn = self.serverid_to_conn.get(int(conn_or_server_id))
         if not conn:
-            raise RuntimeError("no connection available for send")
+            logger.error(f"No connection found for {conn_or_server_id}, cannot send message")
+            return
 
         try:
             msg = {"msg_type": msg_type, "message": payload}
