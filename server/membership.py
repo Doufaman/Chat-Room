@@ -66,7 +66,7 @@ class MembershipManager():
                 "load_info": server_info.get("load_info", {}),
                 "address": server_info.get("address", "")
             }
-            group_id, existed_members = self.assign_group(server_info["server_id"])
+            group_id, existed_members, _, _, _, = self.assign_group(server_info["server_id"])
             self.group_id = group_id
             self.group_members = existed_members
             logger.info(f"Leader initialized with server info: {server_info}")
@@ -208,42 +208,88 @@ class MembershipManager():
     def assign_group(self, server_id: int):
         """
         Assign a server to a replication group.
-        (acc to load balancing policy)
-        Return assigned group_id.
+        Ensure no group has only one server (no orphan server).
         Leader only.
         """
-        pass
         if not self.is_leader:
             logger.error("illegal operation (not leader)")
             return "", {}
-        # assign group according to the number of servers and the sum of load in each group
+
         group_id = None
         min_load = float("inf")
+        steal_group_id = None
+        steal_server_id = None
+        steal_group_members: Dict[int, str] = {}
         existed_members: Dict[int, str] = {}
 
+
+        # 1. Try to find a non-full group with minimum load
         for g_id, servers in self.group_servers.items():
             if len(servers) < MAX_SERVERS_PER_GROUP:
                 total_load = sum(
-                    self.servers[s_id]["load_info"]["cpu_percent"] + self.servers[s_id]["load_info"]["memory_percent"] for s_id in servers
+                    self.servers[s_id]["load_info"].get("cpu_percent", 0) +
+                    self.servers[s_id]["load_info"].get("memory_percent", 0)
+                    for s_id in servers
                 )
                 if total_load < min_load:
                     min_load = total_load
                     group_id = g_id
 
-        if not group_id:
-            # create a new group
-            group_id = f"group_{len(self.group_servers)}"
-            self.group_servers[group_id] = []
+        # 2. If found, assign directly
+        if group_id is not None:
+            existed_members_id = self.group_servers[group_id]
 
-        existed_members_id = self.group_servers[group_id]
+        else:
+            # 3. All groups are full → avoid creating orphan group
+            # Find a group with at least 2 members and "steal" one
+
+            max_load = -1
+
+            for g_id, servers in self.group_servers.items():
+                if len(servers) >= 2:
+                    total_load = sum(
+                        self.servers[s_id]["load_info"].get("cpu_percent", 0) +
+                        self.servers[s_id]["load_info"].get("memory_percent", 0)
+                        for s_id in servers
+                    )
+                    if total_load > max_load:
+                        max_load = total_load
+                        steal_group_id = g_id
+                        steal_server_id = servers[-1]  # simple heuristic
+
+            if steal_group_id is None:
+                # This only happens when the system has no group or only 1 server total
+                group_id = f"group_{len(self.group_servers)}"
+                self.group_servers[group_id] = []
+                existed_members_id = []
+            else:
+                # Create new group with stolen server + new server
+                self.group_servers[steal_group_id].remove(steal_server_id)
+
+                group_id = f"group_{len(self.group_servers)}"
+                self.group_servers[group_id] = [steal_server_id]
+
+                self.server_groups[steal_server_id] = group_id
+                existed_members_id = [steal_server_id]
+
+
+        # Prepare existed members info
         for sid in existed_members_id:
             existed_members[sid] = self.servers[sid]["address"]
+        # 4. Assign new server
         self.group_servers[group_id].append(server_id)
         self.server_groups[server_id] = group_id
+        if steal_server_id:
+            for sid in self.group_servers[steal_group_id]:
+                steal_group_members[sid] = self.servers[sid]["address"]
+            steal_group_members[steal_server_id] = self.servers[steal_server_id]["address"]
+        if self.group_id == group_id:
+            self.group_members[server_id] = self.servers[server_id]["address"]
+            
 
         logger.info(f"server {server_id} assigned to group {group_id}")
 
-        return group_id, existed_members
+        return group_id, existed_members, steal_group_id, steal_server_id, steal_group_members
 
     def get_group_servers(self, group_id: str) -> Dict[int, str]:
         """
@@ -284,7 +330,6 @@ class MembershipManager():
         """
         Set group information.
         """
-        pass
         self.group_id = group_id
         self.group_members = group_members
 
@@ -295,15 +340,16 @@ class MembershipManager():
         pass
         if server_id not in self.group_members:
             self.group_members[server_id] = server_ip
-        
+   
 
-    def remove_group_member(self, server_id: int):
+    def remove_group_member(self, stealserver_id: int, steal_group_id):
         """
         Remove a server from group members.
         """
-        pass
-        if server_id in self.group_members:
-            del self.group_members[server_id]
+        if steal_group_id == self.group_id:
+            if stealserver_id in self.group_members:
+                del self.group_members[stealserver_id]
+
 
     def bind_chatroom(self, chatroom_id: str):
         """

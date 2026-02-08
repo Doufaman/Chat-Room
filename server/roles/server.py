@@ -4,11 +4,14 @@ import time
 import psutil
 
 from server.fault_detection import HeartbeatMonitor
+from utills.logger import get_logger
 
 from .base import Role
 from server.config import TYPE_LEADER, TYPE_FOLLOWER, HEARTBEAT_INTERVAL
 from server.heartbeat import Heartbeat
 from server.membership import MembershipManager
+
+logger = get_logger("server_role")
 
 class Server(Role):
     def __init__(self, server_id, network_manager, identity, leader_address=None):
@@ -75,10 +78,20 @@ class Server(Role):
 
          
     def handle_messages(self, msg_type, message, ip_sender):
-        # heartbeat messages
-        if msg_type in ("HEARTBEAT", "ARE_YOU_ALIVE", "PROBE_REQUEST", "PROBE_RESPONSE", "I_AM_ALIVE"):
-            self.heartbeat.handle_incoming(message, msg_type, sender_addr=ip_sender)
-            return
+
+        if msg_type == "STEAL_NOTIFICATION":
+            stolen_server_id = message.get("stolen_server")
+            stolen_group_id = message.get("stolen_group_id")
+            new_group_id = message.get("new_group_id")
+            new_group_member = message.get("new_group_member", {})
+            logger.info(f"Received STEAL_NOTIFICATION: stolen_server={stolen_server_id}, stolen_group_id={stolen_group_id}, new_group_id={new_group_id}, new_group_member={new_group_member}")
+            if self.server_id == stolen_server_id:
+                logger.info(f"Server {self.server_id} is being stolen from group {stolen_group_id} to new group {new_group_id}")
+                self.membership_manager.set_group_info(new_group_id, new_group_member)
+            else:
+                self.membership_manager.remove_group_member(stolen_server_id, stolen_group_id)
+
+            logger.info(f"Updated group info: group_id={self.membership_manager.group_id}, group_members={self.membership_manager.group_members}")
         
         if self.identity == TYPE_LEADER:
             if msg_type == "WHO_IS_LEADER":
@@ -101,7 +114,7 @@ class Server(Role):
 
                             
                 self.membership_manager.add_server(follower_id, follower_ip, load_info)
-                group_id, existed_members = self.membership_manager.assign_group(follower_id)
+                group_id, existed_members, steal_group_id, steal_server_id, steal_group_members = self.membership_manager.assign_group(follower_id)
                
                 # Send membership excluding self (leader should not include itself for followers)
                 membership_for_follower = {sid: sip for sid, sip in self.membership_list.items() if sid != self.server_id}
@@ -113,6 +126,9 @@ class Server(Role):
                     {"leader_id": self.server_id, 
                         "group_id": group_id,
                         "existed_members": existed_members,
+                        "steal_group_id": steal_group_id,
+                        "steal_server_id": steal_server_id,
+                        "steal_group_members": steal_group_members,
                         "membership_list": membership_for_follower}
                 )           
                 # todo: notidy other followers about the new member
@@ -124,6 +140,25 @@ class Server(Role):
                 self.leader_id = message.get("leader_id")
                 membership_raw = message.get("membership_list", {})
                 self.membership_manager.set_group_info(message.get("group_id"), message.get("existed_members", {}))
+                steal_group_id = message.get("steal_group_id")
+                steal_server_id = message.get("steal_server_id")
+                steal_group_members = message.get("steal_group_members", {})
+                # if this follower is assigned to a group with steal_server
+                # notify steal message
+                if steal_group_id and steal_server_id:
+                    for sid, sip in steal_group_members.items():
+                        self.network_manager.send_unicast(
+                            sip,
+                            9001,
+                            "STEAL_NOTIFICATION",
+                            {"stolen_server": steal_server_id, 
+                             "stolen_group_id": steal_group_id,
+                             "new_group_id": message.get("group_id"),
+                             "new_group_member": {self.server_id: self.network_manager.ip_local}
+                            }
+                        )
+                    
+
                 # start long-lived TCP connection to leader 
                 self.network_manager.start_follower_long_lived_connector(self.leader_address,self.leader_id)
 
