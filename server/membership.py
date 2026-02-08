@@ -185,9 +185,9 @@ class MembershipManager():
 
         
 
-    def get_active_servers(self) -> Dict[int, float]:
+    def get_servers_via_status(self, status: str) -> Dict[int, float]:
         """
-        Return mapping of ACTIVE server_id -> last_heartbeat_ts.
+        Return mapping of server_id -> last_heartbeat_ts for servers with given status.
         """
         pass
         if not self.is_leader:
@@ -197,7 +197,7 @@ class MembershipManager():
         active_servers: Dict[int, float] = {}
 
         for server_id, info in self.servers.items():
-            if info.get("status") == ACTIVE:
+            if info.get("status") == status:
                 active_servers[server_id] = info.get("last_heartbeat_ts")
         return active_servers
 

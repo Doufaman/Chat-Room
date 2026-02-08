@@ -16,12 +16,13 @@ class HeartbeatMonitor:
     """
     Keep timeout / probe / dead-detection logic here.
     This class expects:
-      - self.server.membership API: get_active_servers(), update_heartbeat(...), update_server_status(...)
+      - self.server.membership_manager API: get_servers_via_status(), update_heartbeat(...), update_server_status(...)
       - self.server.network_manager (or network) to send probes (we mark sends as TODO)
       - heartbeat.Heartbeat handles periodic sending and basic incoming dispatch
     """
     def __init__(self, server):
-        self.server = server    
+        self.server = server 
+        self.interval = HEARTBEAT_INTERVAL   
         self.leader_timeout = HEARTBEAT_LEADER_TIMEOUT
         self.server_timeout = HEARTBEAT_SERVER_TIMEOUT
 
@@ -35,12 +36,12 @@ class HeartbeatMonitor:
 
         if sender_identity == "FOLLOWER" and getattr(self.server, "identity", None) == "LEADER":
             load_info = msg.get("load_info", {})
-            # update membership heartbeat timestamp and load
+            # update membership_manager heartbeat timestamp and load
             try:
-                self.server.membership.update_heartbeat(server_id, timestamp)
-                self.server.membership.update_server_load(server_id, load_info)
+                self.server.membership_manager.update_heartbeat(server_id, timestamp)
+                self.server.membership_manager.update_server_load(server_id, load_info)
             except Exception as e:
-                logger.debug(f"membership update error for heartbeat from {server_id}: {e}")
+                logger.debug(f"membership_manager update error for heartbeat from {server_id}: {e}")
 
         elif sender_identity == "LEADER" and getattr(self.server, "identity", None) == "FOLLOWER":
             # update local leader last heartbeat time (detection uses this)
@@ -67,8 +68,8 @@ class HeartbeatMonitor:
         server_id = msg.get("server_id")
         timestamp = msg.get("timestamp")
         try:
-            self.server.membership.update_heartbeat(server_id, timestamp)
-            self.server.membership.update_server_status(server_id, ACTIVE)
+            self.server.membership_manager.update_heartbeat(server_id, timestamp)
+            self.server.membership_manager.update_server_status(server_id, ACTIVE)
             logger.info(f"Received probe response from server {server_id}, marked ACTIVE.")
         except Exception as e:
             logger.debug(f"probe response handling error: {e}")
@@ -97,12 +98,14 @@ class HeartbeatMonitor:
                             "server_id": getattr(self.server, "server_id", None), 
                             "timestamp": time.time()
                         }
-                        self.server.network_manager.send_udp_message(sid, "ARE_YOU_ALIVE", probe_msg)
+                        self.server.network_manager.send_tcp_message(sid, "ARE_YOU_ALIVE", probe_msg)
                     time.sleep(probe_wait)
-                    still = self.get_suspected_servers(self.server_timeout)
+                    still = self.server.membership_manager.get_servers_via_status(SUSPECT)
                     for sid in still:
                         logger.warning(f"{sid} did not respond -> mark DEAD")
-                        self.server.membership.update_server_status(sid, DEAD)
+                        self.server.membership_manager.update_server_status(sid, DEAD)
+                        self.server.membership_manager.remove_server(sid)  # remove from membership
+                        self.server.network_manager.unregister_connection(server_id = sid)  # close TCP connection if exists
                         # TODO: call higher-level fault discovery
                         try:
                             if hasattr(self.server, "fault_discovery"):
@@ -114,6 +117,7 @@ class HeartbeatMonitor:
                     leader_ts = getattr(self.server, "leader_latest_heartbeat", None)
                     if not leader_ts or (time.time() - leader_ts > self.leader_timeout):
                         logger.warning("leader heartbeat timeout detected, start election")
+                        self.server.network_manager.unregister_connection(server_id = getattr(self.server, "leader_id", None))
                         # TODO: trigger election process
                 time.sleep(poll_interval)
             except Exception as e:
@@ -123,13 +127,13 @@ class HeartbeatMonitor:
     def get_suspected_servers(self, timeout):
         suspected = []
         try:
-            active = self.server.membership.get_active_servers()
+            active = self.server.membership_manager.get_servers_via_status(ACTIVE)
             for sid, last in active.items():
                 if sid == getattr(self.server, "server_id", None):
                     continue
                 if time.time() - last > timeout:
                     suspected.append(sid)
-                    self.server.membership.update_server_status(sid, SUSPECT)
+                    self.server.membership_manager.update_server_status(sid, SUSPECT)
         except Exception as e:
             logger.debug(f"get_suspected_servers error: {e}")
         return suspected
@@ -144,7 +148,7 @@ class HandleAbnormalStateReport:
         server_id = report["server_id"]
         logger.warning(f"Received abnormal state report for server {server_id}: server {server_id} does not respond.")
         # 1. mark server as suspect
-        self.server.membership.update_server_status(server_id, SUSPECT)
+        self.server.membership_manager.update_server_status(server_id, SUSPECT)
         # 2. send probe to the reported server
         probe_msg = {
             "server_id": self.server.server_id, 
@@ -152,7 +156,7 @@ class HandleAbnormalStateReport:
             "sender": getattr(self.server, "identity", None)
         }
         try:
-            self.server.network_manager.send_udp_message(server_id, "ARE_YOU_ALIVE", probe_msg)
+            self.server.network_manager.send_tcp_message(server_id, "ARE_YOU_ALIVE", probe_msg)
             logger.info(f"Sent probe to reported server {server_id}.")
         except Exception as e:
             logger.debug(f"Failed to send probe to reported server {server_id} {e}")
@@ -160,14 +164,14 @@ class HandleAbnormalStateReport:
         probe_wait = 1  # wait time for probe responses
         time.sleep(probe_wait)
         # 4. re-check server status
-        server_status = self.server.membership.get_serrver_status(server_id)
+        server_status = self.server.membership_manager.get_serrver_status(server_id)
         if server_status == ACTIVE:
             logger.info(f"Server {server_id} responded to probe, marked as ACTIVE.")
         elif server_status == DEAD:
             logger.warning(f"Server {server_id} is already marked as DEAD.")
         else:
             logger.warning(f"Server {server_id} did not respond to probe, treating as DEAD.")
-            self.server.membership.update_server_status(server_id, DEAD)
+            self.server.membership_manager.update_server_status(server_id, DEAD)
             # 5. todo:call higher-level fault discovery (leave implementation to caller)
             try:
                 pass
