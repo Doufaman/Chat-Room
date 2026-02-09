@@ -143,38 +143,39 @@ class HandleAbnormalStateReport:
     def __init__(self, server):
         self.server = server
 
-    def handle_report(self, report):
+    def handle_report(self, failed_ip, failed_port, failed_server_id=None):
         """Handle abnormal state reports from clients."""
-        server_id = report["server_id"]
-        logger.warning(f"Received abnormal state report for server {server_id}: server {server_id} does not respond.")
         # 1. mark server as suspect
-        self.server.membership_manager.update_server_status(server_id, SUSPECT)
+        self.server.membership_manager.update_server_status(failed_server_id, SUSPECT)
         # 2. send probe to the reported server
         probe_msg = {
-            "server_id": self.server.server_id, 
-            "timestamp": time.time(),
-            "sender": getattr(self.server, "identity", None)
+            "server_id": getattr(self.server, "server_id", None), 
+            "timestamp": time.time()
         }
+        self.server.network_manager.send_tcp_message(failed_server_id, "ARE_YOU_ALIVE", probe_msg)
+
         try:
-            self.server.network_manager.send_tcp_message(server_id, "ARE_YOU_ALIVE", probe_msg)
-            logger.info(f"Sent probe to reported server {server_id}.")
+            self.server.network_manager.send_tcp_message(failed_server_id, "ARE_YOU_ALIVE", probe_msg)
+            logger.info(f"Sent probe to reported server {failed_server_id}.")
         except Exception as e:
-            logger.debug(f"Failed to send probe to reported server {server_id} {e}")
+            logger.debug(f"Failed to send probe to reported server {failed_server_id} {e}")
         # 3. wait for probe response
         probe_wait = 1  # wait time for probe responses
         time.sleep(probe_wait)
         # 4. re-check server status
-        server_status = self.server.membership_manager.get_serrver_status(server_id)
+        server_status = self.server.membership_manager.get_serrver_status(failed_server_id)
         if server_status == ACTIVE:
-            logger.info(f"Server {server_id} responded to probe, marked as ACTIVE.")
+            logger.info(f"Server {failed_server_id} responded to probe, marked as ACTIVE.")
+            return
         elif server_status == DEAD:
-            logger.warning(f"Server {server_id} is already marked as DEAD.")
-        else:
-            logger.warning(f"Server {server_id} did not respond to probe, treating as DEAD.")
-            self.server.membership_manager.update_server_status(server_id, DEAD)
-            # 5. todo:call higher-level fault discovery (leave implementation to caller)
-            try:
-                pass
-            except Exception as e:
-                logger.debug(f"fault_discovery call failed for {server_id}: {e}")
+            logger.warning(f"Server {failed_server_id} is already marked as DEAD.")
+        elif server_status == SUSPECT:
+            logger.warning(f"Server {failed_server_id} did not respond to probe, treating as DEAD.")
+            self.server.membership_manager.update_server_status(failed_server_id, DEAD)
+        # 5. todo:call higher-level fault discovery (leave implementation to caller)
+        try:
+            if hasattr(self.server, "fault_discovery"):
+                self.server.fault_discovery.handle_dead_server(failed_server_id)
+        except Exception as e:
+            logger.debug(f"fault_discovery call failed for {failed_server_id}: {e}")
 

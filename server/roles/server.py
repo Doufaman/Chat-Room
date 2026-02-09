@@ -3,7 +3,7 @@ import time
 
 import psutil
 
-from server.fault_detection import HeartbeatMonitor
+from server.fault_detection import HandleAbnormalStateReport, HeartbeatMonitor
 from utills.logger import get_logger
 
 from .base import Role
@@ -56,6 +56,7 @@ class Server(Role):
             # start fault detection monitor
             self.heartbeat_monitor = HeartbeatMonitor(self)
             self.heartbeat_monitor.start_timeout_checker()
+            self.fault_discovery = HandleAbnormalStateReport(self)
         elif self.leader_address:
             self.register(self.leader_address)
 
@@ -134,6 +135,13 @@ class Server(Role):
                 # todo: notidy other followers about the new member
             
                 #print('hhey')
+            elif msg_type == "SERVER_FAILURE_REPORT":
+                # fault_detetion handles this
+                failed_ip = message.get("failed_ip")
+                failed_port = message.get("failed_port")
+                failed_server_id = message.get("failed_server_id")
+                self.fault_discovery.handle_report(failed_ip, failed_port, failed_server_id)
+                logger.info(f"Received SERVER_FAILURE_REPORT: failed_ip={failed_ip}, failed_port={failed_port}")
         else:
             if msg_type == "REGISTER_ACK":
                 #print('hhey')
