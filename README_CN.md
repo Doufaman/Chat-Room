@@ -1,16 +1,16 @@
 # Chat Room 项目说明
 ## 留言
-——Shu Ruiyi, 2026.1.27<br>
-基于restructure_ms_dd 做出了以下修改：<br>
-1. main.py 位置调整为与各文件夹并列，因为引用上一级路径下的另一个文件夹里的模块比较麻烦。server文件夹存放服务器代码，client文件存放客户端代码。
-2. 将dynamic_discovery 和network_manager中的信息格式改为JSON 字典消息（发送/接收均用 json.dumps/loads）
-3. 修改main.py 中的start()函数
+——Shu Ruiyi, 2026.2.9<br>
+基于merge_v03 新增以下功能：<br>
+1. 新增message_history.py，实现聊天记录存储功能
+2. 在chatroom中import ChatMessageHistory，server在接收client信息时进行存储
+3. 新增chat_history文件夹，存储聊天记录，用聊天室名称作区分
 
 ## 运行方法
 ### Server
 在终端运行main_server.py，输入自定义IP，单机测试需使用指定IP，详见IP配制
 ### Client
-在终端运行main_client.py
+在终端运行main_client.py，输入自定义IP，选择
 
 ## 配制说明
 默认所有设备在同一局域网(LAN)内

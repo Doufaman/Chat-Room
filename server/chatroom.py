@@ -12,6 +12,7 @@ from network.chatting_messenger import (
     TYPE_JOIN, TYPE_CHAT, TYPE_LEAVE
 )
 
+from .message_history import ChatMessageHistory
 
 class ChatRoom:
     """A single chat room that manages client connections and messages"""
@@ -43,6 +44,14 @@ class ChatRoom:
         # Server socket
         self.server_socket = None
         self.running = False
+
+        # Message history manager
+        self.message_history = ChatMessageHistory(
+            room_id=self.room_id,
+            room_name=self.room_name,
+            max_history=5,
+            storage_dir="./chat_history"
+        )
     
     def start(self):
         """Start the chatroom (run in a separate thread)"""
@@ -114,6 +123,11 @@ class ChatRoom:
                 pass
         
         print(f"[ChatRoom {self.room_id}] Stopped")
+
+        # Stop message history manager
+        if hasattr(self, 'message_history'):
+            self.message_history.export_all_messages()
+            print(f"[ChatRoom {self.room_id}] Message history exported on stop")
     
     def _handle_client(self, client_socket, client_addr):
         """Handle messages from a single client"""
@@ -145,6 +159,17 @@ class ChatRoom:
                     
                     elif msg_type == TYPE_LEAVE:
                         print(f"[ChatRoom {self.room_id}] {sender} is leaving")
+                
+                # Save message to history (only CHAT messages)
+                if msg_type == TYPE_CHAT:
+                    persistence_triggered = self.message_history.add_message(
+                        msg_type=msg_type,
+                        sender=sender,
+                        content=content,
+                        vector_clock=received_clock
+                    )
+                    if persistence_triggered:
+                        print(f"[ChatRoom {self.room_id}] Message persistence triggered")
                 
                 # Put message in queue for broadcasting
                 self.msg_queue.put((client_socket, message))
