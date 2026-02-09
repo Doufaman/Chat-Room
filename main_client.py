@@ -9,6 +9,11 @@ import threading
 import sys
 import os
 import json
+import time
+from utills.logger import get_logger
+
+
+logger = get_logger("chat_client")
 
 from network.chatting_messenger import (
     send_tcp_message, receive_tcp_message, create_chat_message,
@@ -29,6 +34,11 @@ class ChatClient:
         self.vector_clock = VectorClock(user_id)
         self.socket = None
         self.running = False
+        self.leader_ip = None
+        self.current_server_info = None  # Store current server info (ip: id)
+        self.current_server_ip = None
+        self.current_server_port = None
+        self.current_server_id = None
         self.lock = threading.Lock()
         self.hold_back_queue = []  # For causal ordering
     
@@ -70,6 +80,11 @@ class ChatClient:
                 response = json.loads(data.decode('utf-8'))
                 
                 msg_type = response.get('msg_type')
+                leader_ip = response.get('sender_ip')
+                if leader_ip:
+                    self.leader_ip = leader_ip
+                    print(f"[Discovery] Leader found at {leader_ip}")
+
                 if msg_type == 'CHATROOM_LIST':
                     servers = response.get('message', {}).get('servers', [])
                     print(f"[Discovery] Received chatroom list from Leader {addr[0]}")
@@ -99,6 +114,7 @@ class ChatClient:
             server_id = server.get('server_id', '?')
             server_ip = server.get('server_ip', '?')
             chatrooms = server.get('chatrooms', [])
+            self.current_server_info[server_ip] = server_id  # Store mapping of IP to server ID
             
             if chatrooms:
                 print(f"\nServer {server_id} ({server_ip}):")
@@ -166,12 +182,19 @@ class ChatClient:
                 join_msg = create_chat_message(TYPE_JOIN, self.user_id, self.vector_clock,
                                                 f"{self.user_id} joined the chat.")
             send_tcp_message(self.socket, join_msg)
+
+            self.current_server_ip = server_ip
+            self.current_server_port = server_port
+            self.current_server_id = None  
             
             self.running = True
             return True
             
         except Exception as e:
             print(f"[Client] Connection failed: {e}")
+            if self.current_server_info is not None and self.current_server_ip in self.current_server_info:
+                server_id = self.current_server_info[self.current_server_ip]
+                self.report_server_failure_to_leader(self.leader_ip, server_id, server_ip, server_port)  # Report failure to Leader
             if self.socket:
                 self.socket.close()
                 self.socket = None
@@ -210,6 +233,43 @@ class ChatClient:
                 self.socket.close()
             print("[Chat] Disconnected")
     
+    def report_server_failure_to_leader(self, leader_ip, failed_server_id, failed_ip, failed_port):
+        """
+        仿照连接 Server 的逻辑，直接建立 TCP 连接向 Leader 报告故障。
+        """
+        logger.info(f"\n[Client] Reporting suspected failure of {failed_ip}:{failed_port} to Leader...")
+        
+        # 1. 构造报告消息体
+        # 仿照 create_chat_message 的逻辑，或者直接构造符合你协议的字典
+        report_payload = {
+            "msg_type": "SERVER_FAILURE_REPORT",
+            "message": {
+                "failed_ip": failed_ip,
+                "failed_port": failed_port,
+                "failed_server_id": failed_server_id
+            },
+            "sender_id": self.user_id
+        }
+
+        # 2. 建立短连接发送报告
+        temp_sock = None
+        try:
+            temp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            temp_sock.settimeout(5.0)  # 给 Leader 5秒连接时间
+            temp_sock.connect((leader_ip, 9001))
+            
+            # 3. 调用全局工具函数发送消息
+            # 注意：这里的第二个参数必须是符合协议的消息对象（通常是 dict）
+            send_tcp_message(temp_sock, report_payload)
+            
+            print(f"[Client] Failure report delivered to Leader at {leader_ip}:9001")
+            
+        except Exception as e:
+            print(f"[Client] Failed to report to Leader: {e}")
+        finally:
+            if temp_sock:
+                temp_sock.close()
+
     def _send_chat(self, content):
         """Send a chat message"""
         with self.lock:
@@ -220,6 +280,9 @@ class ChatClient:
             send_tcp_message(self.socket, msg)
         except Exception as e:
             print(f"[Error] Failed to send message: {e}")
+            if self.current_server_info is not None and self.current_server_ip in self.current_server_info:
+                server_id = self.current_server_info[self.current_server_ip]
+                self.report_server_failure_to_leader(self.leader_ip, server_id, self.current_server_ip, self.current_server_port)  # Report failure to Leader
             self.running = False
     
     def _send_leave(self):
