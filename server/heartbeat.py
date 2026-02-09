@@ -91,7 +91,7 @@ class Heartbeat:
         raw_msg may be dict or JSON string. This method normalizes and forwards to server
         callbacks that implement detection/handling.
         """
-        logger.debug(f"Heartbeat received message: {msg_type} {msg} from {sender_addr}")
+        logger.debug(f"Heartbeat received message: {msg_type} {msg} from {sender_addr}, current memnershiplist is {getattr(self.server, 'membership_list', None)}")
 
         # dispatch to server-side handlers (fault_detection expected to provide these)
         if msg_type == "HEARTBEAT":

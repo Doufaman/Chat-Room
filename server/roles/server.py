@@ -4,6 +4,7 @@ import time
 import psutil
 
 from server.fault_detection import HandleAbnormalStateReport, HeartbeatMonitor
+from server.fault_discovery import ServerCrashDiscovery
 from utills.logger import get_logger
 
 from .base import Role
@@ -56,9 +57,11 @@ class Server(Role):
             # start fault detection monitor
             self.heartbeat_monitor = HeartbeatMonitor(self)
             self.heartbeat_monitor.start_timeout_checker()
-            self.fault_discovery = HandleAbnormalStateReport(self)
+            self.handle_abnormal_state_report = HandleAbnormalStateReport(self)
+            self.fault_discovery = ServerCrashDiscovery(self)
         elif self.leader_address:
             self.register(self.leader_address)
+        
 
 
 
@@ -133,6 +136,16 @@ class Server(Role):
                         "membership_list": membership_for_follower}
                 )           
                 # todo: notidy other followers about the new member
+
+                for sid, sip in self.membership_list.items():
+                    if sid != self.server_id:
+                        self.network_manager.send_unicast(
+                            sip,
+                            9001,
+                            "NEW_FOLLOWER_JOINED",
+                            {"new_follower_id": follower_id, 
+                             "new_follower_ip": follower_ip}
+                        )
             
                 #print('hhey')
             elif msg_type == "SERVER_FAILURE_REPORT":
@@ -140,7 +153,7 @@ class Server(Role):
                 failed_ip = message.get("failed_ip")
                 failed_port = message.get("failed_port")
                 failed_server_id = message.get("failed_server_id")
-                self.fault_discovery.handle_report(failed_ip, failed_port, failed_server_id)
+                self.handle_abnormal_state_report.handle_report(failed_ip, failed_port, failed_server_id)
                 logger.info(f"Received SERVER_FAILURE_REPORT: failed_ip={failed_ip}, failed_port={failed_port}")
         else:
             if msg_type == "REGISTER_ACK":
@@ -182,7 +195,20 @@ class Server(Role):
                     sid_int = int(sid) if isinstance(sid, str) else sid
                     self.membership_list[sid_int] = sip
                 print(f'[Follower] Registered with Leader {self.leader_id}. Current membership list: {self.membership_list}')
-    
+            elif msg_type == "NEW_FOLLOWER_JOINED":
+                new_follower_id = message.get("new_follower_id")
+                new_follower_ip = message.get("new_follower_ip")
+                if new_follower_id != self.server_id:
+                    new_follower_id = int(new_follower_id) if isinstance(new_follower_id, str) else new_follower_id
+                    self.membership_list[new_follower_id] = new_follower_ip
+                    logger.info(f'[Follower] New follower joined: {new_follower_id} with IP: {new_follower_ip}. Updated membership list: {self.membership_list}')
+
+            elif msg_type == "SERVER_REMOVED":
+                removed_server_id = message.get("server_id")
+                removed_group_id = message.get("group_id")
+                removed_server_id = int(removed_server_id) if isinstance(removed_server_id, str) else removed_server_id
+                self.membership_list.pop(removed_server_id, None)
+                logger.info(f'[Follower] Server removed: {removed_server_id} from group {removed_group_id}. Updated membership list: {self.membership_list}')
     def change_role(self, new_role, leader_id):
         """Handle role change triggered by ElectionManager."""
         # Only log if role actually changes

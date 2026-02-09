@@ -314,7 +314,7 @@ class NetworkManager:
                 if result:
                     conn, addr = result
                     # 接收身份消息
-                    msg = self.receive_tcp_message(conn, timeout=1.0)
+                    msg = self.receive_tcp_message(conn, timeout=2.0)
                     if msg and msg[0] == "IDENTIFY":
                         f_id = msg[1].get("server_id")
                         self.register_connection(conn, server_id=f_id)
