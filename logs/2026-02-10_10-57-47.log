@@ -1,0 +1,9 @@
+10:57:47 [root] [INFO] 日志系统初始化完成。文件保存至: logs/2026-02-10_10-57-47.log
+10:57:49 [utills.ip_validator] [DEBUG] IP 127.0.0.5 是回环地址（本地测试用）
+10:57:49 [election] [INFO] [I'm Follower - (507043040, 127.0.0.5)] Election Manager starting
+10:57:49 [election] [INFO] [I'm Follower - (507043040, 127.0.0.5)] UDP listener started on UDP:9003
+10:57:50 [network_manager] [DEBUG] Starting follower long-lived connection to leader at 127.0.0.3...
+10:57:50 [network_manager] [DEBUG] Follower established long-lived connection to leader at 127.0.0.3
+10:57:51 [server.heartbeat] [DEBUG] [I'm Follower - 507043040] Heartbeat received message: HEARTBEAT {'server_id': 606035513, 'timestamp': 1770717471.4020312, 'identity': 'LEADER'} from 606035513, current memnershiplist is {581012865: '127.0.0.2', 774390020: '127.0.0.4', 507043040: '127.0.0.5', 606035513: '127.0.0.3'}
+10:57:54 [server.heartbeat] [DEBUG] [I'm Follower - 507043040] Heartbeat received message: HEARTBEAT {'server_id': 606035513, 'timestamp': 1770717474.4056818, 'identity': 'LEADER'} from 606035513, current memnershiplist is {581012865: '127.0.0.2', 774390020: '127.0.0.4', 507043040: '127.0.0.5', 606035513: '127.0.0.3'}
+10:57:57 [server.heartbeat] [DEBUG] [I'm Follower - 507043040] Heartbeat received message: HEARTBEAT {'server_id': 606035513, 'timestamp': 1770717477.404854, 'identity': 'LEADER'} from 606035513, current memnershiplist is {581012865: '127.0.0.2', 774390020: '127.0.0.4', 507043040: '127.0.0.5', 606035513: '127.0.0.3'}

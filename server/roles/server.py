@@ -344,6 +344,9 @@ class Server(Role):
                 if not hasattr(self, "heartbeat") or self.heartbeat is None:
                     self.heartbeat = Heartbeat(self, interval=HEARTBEAT_INTERVAL)
                     self.heartbeat.start()
+                # Wait a bit for followers to establish connections before first heartbeat
+                logger.info(f"[Leader] Waiting for followers to connect...")
+                time.sleep(1.5)  # Give followers time to connect
                 # Send immediate heartbeat to stabilize new leadership
                 self.heartbeat.send_heartbeat()
                 logger.info(f"[Leader] Sent initial heartbeat after becoming leader")
@@ -368,6 +371,8 @@ class Server(Role):
         elif new_role == TYPE_FOLLOWER:
             print(f"[Server] Becoming FOLLOWER (Leader ID: {leader_id})")
             self.leader_id = leader_id
+            # Set initial heartbeat timestamp to avoid immediate timeout
+            self.leader_latest_heartbeat = time.time()
             try:
                 self.membership_manager.is_leader = False
             except Exception:

@@ -1,0 +1,77 @@
+10:50:42 [root] [INFO] 日志系统初始化完成。文件保存至: logs/2026-02-10_10-50-42.log
+10:50:48 [utills.ip_validator] [DEBUG] IP 127.0.0.1 是回环地址（本地测试用）
+10:50:51 [election] [INFO] [I'm Leader - (605148904, 127.0.0.1)] Election Manager starting
+10:50:51 [election] [INFO] [I'm Leader - (605148904, 127.0.0.1)] UDP listener started on UDP:9003
+10:50:52 [membership] [INFO] server 605148904 assigned to group group_0
+10:50:52 [membership] [INFO] Leader initialized with server info: {'server_id': 605148904, 'load_info': {'cpu_percent': 4.2, 'memory_percent': 76.6}, 'address': '127.0.0.1'}
+10:50:52 [network_manager] [DEBUG] Starting leader long-lived connection listener...
+10:50:52 [network_manager] [DEBUG] Leader long-lived connection listener started
+10:50:52 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 605148904, 'timestamp': 1770717052.8134348, 'identity': 'LEADER'}
+10:50:52 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+10:50:53 [election] [WARNING] [I'm Leader - (605148904, 127.0.0.1)] Election triggered: First server startup
+10:50:53 [election] [INFO] [I'm Election - (605148904, 127.0.0.1)] Election started; peers=[]
+10:50:53 [election] [INFO] [I'm Election - (605148904, 127.0.0.1)] No higher peers, becoming Leader
+10:50:53 [election] [INFO] [I'm Leader - (605148904, 127.0.0.1)] Broadcasting COORDINATOR (victory)
+10:50:53 [election] [DEBUG] [I'm Leader - (605148904, 127.0.0.1)] UDP send COORDINATOR -> <broadcast>:9003
+10:50:53 [election] [DEBUG] [I'm Leader - (605148904, 127.0.0.1)] UDP send COORDINATOR -> <broadcast>:9003
+10:50:54 [election] [DEBUG] [I'm Leader - (605148904, 127.0.0.1)] UDP send COORDINATOR -> <broadcast>:9003
+10:50:54 [election] [DEBUG] [I'm Leader - (605148904, 127.0.0.1)] UDP send COORDINATOR -> <broadcast>:9003
+10:50:54 [election] [DEBUG] [I'm Leader - (605148904, 127.0.0.1)] UDP send COORDINATOR -> <broadcast>:9003
+10:50:55 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 605148904, 'timestamp': 1770717055.814375, 'identity': 'LEADER'}
+10:50:55 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+10:50:58 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 605148904, 'timestamp': 1770717058.818419, 'identity': 'LEADER'}
+10:50:58 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+10:51:01 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 605148904, 'timestamp': 1770717061.818435, 'identity': 'LEADER'}
+10:51:01 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+10:51:04 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 605148904, 'timestamp': 1770717064.818423, 'identity': 'LEADER'}
+10:51:04 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+10:51:06 [membership] [INFO] server added: 28830870
+10:51:06 [membership] [INFO] server 28830870 assigned to group group_0
+10:51:06 [network_manager] [DEBUG] Registered long-lived connection from follower 28830870 at ('127.0.0.1', 62924)
+10:51:07 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 605148904, 'timestamp': 1770717067.818423, 'identity': 'LEADER'}
+10:51:07 [network_manager] [DEBUG] there are currently 1 followers to send to: [28830870]
+10:51:07 [server.heartbeat] [DEBUG] [I'm Leader - 605148904] Heartbeat received message: HEARTBEAT {'server_id': 28830870, 'timestamp': 1770717066.959789, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 5.1, 'memory_percent': 76.7}} from 28830870, current memnershiplist is {605148904: '127.0.0.1', 28830870: '127.0.0.2'}
+10:51:10 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 605148904, 'timestamp': 1770717070.817247, 'identity': 'LEADER'}
+10:51:10 [network_manager] [DEBUG] there are currently 1 followers to send to: [28830870]
+10:51:10 [server.heartbeat] [DEBUG] [I'm Leader - 605148904] Heartbeat received message: HEARTBEAT {'server_id': 28830870, 'timestamp': 1770717069.960661, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 8.1, 'memory_percent': 75.8}} from 28830870, current memnershiplist is {605148904: '127.0.0.1', 28830870: '127.0.0.2'}
+10:51:13 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 605148904, 'timestamp': 1770717073.813795, 'identity': 'LEADER'}
+10:51:13 [network_manager] [DEBUG] there are currently 1 followers to send to: [28830870]
+10:51:13 [server.heartbeat] [DEBUG] [I'm Leader - 605148904] Heartbeat received message: HEARTBEAT {'server_id': 28830870, 'timestamp': 1770717072.9648058, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 10.1, 'memory_percent': 75.7}} from 28830870, current memnershiplist is {605148904: '127.0.0.1', 28830870: '127.0.0.2'}
+10:51:16 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 605148904, 'timestamp': 1770717076.8184278, 'identity': 'LEADER'}
+10:51:16 [network_manager] [DEBUG] there are currently 1 followers to send to: [28830870]
+10:51:16 [server.heartbeat] [DEBUG] [I'm Leader - 605148904] Heartbeat received message: HEARTBEAT {'server_id': 28830870, 'timestamp': 1770717075.9648051, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 4.9, 'memory_percent': 75.4}} from 28830870, current memnershiplist is {605148904: '127.0.0.1', 28830870: '127.0.0.2'}
+10:51:19 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 605148904, 'timestamp': 1770717079.8184252, 'identity': 'LEADER'}
+10:51:19 [network_manager] [DEBUG] there are currently 1 followers to send to: [28830870]
+10:51:19 [server.heartbeat] [DEBUG] [I'm Leader - 605148904] Heartbeat received message: HEARTBEAT {'server_id': 28830870, 'timestamp': 1770717078.962704, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 6.6, 'memory_percent': 75.7}} from 28830870, current memnershiplist is {605148904: '127.0.0.1', 28830870: '127.0.0.2'}
+10:51:22 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 605148904, 'timestamp': 1770717082.818419, 'identity': 'LEADER'}
+10:51:22 [network_manager] [DEBUG] there are currently 1 followers to send to: [28830870]
+10:51:22 [server.heartbeat] [DEBUG] [I'm Leader - 605148904] Heartbeat received message: HEARTBEAT {'server_id': 28830870, 'timestamp': 1770717081.96478, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 7.9, 'memory_percent': 75.9}} from 28830870, current memnershiplist is {605148904: '127.0.0.1', 28830870: '127.0.0.2'}
+10:51:25 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 605148904, 'timestamp': 1770717085.816112, 'identity': 'LEADER'}
+10:51:25 [network_manager] [DEBUG] there are currently 1 followers to send to: [28830870]
+10:51:25 [server.heartbeat] [DEBUG] [I'm Leader - 605148904] Heartbeat received message: HEARTBEAT {'server_id': 28830870, 'timestamp': 1770717084.9619489, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 7.9, 'memory_percent': 76.0}} from 28830870, current memnershiplist is {605148904: '127.0.0.1', 28830870: '127.0.0.2'}
+10:51:28 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 605148904, 'timestamp': 1770717088.814689, 'identity': 'LEADER'}
+10:51:28 [network_manager] [DEBUG] there are currently 1 followers to send to: [28830870]
+10:51:28 [server.heartbeat] [DEBUG] [I'm Leader - 605148904] Heartbeat received message: HEARTBEAT {'server_id': 28830870, 'timestamp': 1770717087.962743, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 5.9, 'memory_percent': 75.9}} from 28830870, current memnershiplist is {605148904: '127.0.0.1', 28830870: '127.0.0.2'}
+10:51:29 [membership] [INFO] server added: 45924667
+10:51:29 [membership] [INFO] server 45924667 assigned to group group_0
+10:51:29 [network_manager] [DEBUG] Registered long-lived connection from follower 45924667 at ('127.0.0.1', 62932)
+10:51:30 [server.heartbeat] [DEBUG] [I'm Leader - 605148904] Heartbeat received message: HEARTBEAT {'server_id': 45924667, 'timestamp': 1770717089.531831, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 8.1, 'memory_percent': 76.0}} from 45924667, current memnershiplist is {605148904: '127.0.0.1', 28830870: '127.0.0.2', 45924667: '127.0.0.3'}
+10:51:31 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 605148904, 'timestamp': 1770717091.815398, 'identity': 'LEADER'}
+10:51:31 [network_manager] [DEBUG] there are currently 2 followers to send to: [28830870, 45924667]
+10:51:31 [server.heartbeat] [DEBUG] [I'm Leader - 605148904] Heartbeat received message: HEARTBEAT {'server_id': 28830870, 'timestamp': 1770717090.962283, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 7.1, 'memory_percent': 75.9}} from 28830870, current memnershiplist is {605148904: '127.0.0.1', 28830870: '127.0.0.2', 45924667: '127.0.0.3'}
+10:51:33 [server.heartbeat] [DEBUG] [I'm Leader - 605148904] Heartbeat received message: HEARTBEAT {'server_id': 45924667, 'timestamp': 1770717092.534076, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 7.3, 'memory_percent': 76.0}} from 45924667, current memnershiplist is {605148904: '127.0.0.1', 28830870: '127.0.0.2', 45924667: '127.0.0.3'}
+10:51:34 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 605148904, 'timestamp': 1770717094.8169758, 'identity': 'LEADER'}
+10:51:34 [network_manager] [DEBUG] there are currently 2 followers to send to: [28830870, 45924667]
+10:51:34 [server.heartbeat] [DEBUG] [I'm Leader - 605148904] Heartbeat received message: HEARTBEAT {'server_id': 28830870, 'timestamp': 1770717093.9647832, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 9.5, 'memory_percent': 76.0}} from 28830870, current memnershiplist is {605148904: '127.0.0.1', 28830870: '127.0.0.2', 45924667: '127.0.0.3'}
+10:51:36 [server.heartbeat] [DEBUG] [I'm Leader - 605148904] Heartbeat received message: HEARTBEAT {'server_id': 45924667, 'timestamp': 1770717095.535403, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 6.9, 'memory_percent': 75.7}} from 45924667, current memnershiplist is {605148904: '127.0.0.1', 28830870: '127.0.0.2', 45924667: '127.0.0.3'}
+10:51:37 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 605148904, 'timestamp': 1770717097.8145332, 'identity': 'LEADER'}
+10:51:37 [network_manager] [DEBUG] there are currently 2 followers to send to: [28830870, 45924667]
+10:51:37 [server.heartbeat] [DEBUG] [I'm Leader - 605148904] Heartbeat received message: HEARTBEAT {'server_id': 28830870, 'timestamp': 1770717096.9626, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 6.2, 'memory_percent': 75.9}} from 28830870, current memnershiplist is {605148904: '127.0.0.1', 28830870: '127.0.0.2', 45924667: '127.0.0.3'}
+10:51:39 [server.heartbeat] [DEBUG] [I'm Leader - 605148904] Heartbeat received message: HEARTBEAT {'server_id': 45924667, 'timestamp': 1770717098.536837, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 5.6, 'memory_percent': 75.7}} from 45924667, current memnershiplist is {605148904: '127.0.0.1', 28830870: '127.0.0.2', 45924667: '127.0.0.3'}
+10:51:40 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 605148904, 'timestamp': 1770717100.818072, 'identity': 'LEADER'}
+10:51:40 [network_manager] [DEBUG] there are currently 2 followers to send to: [28830870, 45924667]
+10:51:40 [server.heartbeat] [DEBUG] [I'm Leader - 605148904] Heartbeat received message: HEARTBEAT {'server_id': 28830870, 'timestamp': 1770717099.964791, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 14.4, 'memory_percent': 76.7}} from 28830870, current memnershiplist is {605148904: '127.0.0.1', 28830870: '127.0.0.2', 45924667: '127.0.0.3'}
+10:51:42 [server.heartbeat] [DEBUG] [I'm Leader - 605148904] Heartbeat received message: HEARTBEAT {'server_id': 45924667, 'timestamp': 1770717101.5368478, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 7.1, 'memory_percent': 76.2}} from 45924667, current memnershiplist is {605148904: '127.0.0.1', 28830870: '127.0.0.2', 45924667: '127.0.0.3'}
+10:51:43 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 605148904, 'timestamp': 1770717103.8184261, 'identity': 'LEADER'}
+10:51:43 [network_manager] [DEBUG] there are currently 2 followers to send to: [28830870, 45924667]
+10:51:43 [server.heartbeat] [DEBUG] [I'm Leader - 605148904] Heartbeat received message: HEARTBEAT {'server_id': 28830870, 'timestamp': 1770717102.9647841, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 10.1, 'memory_percent': 76.5}} from 28830870, current memnershiplist is {605148904: '127.0.0.1', 28830870: '127.0.0.2', 45924667: '127.0.0.3'}

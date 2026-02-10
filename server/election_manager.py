@@ -191,7 +191,27 @@ class ElectionManager:
             
             with self.lock:
                 old_state = self.state
-                if sender_id > self.my_id or self.state != STATE_LEADER:
+                
+                # Priority 1: If we're in ELECTION state, accept first COORDINATOR (first-come-first-served)
+                # This prevents brain split when multiple nodes start election at similar times
+                if self.state == STATE_ELECTION:
+                    # Accept the first COORDINATOR that arrives, regardless of ID comparison
+                    # This implements "first elected wins" principle
+                    logger.info(f"[{self._get_identity()}] In ELECTION, accepting first COORDINATOR from {sender_id}")
+                    self.current_leader_id = sender_id
+                    self.leader_ip = sender_ip
+                    self.state = STATE_FOLLOWER
+                    self._notify_state_change_if_changed(old_state)
+                    self.election_trigger.set()
+                    # Reset leader heartbeat timestamp
+                    if hasattr(self, '_server_ref') and self._server_ref:
+                        self._server_ref.leader_latest_heartbeat = time.time()
+                        logger.info(f"[{self._get_identity()}] Reset leader heartbeat timer for new leader {sender_id}")
+                        # Trigger immediate connection to new leader
+                        self._try_connect_to_new_leader(sender_id, sender_ip)
+                
+                # Priority 2: If sender has higher ID, always accept
+                elif sender_id > self.my_id:
                     self.current_leader_id = sender_id
                     self.leader_ip = sender_ip
                     if self.state != STATE_FOLLOWER:
@@ -199,13 +219,27 @@ class ElectionManager:
                         self.state = STATE_FOLLOWER
                         self._notify_state_change_if_changed(old_state)
                     self.election_trigger.set()
-                    # Reset leader heartbeat timestamp when new leader is detected
+                    # Reset leader heartbeat timestamp
                     if hasattr(self, '_server_ref') and self._server_ref:
                         self._server_ref.leader_latest_heartbeat = time.time()
-                        logger.info(f"[{self._get_identity()}] Reset leader heartbeat timer for new leader {sender_id}")
+                
+                # Priority 3: If we're FOLLOWER and sender has lower/equal ID, accept it (leader is established)
+                elif self.state == STATE_FOLLOWER and sender_id <= self.my_id:
+                    # If we don't have a leader yet, or this is a re-announcement, accept it
+                    if self.current_leader_id is None or self.current_leader_id == sender_id:
+                        logger.info(f"[{self._get_identity()}] Accepting COORDINATOR from {sender_id} (no current leader)")
+                        self.current_leader_id = sender_id
+                        self.leader_ip = sender_ip
+                        self.election_trigger.set()
+                        if hasattr(self, '_server_ref') and self._server_ref:
+                            self._server_ref.leader_latest_heartbeat = time.time()
+                    # Otherwise keep current leader (don't switch to lower ID)
+                
+                # Priority 4: If we're already LEADER and receive lower ID claim, reject it
                 elif sender_id < self.my_id and self.state == STATE_LEADER:
-                    print(f"[{self._get_identity()}] Rejecting lower ID {sender_id}'s claim")
-                    self._send_to_ip(sender_ip, TYPE_COORDINATOR, {})
+                    logger.warning(f"[{self._get_identity()}] Rejecting lower ID {sender_id}'s COORDINATOR (I'm already Leader)")
+                    # Re-broadcast our leadership to resolve conflict
+                    self._send_to_ip('<broadcast>', TYPE_COORDINATOR, {})
 
     # =================================================================
     #  State Machine
@@ -275,6 +309,8 @@ class ElectionManager:
 
         with self.lock:
             if self.state != STATE_ELECTION:
+                # State changed (likely received COORDINATOR), abort election
+                logger.info(f"[{self._get_identity()}] State changed during election, aborting")
                 return
 
             if not self.received_answer:
@@ -283,6 +319,12 @@ class ElectionManager:
                 should_become_leader = False
         
         if should_become_leader:
+            # Double-check: if state changed to FOLLOWER (COORDINATOR arrived), don't become leader
+            with self.lock:
+                if self.state == STATE_FOLLOWER:
+                    logger.info(f"[{self._get_identity()}] COORDINATOR arrived, canceling leadership")
+                    return
+            
             logger.info(f"[{self._get_identity()}] No ANSWER received, becoming Leader")
             self._become_leader()
             return
@@ -384,10 +426,10 @@ class ElectionManager:
             self._notify_state_change()
         
         logger.info(f"[{self._get_identity()}] Broadcasting COORDINATOR (victory)")
-        # Send multiple COORDINATOR messages to ensure all nodes receive it
-        for _ in range(5):
+        # Send multiple COORDINATOR messages with longer intervals to ensure all nodes receive it
+        for i in range(5):
             self._send_to_ip('<broadcast>', TYPE_COORDINATOR, {})
-            time.sleep(0.15)
+            time.sleep(0.2)  # Slightly longer interval for better delivery
 
     def _send_to_ip(self, target_ip, msg_type, extra_data):
         """Send election message to a specific IP via independent UDP socket."""
@@ -414,4 +456,30 @@ class ElectionManager:
         """Only notify if state actually changed."""
         if old_state != self.state:
             self._notify_state_change()
+    
+    def _try_connect_to_new_leader(self, leader_id, leader_ip):
+        """Helper to trigger follower connection to new leader."""
+        try:
+            if hasattr(self, '_server_ref') and self._server_ref:
+                server = self._server_ref
+                # Update server's leader info
+                server.leader_id = leader_id
+                server.leader_address = leader_ip
+                # Start connection in background to not block election handling
+                threading.Thread(target=self._connect_to_leader_async, 
+                               args=(leader_id, leader_ip), daemon=True).start()
+        except Exception as e:
+            logger.debug(f"Failed to trigger connection to new leader: {e}")
+    
+    def _connect_to_leader_async(self, leader_id, leader_ip):
+        """Async connection to new leader."""
+        try:
+            # Small delay to let new leader start listener
+            time.sleep(0.3)
+            if hasattr(self, '_server_ref') and self._server_ref:
+                server = self._server_ref
+                logger.info(f"[{self._get_identity()}] Connecting to new leader {leader_id} at {leader_ip}")
+                server.network_manager.start_follower_long_lived_connector(leader_ip, leader_id)
+        except Exception as e:
+            logger.debug(f"Failed async connection to leader: {e}")
 
