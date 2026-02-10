@@ -109,7 +109,7 @@ class ChatClient:
     # ==========================================
     def find_leader(self):
         """广播查找Leader"""
-        print("\n正在查找Leader服务器...")
+        print("\nFinding Leader Server...")
 
         resp = self._send_and_receive(
             "WHO_IS_LEADER",
@@ -125,13 +125,13 @@ class ChatClient:
             print(f"✓ 找到Leader: {self.leader_ip} (Server ID: {self.leader_id})")
             return True
 
-        print("✗ 未找到Leader服务器，请确保服务器正在运行")
+        print("✗ Leader server not found. Please ensure the server is running.")
         return False
 
     def get_chatroom_list(self):
         """从Leader获取聊天室列表（UDP广播）"""
         if not self.leader_ip:
-            print("✗ 未连接到Leader")
+            print("✗ Not connected to Leader")
             return False
 
         resp = self._send_and_receive(
@@ -146,13 +146,13 @@ class ChatClient:
             self.chatrooms = resp['message'].get('chatrooms', [])
             return True
 
-        print("✗ 获取聊天室列表超时")
+        print("✗ Retrieving chat room list timed out")
         return False
 
     def display_chatrooms(self):
         """显示可用的聊天室列表"""
         if not self.chatrooms:
-            print("\n当前没有可用的聊天室")
+            print("\nNo chat rooms are currently available.")
             return
 
         print("\n" + "=" * 70)

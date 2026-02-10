@@ -1,0 +1,5 @@
+{"timestamp": "2026-02-09T14:43:23.389188", "type": "CHAT", "sender": "SRY", "content": "Hello", "vector_clock": {"SRY": 1}}
+{"timestamp": "2026-02-09T14:43:30.322363", "type": "CHAT", "sender": "SRY", "content": "This is a test file", "vector_clock": {"SRY": 2}}
+{"timestamp": "2026-02-09T14:44:37.984521", "type": "CHAT", "sender": "SRY", "content": "用于测试聊天室重启中的聊天记录拉取功能", "vector_clock": {"SRY": 3}}
+{"timestamp": "2026-02-09T14:45:32.892288", "type": "CHAT", "sender": "SRY", "content": "聊天室重启可以直接用相同的名称创建新聊天室+拉取记录实现吗", "vector_clock": {"SRY": 4}}
+{"timestamp": "2026-02-09T14:45:35.369685", "type": "CHAT", "sender": "SRY", "content": "5", "vector_clock": {"SRY": 5}}
