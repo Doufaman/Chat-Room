@@ -1,0 +1,103 @@
+16:09:04 [root] [INFO] Log system initialized. File saved to: logs/2026-02-10_16-09-04.log
+16:09:05 [utills.ip_validator] [DEBUG] IP 127.0.0.2 is loopback address (for local testing)
+16:09:09 [election] [INFO] [I'm Leader - (904202196, 127.0.0.2)] Election Manager starting
+16:09:09 [election] [INFO] [I'm Leader - (904202196, 127.0.0.2)] UDP listener started on UDP:9003
+16:09:10 [membership] [INFO] server 904202196 assigned to group group_0
+16:09:10 [membership] [INFO] Leader initialized with server info: {'server_id': 904202196, 'load_info': {'cpu_percent': 5.9, 'memory_percent': 80.6}, 'address': '127.0.0.2'}
+16:09:10 [network_manager] [DEBUG] Starting leader long-lived connection listener...
+16:09:10 [network_manager] [DEBUG] Leader long-lived connection listener started
+16:09:10 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 904202196, 'timestamp': 1770736150.405428, 'identity': 'LEADER'}
+16:09:10 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+16:09:10 [election] [INFO] [I'm Leader - (904202196, 127.0.0.2)] Received COORDINATOR from 414220917 (127.0.0.1)
+16:09:10 [election] [WARNING] [I'm Leader - (904202196, 127.0.0.2)] Rejecting lower ID 414220917's COORDINATOR (I'm already Leader)
+16:09:10 [election] [DEBUG] [I'm Leader - (904202196, 127.0.0.2)] UDP send COORDINATOR -> <broadcast>:9003
+16:09:10 [election] [WARNING] [I'm Leader - (904202196, 127.0.0.2)] Election triggered: First server startup
+16:09:11 [election] [INFO] [I'm Election - (904202196, 127.0.0.2)] Received COORDINATOR from 414220917 (127.0.0.1)
+16:09:11 [election] [INFO] [I'm Election - (904202196, 127.0.0.2)] In ELECTION, accepting first COORDINATOR from 414220917
+16:09:11 [election] [INFO] [I'm Follower - (904202196, 127.0.0.2)] Reset leader heartbeat timer for new leader 414220917
+16:09:11 [election] [INFO] [I'm Follower - (904202196, 127.0.0.2)] Received COORDINATOR from 414220917 (127.0.0.1)
+16:09:11 [election] [INFO] [I'm Follower - (904202196, 127.0.0.2)] Accepting COORDINATOR from 414220917 (no current leader)
+16:09:11 [election] [INFO] [I'm Follower - (904202196, 127.0.0.2)] Election started; peers=[]
+16:09:11 [election] [INFO] [I'm Follower - (904202196, 127.0.0.2)] No higher peers, becoming Leader
+16:09:11 [election] [INFO] [I'm Leader - (904202196, 127.0.0.2)] Connecting to new leader 414220917 at 127.0.0.1
+16:09:11 [network_manager] [DEBUG] Starting follower long-lived connection to leader at 127.0.0.1...
+16:09:11 [network_manager] [DEBUG] Follower established long-lived connection to leader at 127.0.0.1
+16:09:11 [election] [INFO] [I'm Leader - (904202196, 127.0.0.2)] Received COORDINATOR from 414220917 (127.0.0.1)
+16:09:12 [membership] [INFO] server 904202196 assigned to group group_0
+16:09:12 [membership] [INFO] Leader initialized with server info: {'server_id': 904202196, 'load_info': {'cpu_percent': 7.3, 'memory_percent': 80.6}, 'address': '127.0.0.2'}
+16:09:12 [network_manager] [DEBUG] Starting leader long-lived connection listener...
+16:09:12 [network_manager] [DEBUG] Leader long-lived connection listener started
+16:09:12 [server_role] [INFO] [Leader] Notifying followers about new leader: 904202196
+16:09:12 [server_role] [INFO] [Leader] Waiting for followers to connect...
+16:09:13 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 904202196, 'timestamp': 1770736153.410422, 'identity': 'LEADER'}
+16:09:13 [network_manager] [DEBUG] there are currently 1 followers to send to: [414220917]
+16:09:13 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 904202196, 'timestamp': 1770736153.735633, 'identity': 'LEADER'}
+16:09:13 [network_manager] [DEBUG] there are currently 1 followers to send to: [414220917]
+16:09:13 [server_role] [INFO] [Leader] Sent initial heartbeat after becoming leader
+16:09:13 [election] [INFO] [I'm Leader - (904202196, 127.0.0.2)] Broadcasting COORDINATOR (victory)
+16:09:13 [election] [WARNING] [I'm Leader - (904202196, 127.0.0.2)] Rejecting lower ID 414220917's COORDINATOR (I'm already Leader)
+16:09:13 [election] [DEBUG] [I'm Leader - (904202196, 127.0.0.2)] UDP send COORDINATOR -> <broadcast>:9003
+16:09:13 [election] [DEBUG] [I'm Leader - (904202196, 127.0.0.2)] UDP send COORDINATOR -> <broadcast>:9003
+16:09:13 [election] [INFO] [I'm Leader - (904202196, 127.0.0.2)] Received COORDINATOR from 414220917 (127.0.0.1)
+16:09:13 [election] [WARNING] [I'm Leader - (904202196, 127.0.0.2)] Rejecting lower ID 414220917's COORDINATOR (I'm already Leader)
+16:09:13 [election] [DEBUG] [I'm Leader - (904202196, 127.0.0.2)] UDP send COORDINATOR -> <broadcast>:9003
+16:09:13 [server.heartbeat] [DEBUG] [I'm Leader - 904202196] Heartbeat received message: HEARTBEAT {'server_id': 414220917, 'timestamp': 1770736152.905182, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 10.9, 'memory_percent': 80.7}} from 414220917, current memnershiplist is {904202196: '127.0.0.2'}
+16:09:13 [membership] [WARNING] server 414220917 is not existed
+16:09:13 [membership] [WARNING] server 414220917 is not existed
+16:09:13 [election] [DEBUG] [I'm Leader - (904202196, 127.0.0.2)] UDP send COORDINATOR -> <broadcast>:9003
+16:09:14 [election] [DEBUG] [I'm Leader - (904202196, 127.0.0.2)] UDP send COORDINATOR -> <broadcast>:9003
+16:09:14 [election] [DEBUG] [I'm Leader - (904202196, 127.0.0.2)] UDP send COORDINATOR -> <broadcast>:9003
+16:09:14 [election] [DEBUG] [I'm Leader - (904202196, 127.0.0.2)] UDP send COORDINATOR -> <broadcast>:9003
+16:09:16 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 904202196, 'timestamp': 1770736156.409655, 'identity': 'LEADER'}
+16:09:16 [network_manager] [DEBUG] there are currently 1 followers to send to: [414220917]
+16:09:16 [server.heartbeat] [DEBUG] [I'm Leader - 904202196] Heartbeat received message: HEARTBEAT {'server_id': 414220917, 'timestamp': 1770736155.905303, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 13.6, 'memory_percent': 80.5}} from 414220917, current memnershiplist is {904202196: '127.0.0.2'}
+16:09:16 [membership] [WARNING] server 414220917 is not existed
+16:09:16 [membership] [WARNING] server 414220917 is not existed
+16:09:19 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 904202196, 'timestamp': 1770736159.40698, 'identity': 'LEADER'}
+16:09:19 [network_manager] [DEBUG] there are currently 1 followers to send to: [414220917]
+16:09:19 [server.heartbeat] [DEBUG] [I'm Leader - 904202196] Heartbeat received message: HEARTBEAT {'server_id': 414220917, 'timestamp': 1770736158.9065359, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 5.4, 'memory_percent': 80.4}} from 414220917, current memnershiplist is {904202196: '127.0.0.2'}
+16:09:19 [membership] [WARNING] server 414220917 is not existed
+16:09:19 [membership] [WARNING] server 414220917 is not existed
+16:09:22 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 904202196, 'timestamp': 1770736162.408969, 'identity': 'LEADER'}
+16:09:22 [network_manager] [DEBUG] there are currently 1 followers to send to: [414220917]
+16:09:22 [server.heartbeat] [DEBUG] [I'm Leader - 904202196] Heartbeat received message: HEARTBEAT {'server_id': 414220917, 'timestamp': 1770736161.906548, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 5.7, 'memory_percent': 80.4}} from 414220917, current memnershiplist is {904202196: '127.0.0.2'}
+16:09:22 [membership] [WARNING] server 414220917 is not existed
+16:09:22 [membership] [WARNING] server 414220917 is not existed
+16:09:25 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 904202196, 'timestamp': 1770736165.41043, 'identity': 'LEADER'}
+16:09:25 [network_manager] [DEBUG] there are currently 1 followers to send to: [414220917]
+16:09:27 [membership] [INFO] server added: 470483918
+16:09:27 [membership] [INFO] server 470483918 assigned to group group_0
+16:09:28 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 904202196, 'timestamp': 1770736168.410432, 'identity': 'LEADER'}
+16:09:28 [network_manager] [DEBUG] there are currently 1 followers to send to: [414220917]
+16:09:28 [server.heartbeat] [DEBUG] [I'm Leader - 904202196] Heartbeat received message: HEARTBEAT {'server_id': 414220917, 'timestamp': 1770736167.902598, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 8.2, 'memory_percent': 80.7}} from 414220917, current memnershiplist is {904202196: '127.0.0.2', 470483918: '127.0.0.3'}
+16:09:28 [membership] [WARNING] server 414220917 is not existed
+16:09:28 [membership] [WARNING] server 414220917 is not existed
+16:09:31 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 904202196, 'timestamp': 1770736171.405879, 'identity': 'LEADER'}
+16:09:31 [network_manager] [DEBUG] there are currently 1 followers to send to: [414220917]
+16:09:31 [server.heartbeat] [DEBUG] [I'm Leader - 904202196] Heartbeat received message: HEARTBEAT {'server_id': 414220917, 'timestamp': 1770736170.9065359, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 14.0, 'memory_percent': 80.8}} from 414220917, current memnershiplist is {904202196: '127.0.0.2', 470483918: '127.0.0.3'}
+16:09:31 [membership] [WARNING] server 414220917 is not existed
+16:09:31 [membership] [WARNING] server 414220917 is not existed
+16:09:34 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 904202196, 'timestamp': 1770736174.4104068, 'identity': 'LEADER'}
+16:09:34 [network_manager] [DEBUG] there are currently 1 followers to send to: [414220917]
+16:09:34 [server_role] [INFO] [Leader] Client client requesting chatroom list
+16:09:34 [server_role] [INFO] [Leader] Sent 0 chatrooms to client client
+16:09:34 [server.heartbeat] [DEBUG] [I'm Leader - 904202196] Heartbeat received message: HEARTBEAT {'server_id': 414220917, 'timestamp': 1770736173.9065778, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 17.0, 'memory_percent': 80.7}} from 414220917, current memnershiplist is {904202196: '127.0.0.2', 470483918: '127.0.0.3'}
+16:09:34 [membership] [WARNING] server 414220917 is not existed
+16:09:34 [membership] [WARNING] server 414220917 is not existed
+16:09:37 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 904202196, 'timestamp': 1770736177.4104161, 'identity': 'LEADER'}
+16:09:37 [network_manager] [DEBUG] there are currently 1 followers to send to: [414220917]
+16:09:37 [server_role] [INFO] [Leader] Chatroom distribution: {904202196: 0, 470483918: 0}, selected: 904202196
+16:09:37 [server_role] [INFO] [Leader] Creating chatroom "Cho1" on server 904202196
+16:09:37 [server_role] [INFO] [Leader] Created and broadcasted chatroom: 904202196_1
+16:09:37 [server_role] [INFO] [Leader] Client client requesting chatroom list
+16:09:37 [server_role] [INFO] [Leader] Sent 1 chatrooms to client client
+16:09:37 [server.heartbeat] [DEBUG] [I'm Leader - 904202196] Heartbeat received message: HEARTBEAT {'server_id': 414220917, 'timestamp': 1770736176.902068, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 8.4, 'memory_percent': 80.6}} from 414220917, current memnershiplist is {904202196: '127.0.0.2', 470483918: '127.0.0.3'}
+16:09:37 [membership] [WARNING] server 414220917 is not existed
+16:09:37 [membership] [WARNING] server 414220917 is not existed
+16:09:40 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 904202196, 'timestamp': 1770736180.410429, 'identity': 'LEADER'}
+16:09:40 [network_manager] [DEBUG] there are currently 1 followers to send to: [414220917]
+16:09:40 [server.heartbeat] [DEBUG] [I'm Leader - 904202196] Heartbeat received message: HEARTBEAT {'server_id': 414220917, 'timestamp': 1770736179.906538, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 14.0, 'memory_percent': 80.4}} from 414220917, current memnershiplist is {904202196: '127.0.0.2', 470483918: '127.0.0.3'}
+16:09:40 [membership] [WARNING] server 414220917 is not existed
+16:09:40 [membership] [WARNING] server 414220917 is not existed
+16:09:43 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 904202196, 'timestamp': 1770736183.4104111, 'identity': 'LEADER'}
+16:09:43 [network_manager] [DEBUG] there are currently 1 followers to send to: [414220917]

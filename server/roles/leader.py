@@ -18,7 +18,7 @@ class Leader(Role):
         #self.known_servers = set()
 
     def start(self):
-        # 启动网络监听
+        # Start network listening
         self.network_manager.start_listening()
         
         print(f"[Server] Initialized role: {self.identity}, Server ID: {self.server_id}")

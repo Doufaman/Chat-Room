@@ -22,9 +22,9 @@ DEAD = "DEAD"
 # Heartbeat / Fault Tolerance
 # ==================================================
 
-HEARTBEAT_INTERVAL = 10  # seconds
-HEARTBEAT_LEADER_TIMEOUT = 20  # seconds
-HEARTBEAT_SERVER_TIMEOUT = 40  # seconds
+HEARTBEAT_INTERVAL = 1  # seconds (reduced for faster detection)
+HEARTBEAT_LEADER_TIMEOUT = 5  # seconds (reduced)
+HEARTBEAT_SERVER_TIMEOUT = 3  # seconds (reduced for faster crash detection)
 
 
 # ==================================================

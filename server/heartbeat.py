@@ -49,12 +49,15 @@ class Heartbeat:
 
         # 2. If Follower, attach load info
         identity = getattr(self.server, "identity", None)
+        server_id = getattr(self.server, "server_id", None)
+        role_tag = f"[I'm Leader - {server_id}]" if identity == "LEADER" else f"[I'm Follower - {server_id}]"
+        
         if identity == "FOLLOWER":
             if hasattr(self.server, "get_current_load"):
                 try:
                     msg_content["load_info"] = self.server.get_current_load()
                 except Exception as e:
-                    logger.debug(f"get_current_load error: {e}")
+                    logger.debug(f"{role_tag} get_current_load error: {e}")
 
         # 3. Send via NetworkManager
         try:
@@ -66,22 +69,24 @@ class Heartbeat:
                 # Leader: use your batch send function to send to all long-lived connected Followers
                 try:
                     nm.send_tcp_msg_to_all_followers("HEARTBEAT", msg_content)
+                    print(f"{role_tag} Sent heartbeat to all followers")
                 except Exception as e:
-                    logger.warning(f"failed sending heartbeat to followers: {e}")
+                    logger.warning(f"{role_tag} failed sending heartbeat to followers: {e}")
             else:
                 # Follower: send to specified Leader
                 leader_id = getattr(self.server, "leader_id", None) # Note: using leader_id is recommended over addr
                 if leader_id is None:
-                    logger.warning("no leader_id known, cannot send follower heartbeat via TCP")
+                    logger.warning(f"{role_tag} no leader_id known, cannot send follower heartbeat via TCP")
                 else:
                     try:
                         # use TCP long-lived connection if exists
                         nm.send_tcp_message(leader_id, "HEARTBEAT", msg_content)
+                        print(f"{role_tag} Sent heartbeat to leader {leader_id}")
                     except Exception as e:
-                        logger.error(f"Failed to send heartbeat to leader {leader_id}: {e}")
+                        logger.error(f"{role_tag} Failed to send heartbeat to leader {leader_id}: {e}")
                         
         except Exception as e:
-            logger.error(f"heartbeat send error: {e}")
+            logger.error(f"{role_tag} heartbeat send error: {e}")
 
 
 
@@ -91,22 +96,29 @@ class Heartbeat:
         raw_msg may be dict or JSON string. This method normalizes and forwards to server
         callbacks that implement detection/handling.
         """
-        logger.debug(f"Heartbeat received message: {msg_type} {msg} from {sender_addr}, current memnershiplist is {getattr(self.server, 'membership_list', None)}")
+        identity = getattr(self.server, "identity", None)
+        server_id = getattr(self.server, "server_id", None)
+        role_tag = f"[I'm Leader - {server_id}]" if identity == "LEADER" else f"[I'm Follower - {server_id}]"
+        
+        logger.debug(f"{role_tag} Heartbeat received message: {msg_type} {msg} from {sender_addr}, current memnershiplist is {getattr(self.server, 'membership_list', None)}")
 
         # dispatch to server-side handlers (fault_detection expected to provide these)
         if msg_type == "HEARTBEAT":
             if hasattr(self.server, "heartbeat_monitor"):
                 try:
                     self.server.heartbeat_monitor.handle_heartbeat(msg, sender_addr=sender_addr)
+                    sender_id = msg.get("server_id")
+                    print(f"{role_tag} Received heartbeat from {sender_id}")
                 except Exception as e:
-                    logger.debug(f"server.heartbeat_monitor.handle_heartbeat error: {e}")
+                    logger.debug(f"{role_tag} server.heartbeat_monitor.handle_heartbeat error: {e}")
         elif msg_type == "ARE_YOU_ALIVE":
             # reply immediately (use same network manager / connection)
             if hasattr(self.server, "heartbeat_monitor"):
                 try:
                     self.server.heartbeat_monitor.handle_probe_request(msg, sender_addr=sender_addr)
+                    print(f"{role_tag} Received probe from {sender_addr}, responding...")
                 except Exception as e:
-                    logger.debug(f"server.heartbeat_monitor.handle_probe_request error: {e}")
+                    logger.debug(f"{role_tag} server.heartbeat_monitor.handle_probe_request error: {e}")
             # also send a probe response on same connection
             try:
                 if self.nm and sender_addr:
@@ -117,13 +129,15 @@ class Heartbeat:
                     self.nm.send_tcp_message(sender_addr, "I_AM_ALIVE", response)
                     pass
             except Exception as e:
-                logger.debug(f"failed sending probe response: {e}")
+                logger.debug(f"{role_tag} failed sending probe response: {e}")
         elif msg_type  == "I_AM_ALIVE":
             if hasattr(self.server, "heartbeat_monitor"):
                 try:
                     self.server.heartbeat_monitor.handle_probe_response(msg, sender_addr=sender_addr)
+                    sender_id = msg.get("server_id")
+                    print(f"{role_tag} Received probe response from {sender_id}")
                 except Exception as e:
-                    logger.debug(f"server.heartbeat_monitor.handle_probe_response error: {e}")
+                    logger.debug(f"{role_tag} server.heartbeat_monitor.handle_probe_response error: {e}")
         else:
             # ignore here; main.handle_event / role logic may handle other types
             return

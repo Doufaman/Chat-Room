@@ -14,7 +14,7 @@ class Role(ABC):
         # load info
         self.load_info = None
         
-        # 初始化消息处理器映射表
+        # Initialize message handler mapping table
         self._msg_map = {
             #"HEARTBEAT": self._handle_heartbeat,
         }

@@ -12,22 +12,26 @@ from network.chatting_messenger import (
     TYPE_JOIN, TYPE_CHAT, TYPE_LEAVE
 )
 
+from .message_history import ChatMessageHistory
 
 class ChatRoom:
     """A single chat room that manages client connections and messages"""
     
-    def __init__(self, room_id, room_name, port, local_ip):
+    def __init__(self, room_id, room_name, port, local_ip, 
+                 on_client_count_change=None):
         """
         Args:
             room_id: Unique ID for this chatroom
             room_name: Display name of the chatroom
             port: TCP port to listen on
             local_ip: Local IP address to bind
+            on_client_count_change: Callback function(room_id, new_count) when client count changes
         """
         self.room_id = room_id
         self.room_name = room_name
         self.port = port
         self.local_ip = local_ip
+        self.on_client_count_change = on_client_count_change
         
         # Client management
         self.clients = []  # List of client sockets
@@ -43,6 +47,14 @@ class ChatRoom:
         # Server socket
         self.server_socket = None
         self.running = False
+
+        # Message history manager
+        self.message_history = ChatMessageHistory(
+            room_id=self.room_id,
+            room_name=self.room_name,
+            max_history=5,
+            #storage_dir="./chat_history"
+        )
     
     def start(self):
         """Start the chatroom (run in a separate thread)"""
@@ -114,6 +126,11 @@ class ChatRoom:
                 pass
         
         print(f"[ChatRoom {self.room_id}] Stopped")
+
+        # Stop message history manager
+        if hasattr(self, 'message_history'):
+            self.message_history.export_all_messages()
+            print(f"[ChatRoom {self.room_id}] Message history exported on stop")
     
     def _handle_client(self, client_socket, client_addr):
         """Handle messages from a single client"""
@@ -139,12 +156,41 @@ class ChatRoom:
                         self.vector_clock.merge(received_clock)
                         self.client_info[client_socket]["user_id"] = sender
                         print(f"[ChatRoom {self.room_id}] {sender} joined. Clock: {self.vector_clock.clock}")
+                        
+                        # Send current vector clock to the new client so they know about existing members
+                        from network.chatting_messenger import TYPE_UPDATE, create_chat_message
+                        update_msg = create_chat_message(
+                            TYPE_UPDATE, 
+                            "server", 
+                            self.vector_clock,
+                            "Member list update"
+                        )
+                        try:
+                            send_tcp_message(client_socket, update_msg)
+                            print(f"[ChatRoom {self.room_id}] Sent member update to {sender}")
+                        except Exception as e:
+                            print(f"[ChatRoom {self.room_id}] Failed to send update to {sender}: {e}")
+                        
+                        # Notify server of client count change
+                        if self.on_client_count_change:
+                            self.on_client_count_change(self.room_id, len(self.clients))
                     
                     elif msg_type == TYPE_CHAT:
                         self.vector_clock.merge(received_clock)
                     
                     elif msg_type == TYPE_LEAVE:
                         print(f"[ChatRoom {self.room_id}] {sender} is leaving")
+                
+                # Save message to history (only CHAT messages)
+                if msg_type == TYPE_CHAT:
+                    persistence_triggered = self.message_history.add_message(
+                        msg_type=msg_type,
+                        sender=sender,
+                        content=content,
+                        vector_clock=received_clock
+                    )
+                    if persistence_triggered:
+                        print(f"[ChatRoom {self.room_id}] Message persistence triggered")
                 
                 # Put message in queue for broadcasting
                 self.msg_queue.put((client_socket, message))
@@ -167,6 +213,10 @@ class ChatRoom:
             with self.lock:
                 for client in list(self.clients):
                     try:
+                        # Don't send any message back to the sender
+                        if client == sender_socket:
+                            continue
+                            
                         if msg_type == TYPE_JOIN:
                             # For JOIN, send to everyone with server's clock
                             join_msg = message.copy()
@@ -174,10 +224,10 @@ class ChatRoom:
                             send_tcp_message(client, join_msg)
                         else:
                             # For CHAT/LEAVE, send to everyone except sender
-                            if client != sender_socket:
-                                send_tcp_message(client, message)
+                            send_tcp_message(client, message)
                     except Exception as e:
                         print(f"[ChatRoom {self.room_id}] Broadcast error: {e}")
+                        self._remove_client(client)
                         self._remove_client(client)
             
             self.msg_queue.task_done()
@@ -195,6 +245,9 @@ class ChatRoom:
                 client_socket.close()
             except:
                 pass
+            # Notify server of client count change
+            if self.on_client_count_change:
+                self.on_client_count_change(self.room_id, len(self.clients))
     
     def get_client_count(self):
         """Return number of connected clients"""

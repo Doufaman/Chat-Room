@@ -11,14 +11,14 @@ def dynamic_discovery(ip_local, timeout = 3.0):
 
     # try to find leader
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1) #允许广播
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) #允许端口复用
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1) # Allow broadcast
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Allow port reuse
     if hasattr(socket, 'SO_REUSEPORT'):
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-    sock.bind(('', 9000))  # 绑定到指定的本地IP
+    sock.bind(('', 9000))  # Bind to specified local IP
     sock.settimeout(timeout)
     try:
-        # NetworkManager也能用
+        # NetworkManager can also be used
         #nw = NetworkManager(ip_local='192.168.1.102')
         #nw.send_broadcast("WHO_IS_LEADER", "hey")
         
@@ -28,7 +28,7 @@ def dynamic_discovery(ip_local, timeout = 3.0):
                      "sender_ip": ip_local}
         broad_msg_str = json.dumps(broad_msg, ensure_ascii=False)
         sock.sendto(broad_msg_str.encode(), ('255.255.255.255', 9000))
-        time.sleep(0.5) #我停着玩的
+        time.sleep(0.5) # Just playing around
         
         while True:
             try:
@@ -39,7 +39,7 @@ def dynamic_discovery(ip_local, timeout = 3.0):
                 msg_type = received_msg_dic.get("msg_type")
                 message = received_msg_dic.get("message")
                 sender_ip = received_msg_dic.get("sender_ip")
-                if sender_ip == ip_local: # 忽略自己发出的广播
+                if sender_ip == ip_local: # Ignore own broadcast
                     continue
                 
                 if msg_type == "I_AM_LEADER":
@@ -66,7 +66,7 @@ def dynamic_discovery(ip_local, timeout = 3.0):
 
 
 '''
-被删减的功能
+Removed functionality
 class RoleManager:
     # critical resources
     registry: Dict[str, Type] = {
@@ -80,10 +80,10 @@ class RoleManager:
         self._lock = threading.RLock()
         self._ip_local = ip_local
 
-        # 统一的网络管理
+        # Unified network management
         self.network_manager = NetworkManager(ip_local=self._ip_local)
 
-        # 状态维护
+        # State maintenance
         self._current_role_name: Optional[str] = None
         self._role_instance = None
 
@@ -98,7 +98,7 @@ class RoleManager:
             self._role_instance = role_class(self.network_manager)
             self._current_role_name = role_name
             
-            # 启动网络监听
+            # Start network listening
             self.network_manager.start_listening()
 
             print(f"[Server] Initialized role: {role_name}")

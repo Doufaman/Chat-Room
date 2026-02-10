@@ -84,8 +84,8 @@ class HeartbeatMonitor:
          - leader: find suspected servers, send probes (via network_manager), wait, re-check, mark DEAD and call fault discovery
          - follower: check leader_last_ts and probe leader once, then trigger election if still stale
         """
-        poll_interval = max(1.0, self.interval / 2.0)
-        probe_wait = 1.0
+        poll_interval = max(0.5, self.interval / 2.0)  # Reduced minimum from 1.0 to 0.5
+        probe_wait = 0.5  # Reduced from 1.0 to 0.5 for faster detection
 
         while True:
             try:
@@ -114,11 +114,26 @@ class HeartbeatMonitor:
                             logger.debug(f"fault_discovery failed for {sid}: {e}")
                 else:
                     # follower: check leader freshness
+                    # Skip timeout detection if election is in progress
+                    em = getattr(self.server, "election_manager", None)
+                    if em and hasattr(em, 'election_in_progress') and em.election_in_progress:
+                        logger.debug("Election in progress, skipping heartbeat timeout check")
+                        time.sleep(poll_interval)
+                        continue
+                    
                     leader_ts = getattr(self.server, "leader_latest_heartbeat", None)
-                    if not leader_ts or (time.time() - leader_ts > self.leader_timeout):
-                        logger.warning("leader heartbeat timeout detected, start election")
-                        self.server.network_manager.unregister_connection(server_id = getattr(self.server, "leader_id", None))
-                        # TODO: trigger election process
+                    if leader_ts and (time.time() - leader_ts > self.leader_timeout):
+                        logger.warning(f"leader heartbeat timeout detected ({time.time() - leader_ts:.1f}s > {self.leader_timeout}s), start election")
+                        # Only trigger if we haven't recently done so
+                        if em:
+                            # Check if election is already in progress
+                            if hasattr(em, 'state') and em.state == 'ELECTION':
+                                logger.info("Election already in progress, skipping trigger")
+                            else:
+                                self.server.network_manager.unregister_connection(server_id = getattr(self.server, "leader_id", None))
+                                em.trigger_election("leader heartbeat timeout")
+                        else:
+                            logger.warning("No election_manager attached to server; cannot trigger election")
                 time.sleep(poll_interval)
             except Exception as e:
                 logger.exception(f"Exception in check_timeouts loop: {e}")
