@@ -1,0 +1,28 @@
+10:39:32 [root] [INFO] 日志系统初始化完成。文件保存至: logs/2026-02-10_10-39-32.log
+10:39:34 [utills.ip_validator] [DEBUG] IP 127.0.0.1 是回环地址（本地测试用）
+10:39:37 [election] [INFO] [I'm Leader - (307279263, 127.0.0.1)] Election Manager starting
+10:39:37 [election] [INFO] [I'm Leader - (307279263, 127.0.0.1)] UDP listener started on UDP:9003
+10:39:38 [membership] [INFO] server 307279263 assigned to group group_0
+10:39:38 [membership] [INFO] Leader initialized with server info: {'server_id': 307279263, 'load_info': {'cpu_percent': 8.2, 'memory_percent': 81.8}, 'address': '127.0.0.1'}
+10:39:38 [network_manager] [DEBUG] Starting leader long-lived connection listener...
+10:39:38 [network_manager] [DEBUG] Leader long-lived connection listener started
+10:39:38 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 307279263, 'timestamp': 1770716378.7534049, 'identity': 'LEADER'}
+10:39:38 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+10:39:39 [election] [WARNING] [I'm Leader - (307279263, 127.0.0.1)] Election triggered: First server startup
+10:39:39 [election] [INFO] [I'm Election - (307279263, 127.0.0.1)] Election started; peers=[]
+10:39:39 [election] [INFO] [I'm Election - (307279263, 127.0.0.1)] No higher peers, becoming Leader
+10:39:39 [election] [INFO] [I'm Leader - (307279263, 127.0.0.1)] Broadcasting COORDINATOR (victory)
+10:39:39 [election] [DEBUG] [I'm Leader - (307279263, 127.0.0.1)] UDP send COORDINATOR -> <broadcast>:9003
+10:39:39 [election] [DEBUG] [I'm Leader - (307279263, 127.0.0.1)] UDP send COORDINATOR -> <broadcast>:9003
+10:39:39 [election] [DEBUG] [I'm Leader - (307279263, 127.0.0.1)] UDP send COORDINATOR -> <broadcast>:9003
+10:39:40 [membership] [INFO] server added: 406379425
+10:39:40 [membership] [INFO] server 406379425 assigned to group group_0
+10:39:40 [network_manager] [DEBUG] Registered long-lived connection from follower 406379425 at ('127.0.0.1', 62597)
+10:39:41 [server.heartbeat] [DEBUG] Heartbeat received message: HEARTBEAT {'server_id': 406379425, 'timestamp': 1770716380.205996, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 20.8, 'memory_percent': 82.0}} from 406379425, current memnershiplist is {307279263: '127.0.0.1', 406379425: '127.0.0.2'}
+10:39:48 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 307279263, 'timestamp': 1770716388.758347, 'identity': 'LEADER'}
+10:39:48 [network_manager] [DEBUG] there are currently 1 followers to send to: [406379425]
+10:39:49 [membership] [INFO] server added: 413601419
+10:39:49 [membership] [INFO] server 413601419 assigned to group group_0
+10:39:49 [network_manager] [DEBUG] Registered long-lived connection from follower 413601419 at ('127.0.0.1', 62611)
+10:39:50 [server.heartbeat] [DEBUG] Heartbeat received message: HEARTBEAT {'server_id': 413601419, 'timestamp': 1770716389.386676, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 6.9, 'memory_percent': 81.7}} from 413601419, current memnershiplist is {307279263: '127.0.0.1', 406379425: '127.0.0.2', 413601419: '127.0.0.3'}
+10:39:51 [server.heartbeat] [DEBUG] Heartbeat received message: HEARTBEAT {'server_id': 406379425, 'timestamp': 1770716390.2077188, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 10.3, 'memory_percent': 81.7}} from 406379425, current memnershiplist is {307279263: '127.0.0.1', 406379425: '127.0.0.2', 413601419: '127.0.0.3'}

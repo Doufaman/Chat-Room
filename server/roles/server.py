@@ -248,6 +248,29 @@ class Server(Role):
                         self.election_manager.update_peers_from_server()
                 except Exception as e:
                     logger.debug(f"Failed to update election peers on SERVER_REMOVED: {e}")
+            
+            elif msg_type == "LEADER_CHANGED":
+                new_leader_id = message.get("new_leader_id")
+                new_leader_ip = message.get("new_leader_ip")
+                print(f"[Server] Received LEADER_CHANGED notification: new leader is {new_leader_id} at {new_leader_ip}")
+                
+                if self.identity == TYPE_FOLLOWER:
+                    self.leader_id = new_leader_id
+                    self.leader_address = new_leader_ip
+                    self.membership_list[new_leader_id] = new_leader_ip
+                    
+                    # 关闭旧连接，重新连接到新 Leader
+                    try:
+                        self.network_manager.unregister_connection(server_id=new_leader_id)
+                        logger.debug(f"Closed old connection to {new_leader_id}")
+                    except Exception as e:
+                        logger.debug(f"Failed to unregister old connection: {e}")
+                    
+                    try:
+                        self.network_manager.start_follower_long_lived_connector(new_leader_ip, new_leader_id)
+                        logger.info(f"Reconnected to new leader {new_leader_id} at {new_leader_ip}")
+                    except Exception as e:
+                        logger.debug(f"Failed to reconnect to new leader: {e}")
     def change_role(self, new_role, leader_id):
         """Handle role change triggered by ElectionManager."""
         # Only log if role actually changes
@@ -269,6 +292,22 @@ class Server(Role):
             print(f"[Server] Becoming LEADER (ID: {self.server_id})")
             self.leader_id = self.server_id
             self.leader_address = self.network_manager.ip_local
+            
+            # 关闭与旧 Leader 的连接（如果从 Follower 转变过来）
+            if old_role == TYPE_FOLLOWER:
+                try:
+                    # 从消息中获取可能的旧 leader_id
+                    old_leader_id = None
+                    for sid in self.membership_list.keys():
+                        if sid != self.server_id:
+                            old_leader_id = sid
+                            break
+                    if old_leader_id:
+                        self.network_manager.unregister_connection(server_id=old_leader_id)
+                        logger.debug(f"Closed connection to old leader {old_leader_id}")
+                except Exception as e:
+                    logger.debug(f"Failed to unregister old leader connection: {e}")
+            
             # Leader takes over membership management + long-lived listener + detection
             try:
                 self.membership_manager.is_leader = True
@@ -277,6 +316,17 @@ class Server(Role):
                     "load_info": self.get_current_load(),
                     "address": self.network_manager.ip_local
                 })
+                
+                # Initialize heartbeat timestamps for other known servers
+                current_time = time.time()
+                for server_id in self.membership_list.keys():
+                    if server_id != self.server_id and server_id not in self.membership_manager.servers:
+                        # Add other servers to membership with current timestamp
+                        server_ip = self.membership_list.get(server_id)
+                        if server_ip:
+                            self.membership_manager.add_server(server_id, server_ip, {})
+                            logger.info(f"[Leader] Initialized server {server_id} in membership")
+                
             except Exception as e:
                 logger.debug(f"Failed to initialize membership for new leader: {e}")
 
@@ -285,12 +335,18 @@ class Server(Role):
                 self.network_manager.start_leader_long_lived_listener()
             except Exception as e:
                 logger.debug(f"Failed to start leader long-lived listener: {e}")
+            
+            # 通知所有 Followers 重新连接到新 Leader
+            self._notify_followers_new_leader()
 
             # Ensure heartbeat + fault detection are running in leader mode
             try:
                 if not hasattr(self, "heartbeat") or self.heartbeat is None:
                     self.heartbeat = Heartbeat(self, interval=HEARTBEAT_INTERVAL)
                     self.heartbeat.start()
+                # Send immediate heartbeat to stabilize new leadership
+                self.heartbeat.send_heartbeat()
+                logger.info(f"[Leader] Sent initial heartbeat after becoming leader")
             except Exception as e:
                 logger.debug(f"Failed to start heartbeat after becoming leader: {e}")
 
@@ -329,6 +385,28 @@ class Server(Role):
             else:
                 # Leader not in membership yet - will be set when we receive heartbeat
                 print(f"[Server] Leader {leader_id} not in membership list yet")
+    
+    def _notify_followers_new_leader(self):
+        """Notify all known Followers about new Leader and their need to re-register."""
+        if self.identity != TYPE_LEADER:
+            return
+        
+        logger.info(f"[Leader] Notifying followers about new leader: {self.server_id}")
+        for server_id, server_ip in self.membership_list.items():
+            if server_id != self.server_id:  # Skip self
+                try:
+                    self.network_manager.send_unicast(
+                        server_ip,
+                        9001,
+                        "LEADER_CHANGED",
+                        {
+                            "new_leader_id": self.server_id,
+                            "new_leader_ip": self.leader_address
+                        }
+                    )
+                    logger.info(f"[Leader] Notified follower {server_id} at {server_ip} about new leader")
+                except Exception as e:
+                    logger.debug(f"Failed to notify follower {server_id} about leader change: {e}")
     
     def get_membership_list(self):
         """Return current membership list for ElectionManager."""

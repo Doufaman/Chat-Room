@@ -115,10 +115,19 @@ class HeartbeatMonitor:
                 else:
                     # follower: check leader freshness
                     leader_ts = getattr(self.server, "leader_latest_heartbeat", None)
-                    if not leader_ts or (time.time() - leader_ts > self.leader_timeout):
+                    if leader_ts and (time.time() - leader_ts > self.leader_timeout):
                         logger.warning("leader heartbeat timeout detected, start election")
-                        self.server.network_manager.unregister_connection(server_id = getattr(self.server, "leader_id", None))
-                        # TODO: trigger election process
+                        # Only trigger if we haven't recently done so
+                        em = getattr(self.server, "election_manager", None)
+                        if em:
+                            # Check if election is already in progress
+                            if hasattr(em, 'state') and em.state == 'ELECTION':
+                                logger.info("Election already in progress, skipping trigger")
+                            else:
+                                self.server.network_manager.unregister_connection(server_id = getattr(self.server, "leader_id", None))
+                                em.trigger_election("leader heartbeat timeout")
+                        else:
+                            logger.warning("No election_manager attached to server; cannot trigger election")
                 time.sleep(poll_interval)
             except Exception as e:
                 logger.exception(f"Exception in check_timeouts loop: {e}")

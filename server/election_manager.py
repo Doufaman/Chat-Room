@@ -4,8 +4,13 @@ Implementing the Bully Election Algorithm for leader selection among servers.
 """
 import threading
 import time
+import socket
+import random
 from server.config import TYPE_LEADER, TYPE_FOLLOWER
 from network.network_manager import create_udp_socket, send_udp_message, receive_udp_message, PORT_ELECTION
+from utills.logger import get_logger
+
+logger = get_logger("election")
 
 
 # --- Message Types for Election ---
@@ -14,8 +19,8 @@ TYPE_ANSWER = 'ANSWER'
 TYPE_COORDINATOR = 'COORDINATOR'
 
 # --- Configuration Constants ---
-TIMEOUT_ELECTION = 2.0   # How long to wait for ANSWER
-TIMEOUT_COORDINATOR = 4.0 # How long to wait for COORDINATOR after receiving ANSWER
+TIMEOUT_ELECTION = 3.0   # How long to wait for ANSWER
+TIMEOUT_COORDINATOR = 5.0 # How long to wait for COORDINATOR after receiving ANSWER
 
 # --- States for Election Process ---
 STATE_FOLLOWER = "FOLLOWER"
@@ -65,6 +70,10 @@ class ElectionManager:
         self.received_answer = False
         self.election_trigger = threading.Event()
         
+        # Election timing control (prevent rapid re-elections)
+        self.last_election_time = 0
+        self.min_election_interval = 2.0  # Minimum time between elections
+        
         # Track if this server joined as Follower (should not self-elect initially)
         self.joined_as_follower = (initial_state == STATE_FOLLOWER)
         
@@ -113,7 +122,7 @@ class ElectionManager:
 
     def start(self):
         """Start the election manager's state machine in a background thread."""
-        print(f"[{self._get_identity()}] Election Manager starting")
+        logger.info(f"[{self._get_identity()}] Election Manager starting")
         threading.Thread(target=self._udp_listener, daemon=True).start()
         threading.Thread(target=self.run_state_machine, daemon=True).start()
 
@@ -128,7 +137,7 @@ class ElectionManager:
     # =================================================================
     def _udp_listener(self):
         """Listen for election messages on dedicated UDP port."""
-        print(f"[{self._get_identity()}] UDP listener started")
+        logger.info(f"[{self._get_identity()}] UDP listener started on UDP:{PORT_ELECTION}")
         while not self.stop_event.is_set():
             message, addr = receive_udp_message(self.udp_socket)
             if not message:
@@ -145,7 +154,7 @@ class ElectionManager:
             
             # Only log important messages (COORDINATOR)
             if msg_type == TYPE_COORDINATOR:
-                print(f"[{self._get_identity()}] Received COORDINATOR from {sender_id}")
+                logger.info(f"[{self._get_identity()}] Received COORDINATOR from {sender_id} ({sender_ip})")
             
             # Forward to message handler
             self.handle_election_messages(msg_type, msg_body, sender_ip)
@@ -166,7 +175,7 @@ class ElectionManager:
             return  # Ignore my own messages
 
         if msg_type == TYPE_ELECTION:
-            print(f"[{self._get_identity()}] Challenged by {sender_id}, sending ANSWER")
+            logger.info(f"[{self._get_identity()}] Challenged by {sender_id}, sending ANSWER to {sender_ip}")
             self._send_to_ip(sender_ip, TYPE_ANSWER, {})
             
             with self.lock:
@@ -186,10 +195,14 @@ class ElectionManager:
                     self.current_leader_id = sender_id
                     self.leader_ip = sender_ip
                     if self.state != STATE_FOLLOWER:
-                        print(f"[{self._get_identity()}] Demoting to Follower, new Leader: {sender_id}")
+                        logger.info(f"[{self._get_identity()}] Demoting to Follower, new Leader: {sender_id}")
                         self.state = STATE_FOLLOWER
                         self._notify_state_change_if_changed(old_state)
                     self.election_trigger.set()
+                    # Reset leader heartbeat timestamp when new leader is detected
+                    if hasattr(self, '_server_ref') and self._server_ref:
+                        self._server_ref.leader_latest_heartbeat = time.time()
+                        logger.info(f"[{self._get_identity()}] Reset leader heartbeat timer for new leader {sender_id}")
                 elif sender_id < self.my_id and self.state == STATE_LEADER:
                     print(f"[{self._get_identity()}] Rejecting lower ID {sender_id}'s claim")
                     self._send_to_ip(sender_ip, TYPE_COORDINATOR, {})
@@ -227,7 +240,11 @@ class ElectionManager:
     # --- Election Logic ---
     def handle_election(self):
         """Handle CANDIDATE state - run Bully election."""
-        print(f"[{self._get_identity()}] Election started")
+        # Add random delay to avoid simultaneous elections
+        random_delay = random.uniform(0.1, 0.5)
+        time.sleep(random_delay)
+        
+        logger.info(f"[{self._get_identity()}] Election started; peers={list(self.peers.keys())}")
         
         with self.lock:
             self.received_answer = False
@@ -239,11 +256,11 @@ class ElectionManager:
         higher_peers = {pid: ip for pid, ip in peers_copy.items() if pid > self.my_id}
         
         if not higher_peers:
-            print(f"[{self._get_identity()}] No higher peers, becoming Leader")
+            logger.info(f"[{self._get_identity()}] No higher peers, becoming Leader")
             self._become_leader()
             return
 
-        print(f"[{self._get_identity()}] Challenging {len(higher_peers)} higher peers")
+        logger.info(f"[{self._get_identity()}] Challenging higher peers: {list(higher_peers.keys())}")
         for peer_id, peer_ip in higher_peers.items():
             self._send_to_ip(peer_ip, TYPE_ELECTION, {})
 
@@ -266,7 +283,7 @@ class ElectionManager:
                 should_become_leader = False
         
         if should_become_leader:
-            print(f"[{self._get_identity()}] No response, becoming Leader")
+            logger.info(f"[{self._get_identity()}] No ANSWER received, becoming Leader")
             self._become_leader()
             return
         
@@ -278,7 +295,7 @@ class ElectionManager:
                     return
             time.sleep(0.1)
         
-        print(f"[{self._get_identity()}] Coordinator timeout, restarting election")
+        logger.warning(f"[{self._get_identity()}] Coordinator timeout, restarting election")
         self._trigger_election("Coordinator timeout")
 
     def handle_follower(self):
@@ -337,7 +354,14 @@ class ElectionManager:
     
     def _trigger_election(self, reason):
         """Trigger a new election."""
-        print(f"[{self._get_identity()}] Election triggered: {reason}")
+        # Debounce: prevent rapid re-elections
+        current_time = time.time()
+        if current_time - self.last_election_time < self.min_election_interval:
+            logger.info(f"[{self._get_identity()}] Election debounced (too soon): {reason}")
+            return
+        
+        self.last_election_time = current_time
+        logger.warning(f"[{self._get_identity()}] Election triggered: {reason}")
         self.state = STATE_ELECTION
         self.election_trigger.set()
 
@@ -359,10 +383,11 @@ class ElectionManager:
             self.leader_ip = self.local_ip
             self._notify_state_change()
         
-        print(f"[{self._get_identity()}] Broadcasting victory")
-        for _ in range(3):
+        logger.info(f"[{self._get_identity()}] Broadcasting COORDINATOR (victory)")
+        # Send multiple COORDINATOR messages to ensure all nodes receive it
+        for _ in range(5):
             self._send_to_ip('<broadcast>', TYPE_COORDINATOR, {})
-            time.sleep(0.1)
+            time.sleep(0.15)
 
     def _send_to_ip(self, target_ip, msg_type, extra_data):
         """Send election message to a specific IP via independent UDP socket."""
@@ -374,6 +399,8 @@ class ElectionManager:
             },
             'sender_ip': self.local_ip
         }
+        if msg_type != TYPE_ANSWER:
+            logger.debug(f"[{self._get_identity()}] UDP send {msg_type} -> {target_ip}:{PORT_ELECTION}")
         send_udp_message(self.udp_socket, message, target_ip, PORT_ELECTION)
 
     def _notify_state_change(self):

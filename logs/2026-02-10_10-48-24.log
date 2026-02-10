@@ -1,0 +1,41 @@
+10:48:24 [root] [INFO] 日志系统初始化完成。文件保存至: logs/2026-02-10_10-48-24.log
+10:48:28 [utills.ip_validator] [DEBUG] IP 127.0.0.3 是回环地址（本地测试用）
+10:48:28 [election] [INFO] [I'm Follower - (347659453, 127.0.0.3)] Election Manager starting
+10:48:28 [election] [INFO] [I'm Follower - (347659453, 127.0.0.3)] UDP listener started on UDP:9003
+10:48:29 [network_manager] [DEBUG] Starting follower long-lived connection to leader at 127.0.0.1...
+10:48:29 [network_manager] [DEBUG] Follower established long-lived connection to leader at 127.0.0.1
+10:48:31 [server.heartbeat] [DEBUG] Heartbeat received message: HEARTBEAT {'server_id': 328443516, 'timestamp': 1770716911.983135, 'identity': 'LEADER'} from 328443516, current memnershiplist is {886855149: '127.0.0.2', 347659453: '127.0.0.3', 328443516: '127.0.0.1'}
+10:48:39 [server.heartbeat] [ERROR] Failed to send heartbeat to leader 328443516: [Errno 32] Broken pipe
+10:48:42 [network_manager] [ERROR] No connection found for 328443516, cannot send message
+10:48:43 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+10:48:43 [election] [WARNING] [I'm Follower - (347659453, 127.0.0.3)] Election triggered: leader heartbeat timeout
+10:48:43 [election] [INFO] [I'm Election - (347659453, 127.0.0.3)] Election started; peers=[886855149, 328443516]
+10:48:43 [election] [INFO] [I'm Election - (347659453, 127.0.0.3)] Challenging higher peers: [886855149]
+10:48:43 [election] [DEBUG] [I'm Election - (347659453, 127.0.0.3)] UDP send ELECTION -> 127.0.0.2:9003
+10:48:44 [server_role] [DEBUG] Closed old connection to 886855149
+10:48:44 [network_manager] [DEBUG] Starting follower long-lived connection to leader at 127.0.0.2...
+10:48:44 [network_manager] [DEBUG] Follower established long-lived connection to leader at 127.0.0.2
+10:48:44 [election] [INFO] [I'm Election - (347659453, 127.0.0.3)] Received COORDINATOR from 886855149 (127.0.0.2)
+10:48:44 [server_role] [INFO] Reconnected to new leader 886855149 at 127.0.0.2
+10:48:44 [election] [INFO] [I'm Election - (347659453, 127.0.0.3)] Demoting to Follower, new Leader: 886855149
+10:48:44 [election] [INFO] [I'm Follower - (347659453, 127.0.0.3)] Reset leader heartbeat timer for new leader 886855149
+10:48:44 [election] [INFO] [I'm Follower - (347659453, 127.0.0.3)] Received COORDINATOR from 886855149 (127.0.0.2)
+10:48:44 [election] [INFO] [I'm Follower - (347659453, 127.0.0.3)] Reset leader heartbeat timer for new leader 886855149
+10:48:44 [election] [INFO] [I'm Follower - (347659453, 127.0.0.3)] Received COORDINATOR from 886855149 (127.0.0.2)
+10:48:44 [election] [INFO] [I'm Follower - (347659453, 127.0.0.3)] Reset leader heartbeat timer for new leader 886855149
+10:48:44 [election] [INFO] [I'm Follower - (347659453, 127.0.0.3)] Received COORDINATOR from 886855149 (127.0.0.2)
+10:48:44 [election] [INFO] [I'm Follower - (347659453, 127.0.0.3)] Reset leader heartbeat timer for new leader 886855149
+10:48:44 [election] [INFO] [I'm Follower - (347659453, 127.0.0.3)] Received COORDINATOR from 886855149 (127.0.0.2)
+10:48:44 [election] [INFO] [I'm Follower - (347659453, 127.0.0.3)] Reset leader heartbeat timer for new leader 886855149
+10:48:45 [server.heartbeat] [DEBUG] Heartbeat received message: HEARTBEAT {'server_id': 886855149, 'timestamp': 1770716925.580986, 'identity': 'LEADER'} from 886855149, current memnershiplist is {886855149: '127.0.0.2', 347659453: '127.0.0.3', 328443516: '127.0.0.1'}
+10:48:48 [server.heartbeat] [DEBUG] Heartbeat received message: HEARTBEAT {'server_id': 886855149, 'timestamp': 1770716928.5831811, 'identity': 'LEADER'} from 886855149, current memnershiplist is {886855149: '127.0.0.2', 347659453: '127.0.0.3', 328443516: '127.0.0.1'}
+10:48:51 [server.heartbeat] [DEBUG] Heartbeat received message: HEARTBEAT {'server_id': 886855149, 'timestamp': 1770716931.5845041, 'identity': 'LEADER'} from 886855149, current memnershiplist is {886855149: '127.0.0.2', 347659453: '127.0.0.3', 328443516: '127.0.0.1'}
+10:48:54 [server.heartbeat] [DEBUG] Heartbeat received message: HEARTBEAT {'server_id': 886855149, 'timestamp': 1770716934.584148, 'identity': 'LEADER'} from 886855149, current memnershiplist is {886855149: '127.0.0.2', 347659453: '127.0.0.3', 328443516: '127.0.0.1'}
+10:48:57 [server.heartbeat] [DEBUG] Heartbeat received message: HEARTBEAT {'server_id': 886855149, 'timestamp': 1770716937.584499, 'identity': 'LEADER'} from 886855149, current memnershiplist is {886855149: '127.0.0.2', 347659453: '127.0.0.3', 328443516: '127.0.0.1'}
+10:48:57 [server_role] [INFO] [Follower] Server removed: 328443516 from group None. Updated membership list: {886855149: '127.0.0.2', 347659453: '127.0.0.3'}
+10:49:00 [server.heartbeat] [DEBUG] Heartbeat received message: HEARTBEAT {'server_id': 886855149, 'timestamp': 1770716940.584298, 'identity': 'LEADER'} from 886855149, current memnershiplist is {886855149: '127.0.0.2', 347659453: '127.0.0.3'}
+10:49:03 [server.heartbeat] [DEBUG] Heartbeat received message: HEARTBEAT {'server_id': 886855149, 'timestamp': 1770716943.580225, 'identity': 'LEADER'} from 886855149, current memnershiplist is {886855149: '127.0.0.2', 347659453: '127.0.0.3'}
+10:49:06 [server.heartbeat] [DEBUG] Heartbeat received message: HEARTBEAT {'server_id': 886855149, 'timestamp': 1770716946.58268, 'identity': 'LEADER'} from 886855149, current memnershiplist is {886855149: '127.0.0.2', 347659453: '127.0.0.3'}
+10:49:09 [server.heartbeat] [DEBUG] Heartbeat received message: HEARTBEAT {'server_id': 886855149, 'timestamp': 1770716949.582143, 'identity': 'LEADER'} from 886855149, current memnershiplist is {886855149: '127.0.0.2', 347659453: '127.0.0.3'}
+10:49:12 [server.heartbeat] [DEBUG] Heartbeat received message: HEARTBEAT {'server_id': 886855149, 'timestamp': 1770716952.584527, 'identity': 'LEADER'} from 886855149, current memnershiplist is {886855149: '127.0.0.2', 347659453: '127.0.0.3'}
+10:49:15 [server.heartbeat] [DEBUG] Heartbeat received message: HEARTBEAT {'server_id': 886855149, 'timestamp': 1770716955.58432, 'identity': 'LEADER'} from 886855149, current memnershiplist is {886855149: '127.0.0.2', 347659453: '127.0.0.3'}
