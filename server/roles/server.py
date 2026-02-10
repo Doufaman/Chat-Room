@@ -6,6 +6,7 @@ import psutil
 from server.fault_detection import HandleAbnormalStateReport, HeartbeatMonitor
 from server.fault_discovery import ServerCrashDiscovery
 from server.election_manager import ElectionManager, STATE_LEADER, STATE_FOLLOWER
+from server.chatroom_manager import ChatroomManager
 from utills.logger import get_logger
 
 from .base import Role
@@ -32,6 +33,18 @@ class Server(Role):
         self.membership_list = {
             self.server_id: self.network_manager.ip_local
         }
+        
+        # Chatroom列表（所有server维护相同副本，类似membership_list）
+        self.chatroom_list = {}  # {chatroom_id: {name, server_id, server_ip, port, clients_count}}
+        self.chatroom_lock = threading.Lock()
+        
+        # 初始化ChatroomManager（每个server都有，用于管理本地实际的chatroom实例）
+        self.chatroom_manager = ChatroomManager(
+            server_id=self.server_id,
+            local_ip=self.network_manager.ip_local,
+            membership_manager=self.membership_manager,
+            on_client_count_change=self._on_chatroom_client_count_change
+        )
 
         self.network_manager.set_callback(self.handle_messages)
 
@@ -52,6 +65,32 @@ class Server(Role):
         if self.identity == TYPE_FOLLOWER and self.leader_address:
             # Leader ID will be set on REGISTER_ACK; seed IP now so follower waits calmly.
             self.election_manager.leader_ip = self.leader_address
+
+    def _on_chatroom_client_count_change(self, room_id, new_count):
+        """
+        Callback when a chatroom's client count changes.
+        Update chatroom_list and broadcast to all servers.
+        """
+        chatroom_id = f"{self.server_id}_{room_id}"
+        logger.info(f"[Server {self.server_id}] Chatroom {chatroom_id} client count changed to {new_count}")
+        
+        # Update local chatroom_list
+        with self.chatroom_lock:
+            if chatroom_id in self.chatroom_list:
+                self.chatroom_list[chatroom_id]['clients_count'] = new_count
+        
+        # Broadcast UPDATE_CHATROOM to all servers
+        for server_id, server_ip in self.membership_list.items():
+            if server_id != self.server_id:
+                self.network_manager.send_unicast(
+                    server_ip,
+                    9001,
+                    "UPDATE_CHATROOM",
+                    {
+                        "chatroom_id": chatroom_id,
+                        "updates": {"clients_count": new_count}
+                    }
+                )
 
     def start(self):
         # 启动网络监听
@@ -114,6 +153,35 @@ class Server(Role):
 
             logger.info(f"Updated group info: group_id={self.membership_manager.group_id}, group_members={self.membership_manager.group_members}")
         
+        # 所有server都处理的消息
+        if msg_type == "NEW_CHATROOM":
+            # Leader广播的新chatroom通知
+            chatroom_info = message.get("chatroom_info")
+            if chatroom_info:
+                with self.chatroom_lock:
+                    chatroom_id = chatroom_info["chatroom_id"]
+                    self.chatroom_list[chatroom_id] = chatroom_info
+                    logger.info(f"[Server {self.server_id}] Added chatroom {chatroom_id} to list: {chatroom_info}")
+        
+        elif msg_type == "CHATROOM_DELETED":
+            # Leader广播的删除chatroom通知
+            chatroom_id = message.get("chatroom_id")
+            if chatroom_id:
+                with self.chatroom_lock:
+                    if chatroom_id in self.chatroom_list:
+                        del self.chatroom_list[chatroom_id]
+                        logger.info(f"[Server {self.server_id}] Removed chatroom {chatroom_id} from list")
+        
+        elif msg_type == "UPDATE_CHATROOM":
+            # 更新chatroom信息（例如客户端数量变化）
+            chatroom_id = message.get("chatroom_id")
+            updates = message.get("updates", {})
+            if chatroom_id and updates:
+                with self.chatroom_lock:
+                    if chatroom_id in self.chatroom_list:
+                        self.chatroom_list[chatroom_id].update(updates)
+                        logger.info(f"[Server {self.server_id}] Updated chatroom {chatroom_id}: {updates}")
+        
         if self.identity == TYPE_LEADER:
             if msg_type == "WHO_IS_LEADER":
                 print(f'[{self.identity}] receive message from new PC {ip_sender}: {msg_type} {message}')
@@ -121,7 +189,104 @@ class Server(Role):
                     "I_AM_LEADER", 
                     {"leader_id": self.server_id, "leader_ip": self.network_manager.ip_local}
                 )
-                #print(1)
+            
+            elif msg_type == "GET_CHATROOM_LIST":
+                # 客户端请求chatroom列表
+                logger.info(f'[Leader] Client {ip_sender} requesting chatroom list')
+                with self.chatroom_lock:
+                    chatrooms = list(self.chatroom_list.values())
+                self.network_manager.send_broadcast(
+                    "CHATROOM_LIST",
+                    {"chatrooms": chatrooms}
+                )
+                logger.info(f'[Leader] Sent {len(chatrooms)} chatrooms to client {ip_sender}')
+            
+            elif msg_type == "CREATE_CHATROOM":
+                # 客户端请求创建chatroom
+                chatroom_name = message.get("name", "Unnamed Room")
+                target_server_id = message.get("server_id")  # 可选：指定在哪个server创建
+                
+                # 如果没有指定server，选择负载最低的server
+                if target_server_id is None:
+                    target_server_id = self._select_server_for_chatroom()
+                
+                logger.info(f'[Leader] Creating chatroom "{chatroom_name}" on server {target_server_id}')
+                
+                # 如果目标是Leader自己，直接创建
+                if target_server_id == self.server_id:
+                    room_info = self.chatroom_manager.create_room(chatroom_name)
+                    if room_info:
+                        chatroom_id = f"{self.server_id}_{room_info['room_id']}"
+                        chatroom_info = {
+                            "chatroom_id": chatroom_id,
+                            "name": chatroom_name,
+                            "server_id": self.server_id,
+                            "server_ip": self.network_manager.ip_local,
+                            "port": room_info['port'],
+                            "clients_count": 0
+                        }
+                        
+                        # 更新本地列表
+                        with self.chatroom_lock:
+                            self.chatroom_list[chatroom_id] = chatroom_info
+                        
+                        # 广播给所有server
+                        for server_id, server_ip in self.membership_list.items():
+                            if server_id != self.server_id:
+                                self.network_manager.send_unicast(
+                                    server_ip,
+                                    9001,
+                                    "NEW_CHATROOM",
+                                    {"chatroom_info": chatroom_info}
+                                )
+                        
+                        # 通知请求的客户端（UDP广播）
+                        self.network_manager.send_broadcast(
+                            "CHATROOM_CREATED",
+                            {"chatroom_info": chatroom_info}
+                        )
+                        
+                        logger.info(f'[Leader] Created and broadcasted chatroom: {chatroom_id}')
+                else:
+                    # 通知目标server创建实际的chatroom实例
+                    target_ip = self.membership_list.get(target_server_id)
+                    if target_ip:
+                        self.network_manager.send_unicast(
+                            target_ip,
+                            9001,
+                            "CREATE_CHATROOM_LOCAL",
+                            {"name": chatroom_name, "requester_ip": ip_sender}
+                        )
+            
+            elif msg_type == "CHATROOM_CREATED":
+                # Server创建完chatroom后回报
+                chatroom_info = message.get("chatroom_info")
+                requester_ip = message.get("requester_ip")
+                
+                if chatroom_info:
+                    # 更新本地列表
+                    with self.chatroom_lock:
+                        chatroom_id = chatroom_info["chatroom_id"]
+                        self.chatroom_list[chatroom_id] = chatroom_info
+                    
+                    # 广播给所有server
+                    for server_id, server_ip in self.membership_list.items():
+                        if server_id != self.server_id:
+                            self.network_manager.send_unicast(
+                                server_ip,
+                                9001,
+                                "NEW_CHATROOM",
+                                {"chatroom_info": chatroom_info}
+                            )
+                    
+                    # 通知请求的客户端（UDP广播）
+                    self.network_manager.send_broadcast(
+                        "CHATROOM_CREATED",
+                        {"chatroom_info": chatroom_info}
+                    )
+                    
+                    logger.info(f'[Leader] Broadcasted new chatroom: {chatroom_id}')
+            
             # handle follower registration
             elif msg_type == "FOLLOWER_REGISTER":
                 follower_id = message.get("follower_id")
@@ -173,6 +338,41 @@ class Server(Role):
                 self.handle_abnormal_state_report.handle_report(failed_ip, failed_port, failed_server_id)
                 logger.info(f"Received SERVER_FAILURE_REPORT: failed_ip={failed_ip}, failed_port={failed_port}")
         else:
+            # Follower处理消息
+            if msg_type == "CREATE_CHATROOM_LOCAL":
+                # Leader指示本server创建chatroom实例
+                chatroom_name = message.get("name", "Unnamed Room")
+                requester_ip = message.get("requester_ip")
+                
+                logger.info(f'[Follower {self.server_id}] Creating local chatroom: {chatroom_name}')
+                
+                # 使用ChatroomManager创建实际的chatroom
+                room_info = self.chatroom_manager.create_room(chatroom_name)
+                
+                if room_info:
+                    # 构造chatroom信息
+                    chatroom_id = f"{self.server_id}_{room_info['room_id']}"
+                    chatroom_info = {
+                        "chatroom_id": chatroom_id,
+                        "name": chatroom_name,
+                        "server_id": self.server_id,
+                        "server_ip": self.network_manager.ip_local,
+                        "port": room_info['port'],
+                        "clients_count": 0
+                    }
+                    
+                    # 回报给Leader
+                    leader_ip = self.membership_list.get(self.leader_id)
+                    if leader_ip:
+                        self.network_manager.send_unicast(
+                            leader_ip,
+                            9001,
+                            "CHATROOM_CREATED",
+                            {"chatroom_info": chatroom_info, "requester_ip": requester_ip}
+                        )
+                    
+                    logger.info(f'[Follower {self.server_id}] Created chatroom {chatroom_id}, reported to Leader')
+            
             if msg_type == "REGISTER_ACK":
                 #print('hhey')
                 self.leader_id = message.get("leader_id")
@@ -416,6 +616,34 @@ class Server(Role):
     def get_membership_list(self):
         """Return current membership list for ElectionManager."""
         return self.membership_list.copy()
+    
+    def _select_server_for_chatroom(self):
+        """选择拥有最少chatroom的server来创建（负载均衡）"""
+        # 统计每个server拥有的chatroom数量
+        server_chatroom_count = {}
+        
+        # 初始化所有server的计数为0
+        for server_id in self.membership_list.keys():
+            server_chatroom_count[server_id] = 0
+        
+        # 统计每个server的chatroom数量
+        with self.chatroom_lock:
+            for chatroom_info in self.chatroom_list.values():
+                sid = chatroom_info.get('server_id')
+                if sid in server_chatroom_count:
+                    server_chatroom_count[sid] += 1
+        
+        # 选择chatroom数量最少的server
+        min_count = float('inf')
+        selected_server = self.server_id
+        
+        for server_id, count in server_chatroom_count.items():
+            if count < min_count:
+                min_count = count
+                selected_server = server_id
+        
+        logger.info(f"[Leader] Chatroom distribution: {server_chatroom_count}, selected: {selected_server}")
+        return selected_server
     
     def update_membership_from_leader(self, membership_dict, leader_id):
         """Update membership list from leader's heartbeat (Follower only)."""

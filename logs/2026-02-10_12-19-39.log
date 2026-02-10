@@ -1,0 +1,72 @@
+12:19:39 [root] [INFO] 日志系统初始化完成。文件保存至: logs/2026-02-10_12-19-39.log
+12:19:45 [utills.ip_validator] [DEBUG] IP 127.0.0.2 是回环地址（本地测试用）
+12:19:45 [election] [INFO] [I'm Follower - (421579379, 127.0.0.2)] Election Manager starting
+12:19:45 [election] [INFO] [I'm Follower - (421579379, 127.0.0.2)] UDP listener started on UDP:9003
+12:19:46 [network_manager] [DEBUG] Starting follower long-lived connection to leader at 127.0.0.1...
+12:19:46 [network_manager] [DEBUG] Follower established long-lived connection to leader at 127.0.0.1
+12:19:48 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722388.098036, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:19:51 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722391.0980039, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:19:54 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722394.1000881, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:19:55 [server_role] [INFO] [Server 421579379] Added chatroom 809218017_1 to list: {'chatroom_id': '809218017_1', 'name': '1', 'server_id': 809218017, 'server_ip': '127.0.0.1', 'port': 9701, 'clients_count': 0}
+12:19:57 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722397.100087, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:19:59 [server_role] [INFO] [Server 421579379] Updated chatroom 809218017_1: {'clients_count': 1}
+12:20:00 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722400.0977979, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:20:03 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722403.1001012, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:20:06 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722406.100082, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:20:08 [server_role] [INFO] [Server 421579379] Updated chatroom 809218017_1: {'clients_count': 2}
+12:20:09 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722409.100085, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:20:12 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722412.1000938, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:20:15 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722415.100091, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:20:18 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722418.096957, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:20:21 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722421.100087, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:20:24 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722424.095176, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:20:27 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722427.0996108, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:20:30 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722430.100093, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:20:33 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722433.09786, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:20:36 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722436.0974379, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:20:37 [server_role] [INFO] [Server 421579379] Updated chatroom 809218017_1: {'clients_count': 3}
+12:20:39 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722439.097125, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:20:42 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722442.100093, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:20:45 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722445.096898, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:20:48 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722448.1000829, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:20:51 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722451.096776, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:20:51 [server_role] [INFO] [Server 421579379] Updated chatroom 809218017_1: {'clients_count': 2}
+12:20:54 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722454.09671, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:20:57 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722457.0986738, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:21:00 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722460.096608, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:21:03 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722463.099612, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:21:06 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722466.0962718, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:21:09 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722469.100095, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:21:11 [server_role] [INFO] [Server 421579379] Added chatroom 923953153_1 to list: {'chatroom_id': '923953153_1', 'name': '2', 'server_id': 923953153, 'server_ip': '127.0.0.3', 'port': 13301, 'clients_count': 0}
+12:21:12 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722472.0970628, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:21:15 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722475.1001, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:21:18 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 809218017, 'timestamp': 1770722478.1000938, 'identity': 'LEADER'} from 809218017, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:21:23 [server.heartbeat] [ERROR] [I'm Follower - 421579379] Failed to send heartbeat to leader 809218017: [Errno 32] Broken pipe
+12:21:26 [network_manager] [ERROR] No connection found for 809218017, cannot send message
+12:21:29 [network_manager] [ERROR] No connection found for 809218017, cannot send message
+12:21:32 [network_manager] [ERROR] No connection found for 809218017, cannot send message
+12:21:33 [fault_detection] [WARNING] leader heartbeat timeout detected (15.3s > 15s), start election
+12:21:33 [election] [WARNING] [I'm Follower - (421579379, 127.0.0.2)] Election triggered: leader heartbeat timeout
+12:21:33 [election] [INFO] [I'm Election - (421579379, 127.0.0.2)] Election started; peers=[923953153, 809218017]
+12:21:33 [election] [INFO] [I'm Election - (421579379, 127.0.0.2)] Challenging higher peers: [923953153, 809218017]
+12:21:33 [election] [DEBUG] [I'm Election - (421579379, 127.0.0.2)] UDP send ELECTION -> 127.0.0.3:9003
+12:21:33 [election] [DEBUG] [I'm Election - (421579379, 127.0.0.2)] UDP send ELECTION -> 127.0.0.1:9003
+12:21:34 [fault_detection] [DEBUG] Election in progress, skipping heartbeat timeout check
+12:21:35 [server_role] [DEBUG] Closed old connection to 923953153
+12:21:35 [network_manager] [DEBUG] Starting follower long-lived connection to leader at 127.0.0.3...
+12:21:35 [network_manager] [DEBUG] Follower established long-lived connection to leader at 127.0.0.3
+12:21:35 [server_role] [INFO] Reconnected to new leader 923953153 at 127.0.0.3
+12:21:36 [fault_detection] [DEBUG] Election in progress, skipping heartbeat timeout check
+12:21:36 [election] [INFO] [I'm Election - (421579379, 127.0.0.2)] Received COORDINATOR from 923953153 (127.0.0.3)
+12:21:36 [election] [INFO] [I'm Election - (421579379, 127.0.0.2)] In ELECTION, accepting first COORDINATOR from 923953153
+12:21:36 [election] [INFO] [I'm Follower - (421579379, 127.0.0.2)] Reset leader heartbeat timer for new leader 923953153
+12:21:36 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 923953153, 'timestamp': 1770722496.618724, 'identity': 'LEADER'} from 923953153, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:21:36 [election] [INFO] [I'm Follower - (421579379, 127.0.0.2)] Received COORDINATOR from 923953153 (127.0.0.3)
+12:21:36 [election] [INFO] [I'm Follower - (421579379, 127.0.0.2)] Connecting to new leader 923953153 at 127.0.0.3
+12:21:36 [network_manager] [DEBUG] Starting follower long-lived connection to leader at 127.0.0.3...
+12:21:36 [network_manager] [DEBUG] Follower established long-lived connection to leader at 127.0.0.3
+12:21:37 [election] [INFO] [I'm Follower - (421579379, 127.0.0.2)] Received COORDINATOR from 923953153 (127.0.0.3)
+12:21:37 [election] [INFO] [I'm Follower - (421579379, 127.0.0.2)] Received COORDINATOR from 923953153 (127.0.0.3)
+12:21:37 [election] [INFO] [I'm Follower - (421579379, 127.0.0.2)] Received COORDINATOR from 923953153 (127.0.0.3)
+12:21:39 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 923953153, 'timestamp': 1770722499.240962, 'identity': 'LEADER'} from 923953153, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}
+12:21:42 [server.heartbeat] [DEBUG] [I'm Follower - 421579379] Heartbeat received message: HEARTBEAT {'server_id': 923953153, 'timestamp': 1770722502.241062, 'identity': 'LEADER'} from 923953153, current memnershiplist is {923953153: '127.0.0.3', 421579379: '127.0.0.2', 809218017: '127.0.0.1'}

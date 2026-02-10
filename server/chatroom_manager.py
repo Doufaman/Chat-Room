@@ -31,16 +31,18 @@ class ChatroomManager:
         Server 2, Room 1 → 8000 + 200 + 1 = 8201
     """
     
-    def __init__(self, server_id, local_ip, membership_manager=None):
+    def __init__(self, server_id, local_ip, membership_manager=None, on_client_count_change=None):
         """
         Args:
             server_id: This server's ID
             local_ip: Local IP address to bind chat rooms
             membership_manager: manage membership info
+            on_client_count_change: Callback function(chatroom_id, new_count) when client count changes
         """
         self.server_id = server_id
         self.local_ip = local_ip
         self.membership_manager = membership_manager
+        self.on_client_count_change = on_client_count_change
         
         # Chat rooms: {room_id: ChatRoom}
         self.rooms = {}
@@ -82,7 +84,8 @@ class ChatroomManager:
             port = self._calculate_port(room_id)
             
             # Create ChatRoom instance
-            room = ChatRoom(room_id, room_name, port, self.local_ip)
+            room = ChatRoom(room_id, room_name, port, self.local_ip, 
+                          on_client_count_change=self.on_client_count_change)
             self.rooms[room_id] = room
             
             # Start room in a new thread

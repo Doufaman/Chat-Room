@@ -1,8 +1,10 @@
 """
-Chat Client - Connects to a chat room server:
-- Discover available servers and chatrooms via Leader
-- Connect to selected chatroom
-- Send and receive messages with causal ordering
+Chat Client - 聊天室客户端（纯UDP通信）
+功能：
+1. 广播查找Leader
+2. 从Leader获取聊天室列表
+3. 创建/加入/刷新聊天室
+4. 加入聊天室后进入聊天模式（TCP）
 """
 import socket
 import threading
@@ -12,422 +14,438 @@ import json
 import time
 from utills.logger import get_logger
 
-
 logger = get_logger("chat_client")
 
 from network.chatting_messenger import (
     send_tcp_message, receive_tcp_message, create_chat_message,
-    TYPE_JOIN, TYPE_CHAT, TYPE_LEAVE, safe_print
+    TYPE_JOIN, TYPE_CHAT, TYPE_LEAVE, TYPE_UPDATE, safe_print
 )
 from common.vector_clock import VectorClock
 
-# Discovery port (must match ChatroomManager.PORT_CLIENT_DISCOVERY)
-PORT_DISCOVERY = 9005
-DISCOVERY_TIMEOUT = 5.0
+# 与服务器一致的广播端口
+PORT_BROADCAST = 9000
+DISCOVERY_TIMEOUT = 3.0
 
 
 class ChatClient:
-    """Chat client with causal ordering support"""
-    
-    def __init__(self, user_id):
-        self.user_id = user_id
-        self.vector_clock = VectorClock(user_id)
-        self.socket = None
-        self.running = False
-        self.leader_ip = None
-        self.current_server_info = None  # Store current server info (ip: id)
-        self.current_server_ip = None
-        self.current_server_port = None
-        self.current_server_id = None
-        self.lock = threading.Lock()
-        self.hold_back_queue = []  # For causal ordering
-    
-    def discover_chatrooms(self):
-        """
-        Discover available chatrooms by querying the Leader.
-        
-        Returns:
-            list: Server chatroom info, or None if discovery failed
-        """
-        print("\n[Discovery] Searching for available chatrooms...")
-        
-        # Create UDP socket for discovery
-        udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        udp_socket.settimeout(DISCOVERY_TIMEOUT)
-        
-        try:
-            # Bind to receive response
-            udp_socket.bind(('', 0))
-            local_port = udp_socket.getsockname()[1]
-            
-            # Send discovery request (broadcast to Leader's discovery port)
-            request = {
-                'msg_type': 'REQUEST_CHATROOMS',
-                'message': {'client_port': local_port},
-                'sender_ip': '0.0.0.0'
-            }
-            udp_socket.sendto(
-                json.dumps(request).encode('utf-8'),
-                ('<broadcast>', PORT_DISCOVERY)
-            )
-            print(f"[Discovery] Sent REQUEST_CHATROOMS broadcast to port {PORT_DISCOVERY}")
-            
-            # Wait for response
-            try:
-                data, addr = udp_socket.recvfrom(4096)
-                response = json.loads(data.decode('utf-8'))
-                
-                msg_type = response.get('msg_type')
-                leader_ip = response.get('sender_ip')
-                if leader_ip:
-                    self.leader_ip = leader_ip
-                    print(f"[Discovery] Leader found at {leader_ip}")
+    """纯UDP聊天室客户端"""
 
-                if msg_type == 'CHATROOM_LIST':
-                    servers = response.get('message', {}).get('servers', [])
-                    print(f"[Discovery] Received chatroom list from Leader {addr[0]}")
-                    return servers
-                    
-            except socket.timeout:
-                print("[Discovery] Timeout - No Leader responded")
-                return None
-                
-        except Exception as e:
-            print(f"[Discovery] Error: {e}")
+    def __init__(self, username):
+        self.username = username
+        self.leader_ip = None
+        self.leader_id = None
+        self.chatrooms = []
+        self.running = True
+
+        # 用于聊天的状态
+        self.chat_socket = None
+        self.chat_running = False
+        self.vector_clock = VectorClock(username)
+        self.lock = threading.Lock()
+
+    # ==========================================
+    # UDP 通信工具
+    # ==========================================
+    def _create_udp_socket(self):
+        """创建绑定到广播端口的UDP socket"""
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        if hasattr(socket, 'SO_REUSEPORT'):
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        sock.bind(('', PORT_BROADCAST))
+        return sock
+
+    def _send_and_receive(self, msg_type, message, expected_response, timeout=3.0, retries=3):
+        """
+        发送UDP广播并等待指定类型的响应
+
+        Args:
+            msg_type: 发送的消息类型
+            message: 消息内容字典
+            expected_response: 期望的响应消息类型
+            timeout: 每次重试的超时时间
+            retries: 重试次数
+
+        Returns:
+            dict or None: 响应数据或None
+        """
+        sock = self._create_udp_socket()
+        sock.settimeout(timeout)
+
+        request = json.dumps({
+            "msg_type": msg_type,
+            "message": message,
+            "sender_ip": "client"
+        }, ensure_ascii=False).encode('utf-8')
+
+        try:
+            for attempt in range(retries):
+                sock.sendto(request, ('<broadcast>', PORT_BROADCAST))
+
+                deadline = time.time() + timeout
+                while time.time() < deadline:
+                    remaining = deadline - time.time()
+                    if remaining <= 0:
+                        break
+                    sock.settimeout(remaining)
+                    try:
+                        data, addr = sock.recvfrom(65536)
+                        resp = json.loads(data.decode('utf-8'))
+                        if resp.get('msg_type') == expected_response:
+                            return resp
+                        # 收到了不相关的广播消息，继续等待
+                    except socket.timeout:
+                        break
+                    except json.JSONDecodeError:
+                        continue
+
             return None
         finally:
-            udp_socket.close()
-    
-    def display_chatrooms(self, servers):
-        """Display available chatrooms to user"""
-        print("\n" + "=" * 60)
-        print("Available Chatrooms:")
-        print("=" * 60)
-        
-        if not servers:
-            print("  No chatrooms available.")
-            return
-        
-        for server in servers:
-            server_id = server.get('server_id', '?')
-            server_ip = server.get('server_ip', '?')
-            chatrooms = server.get('chatrooms', [])
-            self.current_server_info[server_ip] = server_id  # Store mapping of IP to server ID
-            
-            if chatrooms:
-                print(f"\nServer {server_id} ({server_ip}):")
-                for room in chatrooms:
-                    room_name = room.get('room_name', 'Unknown')
-                    room_port = room.get('port', '?')
-                    clients = room.get('clients', 0)
-                    print(f"  - {room_name} ({clients} clients) → Port {room_port}")
-            else:
-                print(f"\nServer {server_id} ({server_ip}): No chatrooms")
-        
-        print("=" * 60)
-    
-    def prompt_connection(self):
-        """
-        Prompt user to enter server IP and port.
-        
-        Returns:
-            tuple: (ip, port) or None if user wants to refresh
-        """
-        print("\nEnter connection details (or 'r' to refresh, 'q' to quit):")
-        
-        ip = input("Server IP: ").strip()
-        if ip.lower() == 'r':
-            return 'refresh'
-        if ip.lower() == 'q':
-            return None
-        
-        port_str = input("Port: ").strip()
-        if port_str.lower() == 'r':
-            return 'refresh'
-        if port_str.lower() == 'q':
-            return None
-        
-        try:
-            port = int(port_str)
-            return (ip, port)
-        except ValueError:
-            print("[Error] Invalid port number")
-            return 'refresh'
-    
-    def connect(self, server_ip, server_port):
-        """
-        Connect to a chatroom server.
-        
-        Args:
-            server_ip: Server IP address
-            server_port: Server port
-        
-        Returns:
-            bool: True if connected successfully
-        """
-        print(f"\n[Client] Connecting to {server_ip}:{server_port}...")
-        
-        try:
-            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.socket.settimeout(10.0)
-            self.socket.connect((server_ip, server_port))
-            self.socket.settimeout(None)
-            
-            print(f"[Client] Connected!")
-            
-            # Send JOIN message
-            with self.lock:
-                join_msg = create_chat_message(TYPE_JOIN, self.user_id, self.vector_clock,
-                                                f"{self.user_id} joined the chat.")
-            send_tcp_message(self.socket, join_msg)
+            sock.close()
 
-            self.current_server_ip = server_ip
-            self.current_server_port = server_port
-            self.current_server_id = None  
-            
-            self.running = True
+    # ==========================================
+    # 核心功能
+    # ==========================================
+    def find_leader(self):
+        """广播查找Leader"""
+        print("\n正在查找Leader服务器...")
+
+        resp = self._send_and_receive(
+            "WHO_IS_LEADER",
+            {"client_name": self.username},
+            "I_AM_LEADER",
+            timeout=2.0,
+            retries=3
+        )
+
+        if resp:
+            self.leader_ip = resp['message']['leader_ip']
+            self.leader_id = resp['message']['leader_id']
+            print(f"✓ 找到Leader: {self.leader_ip} (Server ID: {self.leader_id})")
             return True
-            
-        except Exception as e:
-            print(f"[Client] Connection failed: {e}")
-            if self.current_server_info is not None and self.current_server_ip in self.current_server_info:
-                server_id = self.current_server_info[self.current_server_ip]
-                self.report_server_failure_to_leader(self.leader_ip, server_id, server_ip, server_port)  # Report failure to Leader
-            if self.socket:
-                self.socket.close()
-                self.socket = None
+
+        print("✗ 未找到Leader服务器，请确保服务器正在运行")
+        return False
+
+    def get_chatroom_list(self):
+        """从Leader获取聊天室列表（UDP广播）"""
+        if not self.leader_ip:
+            print("✗ 未连接到Leader")
             return False
-    
-    def start_chat(self):
-        """Start the chat session"""
-        # Start receive thread
-        recv_thread = threading.Thread(target=self._receive_loop, daemon=True)
-        recv_thread.start()
-        
-        # Main input loop
-        print(f"\n[Chat] Welcome {self.user_id}! Type your messages below.")
-        print("[Chat] Type '/quit' to leave.\n")
-        
+
+        resp = self._send_and_receive(
+            "GET_CHATROOM_LIST",
+            {},
+            "CHATROOM_LIST",
+            timeout=3.0,
+            retries=2
+        )
+
+        if resp:
+            self.chatrooms = resp['message'].get('chatrooms', [])
+            return True
+
+        print("✗ 获取聊天室列表超时")
+        return False
+
+    def display_chatrooms(self):
+        """显示可用的聊天室列表"""
+        if not self.chatrooms:
+            print("\n当前没有可用的聊天室")
+            return
+
+        print("\n" + "=" * 70)
+        print("可用聊天室列表:")
+        print("=" * 70)
+        print(f"{'序号':<6} {'聊天室ID':<15} {'名称':<20} {'服务器':<18} {'在线人数':<10}")
+        print("-" * 70)
+
+        for idx, room in enumerate(self.chatrooms, 1):
+            port = room.get('port', '?')
+            clients = room.get('clients_count', 0)
+            print(f"{idx:<6} {room['chatroom_id']:<15} {room['name']:<20} "
+                  f"{room['server_ip']}:{port:<6} {clients:<10}")
+
+        print("=" * 70)
+
+    def create_chatroom(self):
+        """创建新聊天室（UDP广播）"""
+        if not self.leader_ip:
+            print("✗ 未连接到Leader")
+            return False
+
+        room_name = input("\n请输入新聊天室的名称: ").strip()
+        if not room_name:
+            print("✗ 聊天室名称不能为空")
+            return False
+
+        print(f"正在创建聊天室 '{room_name}'...")
+
+        resp = self._send_and_receive(
+            "CREATE_CHATROOM",
+            {"name": room_name},
+            "CHATROOM_CREATED",
+            timeout=10.0,
+            retries=1
+        )
+
+        if resp:
+            room_info = resp['message']['chatroom_info']
+            print(f"\n✓ 聊天室创建成功!")
+            print(f"  聊天室ID: {room_info['chatroom_id']}")
+            print(f"  名称: {room_info['name']}")
+            print(f"  服务器: {room_info['server_ip']}:{room_info['port']}")
+            return True
+
+        print("✗ 创建聊天室超时")
+        return False
+
+    def join_chatroom(self):
+        """选择并加入聊天室"""
+        if not self.chatrooms:
+            print("\n当前没有可用的聊天室，请先创建一个")
+            return
+
+        self.display_chatrooms()
+
         try:
-            while self.running:
+            choice = input("\n请输入要加入的聊天室序号 (或直接输入 IP:PORT): ").strip()
+
+            if ':' in choice:
+                parts = choice.split(':')
+                if len(parts) == 2:
+                    server_ip = parts[0]
+                    port = int(parts[1])
+                else:
+                    print("✗ 格式错误，请使用 IP:PORT 格式")
+                    return
+            else:
+                idx = int(choice) - 1
+                if 0 <= idx < len(self.chatrooms):
+                    room = self.chatrooms[idx]
+                    server_ip = room['server_ip']
+                    port = room['port']
+                else:
+                    print("✗ 无效的序号")
+                    return
+
+            # 连接到聊天室（TCP长连接用于实际聊天）
+            self._connect_and_chat(server_ip, port)
+
+        except ValueError:
+            print("✗ 输入格式错误")
+        except Exception as e:
+            print(f"✗ 加入聊天室失败: {e}")
+
+    # ==========================================
+    # 聊天功能（TCP连接到具体chatroom）
+    # ==========================================
+    def _connect_and_chat(self, server_ip, port):
+        """连接到聊天室并开始聊天"""
+        print(f"\n正在连接到聊天室 {server_ip}:{port}...")
+
+        try:
+            self.chat_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.chat_socket.settimeout(10.0)
+            self.chat_socket.connect((server_ip, port))
+            self.chat_socket.settimeout(None)
+            safe_print(f"✓ 已连接!")
+
+            # 发送JOIN消息
+            with self.lock:
+                join_msg = create_chat_message(
+                    TYPE_JOIN, self.username, self.vector_clock,
+                    f"{self.username} joined the chat."
+                )
+            send_tcp_message(self.chat_socket, join_msg)
+
+            self.chat_running = True
+
+            # 启动接收线程
+            recv_thread = threading.Thread(target=self._receive_loop, daemon=True)
+            recv_thread.start()
+
+            safe_print(f"\n[Chat] 欢迎 {self.username}! 输入消息开始聊天。")
+            safe_print("[Chat] 输入 /quit 离开聊天室。\n")
+
+            # 发送消息循环
+            while self.chat_running:
                 try:
                     content = input("Your message: ")
-                    
                     if content.lower() == '/quit':
                         self._send_leave()
                         break
-                    
                     if content.strip():
                         self._send_chat(content)
-                        
                 except EOFError:
                     break
-                    
-        except KeyboardInterrupt:
-            print("\n[Chat] Interrupted")
-        finally:
-            self.running = False
-            if self.socket:
-                self.socket.close()
-            print("[Chat] Disconnected")
-    
-    def report_server_failure_to_leader(self, leader_ip, failed_server_id, failed_ip, failed_port):
-        """
-        仿照连接 Server 的逻辑，直接建立 TCP 连接向 Leader 报告故障。
-        """
-        logger.info(f"\n[Client] Reporting suspected failure of {failed_ip}:{failed_port} to Leader...")
-        
-        # 1. 构造报告消息体
-        # 仿照 create_chat_message 的逻辑，或者直接构造符合你协议的字典
-        report_payload = {
-            "msg_type": "SERVER_FAILURE_REPORT",
-            "message": {
-                "failed_ip": failed_ip,
-                "failed_port": failed_port,
-                "failed_server_id": failed_server_id
-            },
-            "sender_id": self.user_id
-        }
 
-        # 2. 建立短连接发送报告
-        temp_sock = None
-        try:
-            temp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            temp_sock.settimeout(5.0)  # 给 Leader 5秒连接时间
-            temp_sock.connect((leader_ip, 9001))
-            
-            # 3. 调用全局工具函数发送消息
-            # 注意：这里的第二个参数必须是符合协议的消息对象（通常是 dict）
-            send_tcp_message(temp_sock, report_payload)
-            
-            print(f"[Client] Failure report delivered to Leader at {leader_ip}:9001")
-            
         except Exception as e:
-            print(f"[Client] Failed to report to Leader: {e}")
+            safe_print(f"✗ 连接失败: {e}")
         finally:
-            if temp_sock:
-                temp_sock.close()
+            self.chat_running = False
+            if self.chat_socket:
+                self.chat_socket.close()
+                self.chat_socket = None
+            safe_print("[Chat] 已断开连接")
 
     def _send_chat(self, content):
-        """Send a chat message"""
+        """发送聊天消息"""
         with self.lock:
             self.vector_clock.increment()
-            msg = create_chat_message(TYPE_CHAT, self.user_id, self.vector_clock, content)
-        
+            msg = create_chat_message(TYPE_CHAT, self.username, self.vector_clock, content)
         try:
-            send_tcp_message(self.socket, msg)
+            send_tcp_message(self.chat_socket, msg)
         except Exception as e:
-            print(f"[Error] Failed to send message: {e}")
-            if self.current_server_info is not None and self.current_server_ip in self.current_server_info:
-                server_id = self.current_server_info[self.current_server_ip]
-                self.report_server_failure_to_leader(self.leader_ip, server_id, self.current_server_ip, self.current_server_port)  # Report failure to Leader
-            self.running = False
-    
+            safe_print(f"[Error] 发送失败: {e}")
+            self.chat_running = False
+
     def _send_leave(self):
-        """Send leave message"""
+        """发送离开消息"""
         with self.lock:
-            msg = create_chat_message(TYPE_LEAVE, self.user_id, self.vector_clock,
-                                       f"{self.user_id} left the chat.")
+            msg = create_chat_message(
+                TYPE_LEAVE, self.username, self.vector_clock,
+                f"{self.username} left the chat."
+            )
         try:
-            send_tcp_message(self.socket, msg)
+            send_tcp_message(self.chat_socket, msg)
         except:
             pass
-    
+
     def _receive_loop(self):
-        """Receive and process messages from server"""
+        """接收聊天消息"""
+        hold_back_queue = []
         try:
-            while self.running:
-                message = receive_tcp_message(self.socket)
-                
+            while self.chat_running:
+                message = receive_tcp_message(self.chat_socket)
                 if message is None:
-                    safe_print("[Chat] Server closed connection")
-                    self.running = False
+                    safe_print("[Chat] 服务器断开连接")
+                    self.chat_running = False
                     break
-                
-                self._handle_message(message)
-                
-        except Exception as e:
-            if self.running:
-                safe_print(f"[Error] Receive error: {e}")
-            self.running = False
-    
-    def _handle_message(self, message):
-        """Handle received message with causal ordering"""
-        msg_type = message.get('type')
-        sender = message.get('sender')
-        received_clock = message.get('vector_clock', {})
-        content = message.get('content', '')
-        
-        messages_to_deliver = []
-        
-        with self.lock:
-            if msg_type == TYPE_JOIN:
-                # Add new user to vector clock
-                self.vector_clock.add_entry(sender)
-                self.vector_clock.merge(received_clock)
-                messages_to_deliver.append(message)
-                # Check if this unlocks held-back messages
-                messages_to_deliver.extend(self._check_holdback_queue())
-                
-            elif msg_type == TYPE_CHAT:
-                # Causal ordering check
-                if self.vector_clock.is_deliveravle(received_clock, sender):
-                    self.vector_clock.merge(received_clock)
-                    messages_to_deliver.append(message)
-                    messages_to_deliver.extend(self._check_holdback_queue())
-                else:
-                    # Hold back for causal ordering
-                    self.hold_back_queue.append(message)
-                    
-            elif msg_type == TYPE_LEAVE:
-                messages_to_deliver.append(message)
-        
-        # Deliver messages (outside lock)
-        for msg in messages_to_deliver:
-            self._deliver(msg)
-    
-    def _check_holdback_queue(self):
-        """Check and return deliverable messages from hold-back queue"""
-        deliverable = []
-        
-        while True:
-            progress = False
-            for message in list(self.hold_back_queue):
+
+                msg_type = message.get('type')
                 sender = message.get('sender')
                 received_clock = message.get('vector_clock', {})
-                
-                if self.vector_clock.is_deliveravle(received_clock, sender):
-                    self.vector_clock.merge(received_clock)
-                    deliverable.append(message)
-                    self.hold_back_queue.remove(message)
-                    progress = True
-                    break
-            
-            if not progress:
-                break
-        
-        return deliverable
-    
-    def _deliver(self, message):
-        """Deliver message to user"""
-        msg_type = message.get('type')
-        sender = message.get('sender')
-        content = message.get('content', '')
-        
-        if sender == self.user_id:
-            return  # Don't show own messages
-        
-        if msg_type == TYPE_JOIN:
-            safe_print(f">>> {sender} joined the chat")
-        elif msg_type == TYPE_CHAT:
-            safe_print(f"{sender}: {content}")
-        elif msg_type == TYPE_LEAVE:
-            safe_print(f"<<< {sender} left the chat")
+                content = message.get('content', '')
+
+                with self.lock:
+                    if msg_type == TYPE_UPDATE:
+                        # Server sent us the full member list (vector clock)
+                        self.vector_clock.merge(received_clock)
+                        safe_print(f"[Chat] 成员列表已更新")
+                        continue
+                    
+                    if msg_type == TYPE_JOIN:
+                        self.vector_clock.add_entry(sender)
+                        self.vector_clock.merge(received_clock)
+                        safe_print(f">>> {sender} 加入了聊天室 (Debug: VC={received_clock})")
+                    elif msg_type == TYPE_CHAT:
+                        if self.vector_clock.is_deliveravle(received_clock, sender):
+                            self.vector_clock.merge(received_clock)
+                            safe_print(f"{sender}: {content} (Debug: VC={received_clock})")
+                        else:
+                            hold_back_queue.append(message)
+                    elif msg_type == TYPE_LEAVE:
+                        safe_print(f"<<< {sender} 离开了聊天室 (Debug: VC={received_clock})")
+
+                # 检查hold-back队列
+                with self.lock:
+                    changed = True
+                    while changed:
+                        changed = False
+                        for msg in list(hold_back_queue):
+                            s = msg.get('sender')
+                            rc = msg.get('vector_clock', {})
+                            if self.vector_clock.is_deliveravle(rc, s):
+                                self.vector_clock.merge(rc)
+                                safe_print(f"{s}: {msg.get('content', '')} (Debug: VC={rc} [from hold-back])")
+                                hold_back_queue.remove(msg)
+                                changed = True
+                                break
+
+        except Exception as e:
+            if self.chat_running:
+                safe_print(f"[Error] 接收错误: {e}")
+            self.chat_running = False
+
+    # ==========================================
+    # 菜单
+    # ==========================================
+    def show_menu(self):
+        """显示主菜单"""
+        print("\n" + "=" * 60)
+        print("聊天室客户端 - 主菜单")
+        print("=" * 60)
+        print("(1) 创建聊天室")
+        print("(2) 加入聊天室")
+        print("(3) 刷新聊天室列表")
+        print("(4) 重新查找Leader")
+        print("(5) 退出")
+        print("=" * 60)
+
+    def run(self):
+        """运行客户端"""
+        print("=" * 60)
+        print("       欢迎使用分布式聊天室客户端")
+        print("=" * 60)
+        print(f"\n欢迎, {self.username}!")
+
+        # 查找Leader
+        if not self.find_leader():
+            print("\n无法找到Leader服务器，程序退出")
+            return
+
+        # 主循环
+        while self.running:
+            # 自动刷新聊天室列表
+            if self.get_chatroom_list():
+                self.display_chatrooms()
+
+            self.show_menu()
+            choice = input("\n请选择操作 (1-5): ").strip()
+
+            if choice == '1':
+                self.create_chatroom()
+            elif choice == '2':
+                self.join_chatroom()
+            elif choice == '3':
+                print("\n正在刷新聊天室列表...")
+                if self.get_chatroom_list():
+                    self.display_chatrooms()
+                    print("✓ 列表已刷新")
+                else:
+                    print("✗ 刷新失败")
+            elif choice == '4':
+                self.find_leader()
+            elif choice == '5':
+                print(f"\n再见, {self.username}!")
+                self.running = False
+            else:
+                print("\n✗ 无效的选择，请输入 1-5")
+
+        print("\n客户端已退出")
 
 
 def main():
-    """Main entry point"""
+    """主函数"""
     print("=" * 60)
-    print("       Welcome to the Distributed Chat Client")
+    print("       分布式聊天室客户端")
     print("=" * 60)
-    
-    # Get user ID
-    user_id = input("\nEnter your username: ").strip()
-    if not user_id:
-        user_id = f"User_{os.getpid()}"
-    
-    client = ChatClient(user_id)
-    
-    while True:
-        # Discover chatrooms
-        servers = client.discover_chatrooms()
-        
-        if servers:
-            client.display_chatrooms(servers)
-        else:
-            print("\n[!] No servers found. Make sure a Leader is running.")
-        
-        # Prompt for connection
-        result = client.prompt_connection()
-        
-        if result is None:
-            print("\nGoodbye!")
-            break
-        elif result == 'refresh':
-            continue
-        else:
-            ip, port = result
-            if client.connect(ip, port):
-                client.start_chat()
-                # After chat ends, ask if want to reconnect
-                again = input("\nConnect to another room? (y/n): ").strip().lower()
-                if again != 'y':
-                    print("\nGoodbye!")
-                    break
-                # Reset client state for new connection
-                client = ChatClient(user_id)
+
+    username = input("\n请输入您的用户名: ").strip()
+    if not username:
+        username = f"User_{os.getpid()}"
+
+    client = ChatClient(username)
+    try:
+        client.run()
+    except KeyboardInterrupt:
+        print(f"\n\n再见, {username}!")
+    except Exception as e:
+        print(f"\n程序错误: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 if __name__ == '__main__':

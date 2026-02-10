@@ -1,0 +1,58 @@
+11:47:11 [root] [INFO] 日志系统初始化完成。文件保存至: logs/2026-02-10_11-47-11.log
+11:47:14 [utills.ip_validator] [DEBUG] IP 127.0.0.3 是回环地址（本地测试用）
+11:47:14 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Election Manager starting
+11:47:14 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] UDP listener started on UDP:9003
+11:47:15 [network_manager] [DEBUG] Starting follower long-lived connection to leader at 127.0.0.2...
+11:47:15 [network_manager] [DEBUG] Follower established long-lived connection to leader at 127.0.0.2
+11:47:30 [fault_detection] [WARNING] leader heartbeat timeout detected (16.0s > 15s), start election
+11:47:30 [election] [WARNING] [I'm Follower - (821697342, 127.0.0.3)] Election triggered: leader heartbeat timeout
+11:47:31 [election] [INFO] [I'm Election - (821697342, 127.0.0.3)] Election started; peers=[929583631]
+11:47:31 [election] [INFO] [I'm Election - (821697342, 127.0.0.3)] Challenging higher peers: [929583631]
+11:47:31 [election] [DEBUG] [I'm Election - (821697342, 127.0.0.3)] UDP send ELECTION -> 127.0.0.2:9003
+11:47:31 [network_manager] [ERROR] No connection found for 929583631, cannot send message
+11:47:32 [fault_detection] [DEBUG] Election in progress, skipping heartbeat timeout check
+11:47:33 [fault_detection] [DEBUG] Election in progress, skipping heartbeat timeout check
+11:47:34 [election] [INFO] [I'm Election - (821697342, 127.0.0.3)] Received COORDINATOR from 908737562 (127.0.0.1)
+11:47:34 [election] [INFO] [I'm Election - (821697342, 127.0.0.3)] In ELECTION, accepting first COORDINATOR from 908737562
+11:47:34 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Reset leader heartbeat timer for new leader 908737562
+11:47:34 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Received COORDINATOR from 929583631 (127.0.0.2)
+11:47:34 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Received COORDINATOR from 908737562 (127.0.0.1)
+11:47:34 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Received COORDINATOR from 929583631 (127.0.0.2)
+11:47:34 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Connecting to new leader 908737562 at 127.0.0.1
+11:47:34 [network_manager] [DEBUG] Starting follower long-lived connection to leader at 127.0.0.1...
+11:47:34 [network_manager] [DEBUG] Follower established long-lived connection to leader at 127.0.0.1
+11:47:34 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Received COORDINATOR from 908737562 (127.0.0.1)
+11:47:34 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Received COORDINATOR from 929583631 (127.0.0.2)
+11:47:34 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Received COORDINATOR from 908737562 (127.0.0.1)
+11:47:34 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Received COORDINATOR from 929583631 (127.0.0.2)
+11:47:34 [server.heartbeat] [DEBUG] [I'm Follower - 821697342] Heartbeat received message: HEARTBEAT {'server_id': 929583631, 'timestamp': 1770720454.926574, 'identity': 'LEADER'} from 908737562, current memnershiplist is {821697342: '127.0.0.3', 929583631: '127.0.0.2'}
+11:47:35 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Received COORDINATOR from 908737562 (127.0.0.1)
+11:47:35 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Received COORDINATOR from 929583631 (127.0.0.2)
+11:47:40 [server.heartbeat] [ERROR] [I'm Follower - 821697342] Failed to send heartbeat to leader 908737562: [Errno 32] Broken pipe
+11:47:43 [network_manager] [ERROR] No connection found for 908737562, cannot send message
+11:47:46 [network_manager] [ERROR] No connection found for 908737562, cannot send message
+11:47:49 [network_manager] [ERROR] No connection found for 908737562, cannot send message
+11:47:50 [fault_detection] [WARNING] leader heartbeat timeout detected (15.4s > 15s), start election
+11:47:50 [election] [WARNING] [I'm Follower - (821697342, 127.0.0.3)] Election triggered: leader heartbeat timeout
+11:47:50 [election] [INFO] [I'm Election - (821697342, 127.0.0.3)] Election started; peers=[929583631]
+11:47:50 [election] [INFO] [I'm Election - (821697342, 127.0.0.3)] Challenging higher peers: [929583631]
+11:47:50 [election] [DEBUG] [I'm Election - (821697342, 127.0.0.3)] UDP send ELECTION -> 127.0.0.2:9003
+11:47:52 [fault_detection] [DEBUG] Election in progress, skipping heartbeat timeout check
+11:47:52 [network_manager] [ERROR] No connection found for 908737562, cannot send message
+11:47:53 [fault_detection] [DEBUG] Election in progress, skipping heartbeat timeout check
+11:47:54 [election] [INFO] [I'm Election - (821697342, 127.0.0.3)] Received COORDINATOR from 908737562 (127.0.0.1)
+11:47:54 [election] [INFO] [I'm Election - (821697342, 127.0.0.3)] In ELECTION, accepting first COORDINATOR from 908737562
+11:47:54 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Reset leader heartbeat timer for new leader 908737562
+11:47:54 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Received COORDINATOR from 929583631 (127.0.0.2)
+11:47:54 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Received COORDINATOR from 908737562 (127.0.0.1)
+11:47:54 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Received COORDINATOR from 929583631 (127.0.0.2)
+11:47:54 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Connecting to new leader 908737562 at 127.0.0.1
+11:47:54 [network_manager] [DEBUG] Starting follower long-lived connection to leader at 127.0.0.1...
+11:47:54 [network_manager] [DEBUG] Follower established long-lived connection to leader at 127.0.0.1
+11:47:54 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Received COORDINATOR from 908737562 (127.0.0.1)
+11:47:54 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Received COORDINATOR from 929583631 (127.0.0.2)
+11:47:54 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Received COORDINATOR from 908737562 (127.0.0.1)
+11:47:54 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Received COORDINATOR from 929583631 (127.0.0.2)
+11:47:54 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Received COORDINATOR from 908737562 (127.0.0.1)
+11:47:54 [election] [INFO] [I'm Follower - (821697342, 127.0.0.3)] Received COORDINATOR from 929583631 (127.0.0.2)
+11:47:55 [server.heartbeat] [DEBUG] [I'm Follower - 821697342] Heartbeat received message: HEARTBEAT {'server_id': 929583631, 'timestamp': 1770720475.922793, 'identity': 'LEADER'} from 908737562, current memnershiplist is {821697342: '127.0.0.3', 929583631: '127.0.0.2'}
