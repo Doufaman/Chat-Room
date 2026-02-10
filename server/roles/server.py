@@ -5,6 +5,7 @@ import psutil
 
 from server.fault_detection import HandleAbnormalStateReport, HeartbeatMonitor
 from server.fault_discovery import ServerCrashDiscovery
+from server.election_manager import ElectionManager, STATE_LEADER, STATE_FOLLOWER
 from utills.logger import get_logger
 
 from .base import Role
@@ -37,9 +38,25 @@ class Server(Role):
         self._running = True
         #self.known_servers = set()
 
+        # ---------------------------
+        # Election manager (UDP-only)
+        # ---------------------------
+        initial_state = STATE_LEADER if self.identity == TYPE_LEADER else STATE_FOLLOWER
+        self.election_manager = ElectionManager(
+            self.server_id,
+            self.network_manager,
+            on_state_change=self.change_role,
+            initial_state=initial_state,
+        )
+        self.election_manager.set_server_reference(self)
+        if self.identity == TYPE_FOLLOWER and self.leader_address:
+            # Leader ID will be set on REGISTER_ACK; seed IP now so follower waits calmly.
+            self.election_manager.leader_ip = self.leader_address
+
     def start(self):
         # 启动网络监听
         self.network_manager.start_listening()
+        self.election_manager.start()
 
         # leader role needs to initialize membership management immediately, while follower will initialize later
         if self.identity == TYPE_LEADER:
@@ -195,6 +212,14 @@ class Server(Role):
                     sid_int = int(sid) if isinstance(sid, str) else sid
                     self.membership_list[sid_int] = sip
                 print(f'[Follower] Registered with Leader {self.leader_id}. Current membership list: {self.membership_list}')
+
+                # Seed ElectionManager with leader info + peers based on membership.
+                try:
+                    if self.election_manager:
+                        self.election_manager.set_leader(self.leader_id, self.leader_address)
+                        self.election_manager.update_peers_from_server()
+                except Exception as e:
+                    logger.debug(f"Failed to seed election manager after REGISTER_ACK: {e}")
             elif msg_type == "NEW_FOLLOWER_JOINED":
                 new_follower_id = message.get("new_follower_id")
                 new_follower_ip = message.get("new_follower_ip")
@@ -202,6 +227,11 @@ class Server(Role):
                     new_follower_id = int(new_follower_id) if isinstance(new_follower_id, str) else new_follower_id
                     self.membership_list[new_follower_id] = new_follower_ip
                     logger.info(f'[Follower] New follower joined: {new_follower_id} with IP: {new_follower_ip}. Updated membership list: {self.membership_list}')
+                    try:
+                        if self.election_manager:
+                            self.election_manager.update_peers_from_server()
+                    except Exception as e:
+                        logger.debug(f"Failed to update election peers on NEW_FOLLOWER_JOINED: {e}")
 
             elif msg_type == "SERVER_REMOVED":
                 removed_server_id = message.get("server_id")
@@ -209,6 +239,11 @@ class Server(Role):
                 removed_server_id = int(removed_server_id) if isinstance(removed_server_id, str) else removed_server_id
                 self.membership_list.pop(removed_server_id, None)
                 logger.info(f'[Follower] Server removed: {removed_server_id} from group {removed_group_id}. Updated membership list: {self.membership_list}')
+                try:
+                    if self.election_manager:
+                        self.election_manager.update_peers_from_server()
+                except Exception as e:
+                    logger.debug(f"Failed to update election peers on SERVER_REMOVED: {e}")
     def change_role(self, new_role, leader_id):
         """Handle role change triggered by ElectionManager."""
         # Only log if role actually changes
