@@ -211,6 +211,10 @@ class Server(Role):
                 for sid, sip in membership_raw.items():
                     sid_int = int(sid) if isinstance(sid, str) else sid
                     self.membership_list[sid_int] = sip
+                # Always include leader + self in membership view (needed for bully + role switching).
+                if self.leader_id is not None and self.leader_address:
+                    self.membership_list[int(self.leader_id)] = self.leader_address
+                self.membership_list[self.server_id] = self.network_manager.ip_local
                 print(f'[Follower] Registered with Leader {self.leader_id}. Current membership list: {self.membership_list}')
 
                 # Seed ElectionManager with leader info + peers based on membership.
@@ -265,16 +269,63 @@ class Server(Role):
             print(f"[Server] Becoming LEADER (ID: {self.server_id})")
             self.leader_id = self.server_id
             self.leader_address = self.network_manager.ip_local
-            # Leader takes over membership management
+            # Leader takes over membership management + long-lived listener + detection
+            try:
+                self.membership_manager.is_leader = True
+                self.membership_manager.initialize_for_leader(True, {
+                    "server_id": self.server_id,
+                    "load_info": self.get_current_load(),
+                    "address": self.network_manager.ip_local
+                })
+            except Exception as e:
+                logger.debug(f"Failed to initialize membership for new leader: {e}")
+
+            # Start accepting long-lived follower connections (idempotent-ish for this project)
+            try:
+                self.network_manager.start_leader_long_lived_listener()
+            except Exception as e:
+                logger.debug(f"Failed to start leader long-lived listener: {e}")
+
+            # Ensure heartbeat + fault detection are running in leader mode
+            try:
+                if not hasattr(self, "heartbeat") or self.heartbeat is None:
+                    self.heartbeat = Heartbeat(self, interval=HEARTBEAT_INTERVAL)
+                    self.heartbeat.start()
+            except Exception as e:
+                logger.debug(f"Failed to start heartbeat after becoming leader: {e}")
+
+            try:
+                if not hasattr(self, "heartbeat_monitor") or self.heartbeat_monitor is None:
+                    self.heartbeat_monitor = HeartbeatMonitor(self)
+                    self.heartbeat_monitor.start_timeout_checker()
+            except Exception as e:
+                logger.debug(f"Failed to start heartbeat monitor after becoming leader: {e}")
+
+            try:
+                if not hasattr(self, "handle_abnormal_state_report") or self.handle_abnormal_state_report is None:
+                    self.handle_abnormal_state_report = HandleAbnormalStateReport(self)
+                if not hasattr(self, "fault_discovery") or self.fault_discovery is None:
+                    self.fault_discovery = ServerCrashDiscovery(self)
+            except Exception as e:
+                logger.debug(f"Failed to start fault modules after becoming leader: {e}")
             
         elif new_role == TYPE_FOLLOWER:
             print(f"[Server] Becoming FOLLOWER (Leader ID: {leader_id})")
             self.leader_id = leader_id
+            try:
+                self.membership_manager.is_leader = False
+            except Exception:
+                pass
             # Find leader's IP from membership list
             leader_ip = self.membership_list.get(leader_id)
             if leader_ip:
                 self.leader_address = leader_ip
                 print(f"[Server] Leader address set to: {leader_ip}")
+                # (Re)connect long-lived TCP to the leader so heartbeat can flow.
+                try:
+                    self.network_manager.start_follower_long_lived_connector(self.leader_address, self.leader_id)
+                except Exception as e:
+                    logger.debug(f"Failed to connect to leader after becoming follower: {e}")
             else:
                 # Leader not in membership yet - will be set when we receive heartbeat
                 print(f"[Server] Leader {leader_id} not in membership list yet")
