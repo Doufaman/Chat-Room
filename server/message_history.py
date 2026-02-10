@@ -124,19 +124,23 @@ class ChatMessageHistory:
             print(f"[MessageHistory Room {self.room_id}] "
                   f"ERROR persisting to file: {e}")
     
-    def get_recent_messages(self, count=20):
-        """
-        Retrieve recent messages from memory queue.
+    def get_recent_messages(self, count=5):
+        #count: Number of recent messages to retrieve
+        message = deque(maxlen=count)
+        if not self.history_file.exists():
+            return message
         
-        Args:
-            count: Number of recent messages to retrieve
+        try:
+            with open(self.history_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        message.append(json.loads(line))
+        except Exception as e:
+            print(f"[MessageHistory Room {self.room_id}] "
+                  f"ERROR reading persisted messages: {e}")
         
-        Returns:
-            list: Message records (most recent last)
-        """
-        with self.lock:
-            recent = list(self.history_queue)[-count:]
-            return recent
+        return message
     
     def get_all_persisted_messages(self):
         """
