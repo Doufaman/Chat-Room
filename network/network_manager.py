@@ -75,7 +75,7 @@ class NetworkManager:
         self.port_multicast = port_multicast
         self.port_long_lived = port_long_lived   # for long-lived TCP connections (leader <-> followers)
 
-        # 消息回调映射（业务层通过这个获取数据）
+        # Message callback mapping (business layer gets data through this)
         self.on_message_received = None 
 
         # long-lived connection registries (server_id -> socket)
@@ -86,11 +86,11 @@ class NetworkManager:
         self._msg_callback = None  # callback for incoming messages from long-lived connections
 
     def set_callback(self, callback_func):
-        """供 RoleManager 或 Leader 调用，设置消息回掉"""
+        """Called by RoleManager or Leader to set message callback"""
         self.on_message_received = callback_func
 
     def set_long_lived_msg_callback(self, callback_func):
-        """供 RoleManager 或 Leader 调用，设置长连接消息回掉"""
+        """Called by RoleManager or Leader to set long-lived connection message callback"""
         self._msg_callback = callback_func
 
     # message encode/decode functions
@@ -170,7 +170,7 @@ class NetworkManager:
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                s.bind((self.ip_local,0)) # 让系统自动分配端口
+                s.bind((self.ip_local,0)) # Let system automatically assign port
                 s.connect((target_ip, target_port))
                 # Use TCP message with length header to prevent sticking
                 self.send_TCP_message(s, message_type, message)
@@ -180,19 +180,19 @@ class NetworkManager:
     def send_broadcast(self, 
                        message_type,
                        message):
-        """UDP 广播发送"""
+        """UDP broadcast send"""
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-            s.bind(('',0)) # 让系统自动分配端口
+            s.bind(('',0)) # Let system automatically assign port
             if hasattr(socket, 'SO_REUSEPORT'):
                 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
             data = self.message_encode(message_type, message)
             s.sendto(data, (IP_BROADCAST, self.port_broadcast))
 
-    #没调好
+    # Not debugged yet
     def send_multicast(self, message_type,message):
-        """UDP 组播发送"""
+        """UDP multicast send"""
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as s:
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             if hasattr(socket, 'SO_REUSEPORT'):
@@ -247,16 +247,16 @@ class NetworkManager:
             while True:
                 data, addr = sock.recvfrom(1024)
                 #print(addr)
-                #if addr[0] == self.ip_local: # 忽略自己发出的广播
+                #if addr[0] == self.ip_local: # Ignore own broadcast
                 #    continue
                 if data and self.on_message_received:
                     msg_type, message, sender_ip = self.message_decode(data)
                     if sender_ip == self.ip_local:
                         continue
-                    # 触发回调
+                    # Trigger callback
                     self.on_message_received(msg_type, message, sender_ip)
 
-    #先不管multicast
+    # Not handling multicast for now
     def receive_multicast(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -313,41 +313,41 @@ class NetworkManager:
                 result = self.accept_nonblocking(self.server_sock)
                 if result:
                     conn, addr = result
-                    # 接收身份消息
+                    # Receive identity message
                     msg = self.receive_tcp_message(conn, timeout=2.0)
                     if msg and msg[0] == "IDENTIFY":
                         f_id = msg[1].get("server_id")
                         self.register_connection(conn, server_id=f_id)
                         logger.debug(f"Registered long-lived connection from follower {f_id} at {addr}")
-                        # 这里可以触发发送 REGISTER_ACK 的逻辑
+                        # Can trigger REGISTER_ACK sending logic here
                     else:
                         conn.close()
             except Exception as e:
-                print(f"Accept 线程异常: {e}")
-            time.sleep(0.1) # 避免 CPU 占用过高
+                print(f"Accept thread exception: {e}")
+            time.sleep(0.1) # Avoid excessive CPU usage
 
     def _process_messages(self):
         """Monitor loop to read messages from all registered follower connections."""
-        print("Leader Message Polling Thread 启动...")
+        print("Leader Message Polling Thread started...")
         while True:
-            # 获取当前所有已注册的连接快照
+            # Get snapshot of all currently registered connections
             with self._conn_lock:
                 current_conns = list(self.serverid_to_conn.items())
 
             for f_id, conn in current_conns:
                 try:
-                    # 非阻塞读取消息，timeout 设为 0 或极小
+                    # Non-blocking message read, timeout set to 0 or very small
                     msg = self.receive_tcp_message(conn, timeout=0.01)
                     if msg:
                         msg_type, payload, _ = msg
                         self._msg_callback(payload, msg_type, f_id) # trigger higher-level callback for processing
                     
                 except Exception:
-                    # 如果读取失败，说明连接可能断开，进行注销
+                    # If reading fails, the connection may be broken, unregister it
                     logger.debug(f"Follower {f_id} connection error, unregistering")
                     self.unregister_connection(server_id=f_id)
             
-            time.sleep(0.01) # 消息处理循环可以快一点
+            time.sleep(0.01) # Message processing loop can be faster
 
     def create_tcp_server_socket(self, bind_ip: str, port: int, backlog: int = 5) -> socket.socket:
         """Create a non-blocking TCP server socket ready to accept long-lived connections."""

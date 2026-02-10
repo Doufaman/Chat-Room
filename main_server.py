@@ -44,22 +44,22 @@ class StartupEngine:
         # self.chat = ChatroomManager(self)
 
     def start(self, self_ip):     
-        # 1. 启动通信
+        # 1. Start communication
         # self.comm.start()
         
-        # 2. 进入 discovery
-        current_identity, leader_address = dynamic_discovery(ip_local = self_ip) #使用当前IP进行动态发现
+        # 2. Enter discovery
+        current_identity, leader_address = dynamic_discovery(ip_local = self_ip) # Use current IP for dynamic discovery
 
-        # 生成对应的network manager
+        # Create corresponding network manager
         #network_manager, leader_address = NetworkManager(ip_local=self_ip)
         network_manager = NetworkManager(ip_local=self_ip, server_id=self.server_id)
 
-        #合并了leader和follower的server类
+        # Merged leader and follower server class
         server = Server(self.server_id, network_manager, identity=current_identity, leader_address=leader_address)
         server.start()
 
         # # ------------------------------------------------#
-        # # 以下部分是启动chatroom manager和election manager:  #
+        # # The following part starts chatroom manager and election manager:  #
         # # ------------------------------------------------#
         # chatroom_manager = ChatroomManager(self.server_id, self_ip, membership_manager=server.membership_manager)
         # # Create a default chat room
@@ -135,33 +135,33 @@ class StartupEngine:
         self.state = "FOLLOWER"
         self.leader_addr = leader_addr
         
-        # 向 leader 注册: 要携带目前的load_info和address信息(?)
+        # Register to leader: must carry current load_info and address information (?)
         self.comm.send(leader_addr, {
             "type": "JOIN_SERVER",
             "server_id": self.server_id
         })
         
-        # 启动 follower 心跳
+        # Start follower heartbeat
         self.heartbeat.start_follower_heartbeat()
     
     def become_leader(self):
         self.state = "LEADER"
         self.leader_addr = self.get_own_address()
         
-        # 初始化 membership
+        # Initialize membership
         self.membership.add_server(self.server_id, self.leader_addr)
         
-        # 启动 leader 心跳与 timeout 检测
+        # Start leader heartbeat and timeout detection
         self.heartbeat.start_leader_heartbeat()
         self.heartbeat.start_timeout_checker()
     
     def become_candidate(self):
         self.state = "CANDIDATE"
         
-        # 停止普通 heartbeat
+        # Stop normal heartbeat
         self.heartbeat.stop()
         
-        # 发起选举
+        # Start election
         self.election.start_election()
     
     # --------------------
@@ -169,9 +169,9 @@ class StartupEngine:
     # --------------------
     
     def get_own_address(self):
-        """获取本服务器的地址"""
-        # 需要根据实际网络配置实现
-        # 这里返回一个占位符
+        """Get the address of this server"""
+        # Implementation depends on actual network configuration
+        # Returning a placeholder here
         return f"server_{self.server_id}_addr"
     
     # --------------------
@@ -212,14 +212,14 @@ class StartupEngine:
 
 # modify1: move startup code into main.py
 if __name__ == '__main__':
-    # MY_IP = input("请输入服务器 IP 地址: ")
+    # MY_IP = input("Please enter server IP address: ")
     MY_IP = prompt_valid_ip()  # For MACOS system test
     print(f"[Server] Starting server with IP: {MY_IP}")
 
     startup_engine = StartupEngine(MY_IP)
     startup_engine.start(MY_IP)
 
-    # 保持主线程运行，让后台监听线程继续工作
+    # Keep main thread running, allow background listener threads to continue
     try:
         while True:
             time.sleep(1)

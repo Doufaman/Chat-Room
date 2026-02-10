@@ -84,8 +84,8 @@ class HeartbeatMonitor:
          - leader: find suspected servers, send probes (via network_manager), wait, re-check, mark DEAD and call fault discovery
          - follower: check leader_last_ts and probe leader once, then trigger election if still stale
         """
-        poll_interval = max(1.0, self.interval / 2.0)
-        probe_wait = 1.0
+        poll_interval = max(0.5, self.interval / 2.0)  # Reduced minimum from 1.0 to 0.5
+        probe_wait = 0.5  # Reduced from 1.0 to 0.5 for faster detection
 
         while True:
             try:

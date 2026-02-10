@@ -30,7 +30,7 @@ class Follower(Role):
 
     def start(self):
         pass
-        # 启动网络监听
+        # Start network listening
         self.network_manager.start_listening()
         print(f"[Server] Initialized role: {self.identity}, Server ID: {self.server_id}")
 
@@ -86,7 +86,7 @@ class Follower(Role):
         pass
 
     def get_current_load(self):
-        """获取当前负载信息"""
+        """Get current load information"""
         pass
         cpu_percent = psutil.cpu_percent(interval=1)
         memory_percent = psutil.virtual_memory().percent

@@ -11,95 +11,95 @@ logger = logging.getLogger(__name__)
 
 def validate_ip_address(ip_str):
     """
-    验证IP地址的合法性
+    Validate the legitimacy of an IP address
     
     Args:
-        ip_str: IP地址字符串
+        ip_str: IP address string
         
     Returns:
         tuple: (is_valid, error_message)
-               is_valid: bool, True表示有效
-               error_message: str, 如果无效则包含错误信息
+               is_valid: bool, True indicates valid
+               error_message: str, contains error message if invalid
     """
     if not ip_str or not isinstance(ip_str, str):
-        return False, "IP地址不能为空"
+        return False, "IP address cannot be empty"
     
     ip_str = ip_str.strip()
     
-    # 1. 检查IP格式是否有效
+    # 1. Check if IP format is valid
     try:
         ip_obj = ipaddress.ip_address(ip_str)
     except ValueError as e:
-        return False, f"IP地址格式无效: {str(e)}"
+        return False, f"Invalid IP address format: {str(e)}"
     
-    # 2. 检查是否是保留地址或多播地址（回环地址除外）
+    # 2. Check if it's a reserved or multicast address (except loopback)
     if ip_obj.is_loopback:
-        logger.debug(f"IP {ip_str} 是回环地址（本地测试用）")
-        # 继续验证，不跳过绑定测试
+        logger.debug(f"IP {ip_str} is loopback address (for local testing)")
+        # Continue validation, don't skip binding test
     elif ip_obj.is_reserved:
-        return False, f"IP地址 {ip_str} 是保留地址，不能使用"
+        return False, f"IP address {ip_str} is reserved and cannot be used"
     
     if ip_obj.is_multicast:
-        return False, f"IP地址 {ip_str} 是多播地址，不能使用"
+        return False, f"IP address {ip_str} is multicast address and cannot be used"
     
-    # 3. 验证是否可以绑定到该IP（最重要的检查）
+    # 3. Verify if it can bind to this IP (most important check)
     try:
         test_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         test_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        # 使用一个临时端口测试绑定
+        # Test binding with a temporary port
         test_sock.bind((ip_str, 0))
         test_sock.close()
     except OSError as e:
         if ip_obj.is_loopback:
-            return False, (f"回环地址 {ip_str} 无法绑定: {str(e)}\n"
-                          f"在macOS上，可能需要先添加别名：\n"
+            return False, (f"Loopback address {ip_str} cannot be bound: {str(e)}\n"
+                          f"On macOS, you may need to add an alias first:\n"
                           f"  sudo ifconfig lo0 alias {ip_str}\n"
-                          f"或者使用 127.0.0.1")
+                          f"or use 127.0.0.1")
         else:
-            return False, f"无法绑定到IP地址 {ip_str}: {str(e)}"
+            return False, f"Cannot bind to IP address {ip_str}: {str(e)}"
     
-    # 4. 对于非回环地址，检查是否是本机的有效网络接口IP
+    # 4. For non-loopback addresses, check if it's a valid network interface IP
     if not ip_obj.is_loopback:
         try:
             local_ips = get_local_ips()
             if ip_str not in local_ips:
-                logger.warning(f"IP {ip_str} 不在本机网络接口列表中")
-                logger.warning(f"本机可用IP: {', '.join(local_ips)}")
-                return False, (f"IP地址 {ip_str} 不属于本机网络接口。\n"
-                              f"本机可用IP: {', '.join(local_ips)}")
+                logger.warning(f"IP {ip_str} is not in the local network interface list")
+                logger.warning(f"Available IPs on this machine: {', '.join(local_ips)}")
+                return False, (f"IP address {ip_str} does not belong to local network interface.\n"
+                              f"Available IPs on this machine: {', '.join(local_ips)}")
         except Exception as e:
-            logger.warning(f"无法检查本机网络接口: {e}")
+            logger.warning(f"Cannot check local network interface: {e}")
     
     return True, ""
 
 
 def get_local_ips():
     """
-    获取本机所有有效的IP地址
+    Get all valid IP addresses on this machine
     
     Returns:
-        list: IP地址列表
+        list: IP address list
     """
     local_ips = set()
     
     try:
-        # 方法1: 获取主机名对应的IP
+        # Method 1: Get IP corresponding to hostname
         hostname = socket.gethostname()
         host_ips = socket.gethostbyname_ex(hostname)[2]
         local_ips.update(host_ips)
     except Exception as e:
-        logger.debug(f"无法通过主机名获取IP: {e}")
+        logger.debug(f"Cannot get IP via hostname: {e}")
     
     try:
-        # 方法2: 通过创建临时连接获取本地IP
+        # Method 2: Get local IP by creating temporary connection
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(("8.8.8.8", 80))
         local_ips.add(s.getsockname()[0])
         s.close()
     except Exception as e:
-        logger.debug(f"无法通过临时连接获取IP: {e}")
+        logger.debug(f"Cannot get IP via temporary connection: {e}")
     
-    # 添加回环地址
+    # Add loopback address
     local_ips.add('127.0.0.1')
     
     return sorted(list(local_ips))
@@ -107,33 +107,33 @@ def get_local_ips():
 
 def prompt_valid_ip():
     """
-    提示用户输入有效的IP地址，直到输入合法为止
+    Prompt user to enter a valid IP address until it's legal
     
     Returns:
-        str: 有效的IP地址
+        str: Valid IP address
     """
-    # 显示可用的 IP 地址
+    # Display available IP addresses
     print("\n" + "="*50)
-    print("可用的 IP 地址:")
+    print("Available IP addresses:")
     print("="*50)
     
     local_ips = get_local_ips()
     for i, ip in enumerate(local_ips, 1):
         print(f"  {i}. {ip}")
     
-    print("\n回环地址 :")
-    print("  - 127.0.0.1 (默认可用)")
-    print("  - 127.0.0.x ( MACOS 需要先添加别名: sudo ifconfig lo0 alias 127.0.0.x)")
+    print("\nLoopback addresses:")
+    print("  - 127.0.0.1 (default available)")
+    print("  - 127.0.0.x (macOS requires adding alias first: sudo ifconfig lo0 alias 127.0.0.x)")
     print("="*50 + "\n")
     
     while True:
-        ip_str = input("请输入服务器 IP 地址: ").strip()
+        ip_str = input("Please enter server IP address: ").strip()
         
         is_valid, error_msg = validate_ip_address(ip_str)
         
         if is_valid:
-            print(f"[IP验证] ✓ IP地址 {ip_str} 验证通过")
+            print(f"[IP Validation] ✓ IP address {ip_str} validation passed")
             return ip_str
         else:
-            print(f"[IP验证] ✗ {error_msg}")
-            print("[IP验证] 请重新输入...")
+            print(f"[IP Validation] ✗ {error_msg}")
+            print("[IP Validation] Please re-enter...")
