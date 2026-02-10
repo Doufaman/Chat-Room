@@ -4,7 +4,13 @@
 # General
 # ==================================================
 
+TYPE_LEADER = "LEADER"
+TYPE_FOLLOWER = "FOLLOWER"
+
 DEBUG = True
+ACTIVE = "ACTIVE"
+SUSPECT = "SUSPECT"
+DEAD = "DEAD"
 
 # ==================================================
 # Network / Communication
@@ -16,6 +22,9 @@ DEBUG = True
 # Heartbeat / Fault Tolerance
 # ==================================================
 
+HEARTBEAT_INTERVAL = 10  # seconds
+HEARTBEAT_LEADER_TIMEOUT = 20  # seconds
+HEARTBEAT_SERVER_TIMEOUT = 40  # seconds
 
 
 # ==================================================

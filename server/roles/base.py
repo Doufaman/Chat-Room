@@ -4,7 +4,7 @@ class Role(ABC):
     def __init__(self):
         self._running = True
         # identity: INIT / FOLLOWER / LEADER / CANDIDATE
-        self._identity = "INIT"
+        self.identity = "INIT"
         # network manager
         self.network_manager = None
         # server id
@@ -34,4 +34,5 @@ class Role(ABC):
     def shutdown(self):
         """Cleanly stop the role and release resources. Must be idempotent."""
         pass
+
         
