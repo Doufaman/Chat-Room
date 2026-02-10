@@ -165,13 +165,16 @@ class Server(Role):
         
         elif msg_type == "CHATROOM_DELETED":
             # Leader broadcasts chatroom deletion notification
-            chatroom_id = message.get("chatroom_id")
-            if chatroom_id:
-                with self.chatroom_lock:
-                    if chatroom_id in self.chatroom_list:
-                        del self.chatroom_list[chatroom_id]
-                        logger.info(f"[Server {self.server_id}] Removed chatroom {chatroom_id} from list")
-        
+            logger.info(f"[Server {self.server_id}] Received CHATROOM_DELETED for chatroom_ids: {message.get('chatroom_ids', [])}")
+            chatroom_ids = message.get("chatroom_ids", [])
+            if chatroom_ids:
+                for chatroom_id in chatroom_ids:
+                    with self.chatroom_lock:
+                        if chatroom_id in self.chatroom_list:
+                            del self.chatroom_list[chatroom_id]
+                            logger.info(f"[Server {self.server_id}] Removed chatroom {chatroom_id} from list")
+                            logger.info(f"[Server {self.server_id}] Current chatroom_list after deletion: {self.chatroom_list}")
+    
         elif msg_type == "UPDATE_CHATROOM":
             # Update chatroom info (e.g., client count change)
             chatroom_id = message.get("chatroom_id")
@@ -376,7 +379,49 @@ class Server(Role):
                         )
                     
                     logger.info(f'[Follower {self.server_id}] Created chatroom {chatroom_id}, reported to Leader')
-            
+
+            if msg_type == "TAKE_OVER_CHATROOM":
+                # Leader指示本server接管chatroom实例（从故障server迁移过来）
+                chatroom_name = message.get("chatroom_name")
+                old_chatroom_id = message.get("old_chatroom_id")
+                original_group_members = message.get("original_group_members", {})
+                
+                logger.info(f'[Follower {self.server_id}] Taking over chatroom "{chatroom_name}" from old chatroom {old_chatroom_id}')
+                
+                # 使用ChatroomManager创建实际的chatroom
+                room_info = self.chatroom_manager.create_room(chatroom_name)
+                
+                if room_info:
+                    # 构造新chatroom信息
+                    chatroom_id = f"{self.server_id}_{room_info['room_id']}"
+                    chatroom_info = {
+                        "chatroom_id": chatroom_id,
+                        "name": chatroom_name,
+                        "server_id": self.server_id,
+                        "server_ip": self.network_manager.ip_local,
+                        "port": room_info['port'],
+                        "clients_count": 0
+                    }
+                    logger.info(f"[Follower {self.server_id}] Created chatroom {chatroom_id} to take over from old chatroom {old_chatroom_id}")
+                    # todo: pulling historical chatting records from original group members
+                    # attributes: old_chatroom_id, original_group_members
+
+                    
+                    # 回报给Leader
+                    leader_ip = self.membership_list.get(self.leader_id)
+                    if leader_ip:
+                        self.network_manager.send_unicast(
+                            leader_ip,
+                            9001,
+                            "CHATROOM_CREATED",
+                            {"chatroom_info": chatroom_info}
+                        )
+
+                    
+                    logger.info(f'[Follower {self.server_id}] Took over and created chatroom {chatroom_id}, reported to Leader')
+
+
+
             if msg_type == "REGISTER_ACK":
                 #print('hhey')
                 self.leader_id = message.get("leader_id")
@@ -446,6 +491,7 @@ class Server(Role):
                 removed_group_id = message.get("group_id")
                 removed_server_id = int(removed_server_id) if isinstance(removed_server_id, str) else removed_server_id
                 self.membership_list.pop(removed_server_id, None)
+                self.membership_manager.remove_group_member(removed_server_id, removed_group_id)
                 logger.info(f'[Follower] Server removed: {removed_server_id} from group {removed_group_id}. Updated membership list: {self.membership_list}')
                 try:
                     if self.election_manager:
@@ -475,6 +521,19 @@ class Server(Role):
                         logger.info(f"Reconnected to new leader {new_leader_id} at {new_leader_ip}")
                     except Exception as e:
                         logger.debug(f"Failed to reconnect to new leader: {e}")
+            elif msg_type == "GROUP_REASSIGN":
+                moved_server_id = message.get("server_id")
+                moved_server_ip = message.get("moved_server_ip")
+                new_group_id = message.get("new_group_id")
+                new_group_members = message.get("new_group_members", {})
+                moved_server_id = int(moved_server_id) if isinstance(moved_server_id, str) else moved_server_id
+                if moved_server_id == self.server_id:
+                    self.membership_manager.set_group_info(new_group_id, new_group_members)
+                elif new_group_id == self.membership_manager.group_id:
+                    self.membership_manager.add_group_member(moved_server_id, moved_server_ip)
+                logger.info(f'[Follower] Group reassignment: server {moved_server_id} moved to group {new_group_id}. Updated group members: {new_group_members}')
+ 
+ 
     def change_role(self, new_role, leader_id):
         """Handle role change triggered by ElectionManager."""
         # Only log if role actually changes
@@ -621,6 +680,13 @@ class Server(Role):
         """Return current membership list for ElectionManager."""
         return self.membership_list.copy()
     
+    def get_chatroom_info(self, server_id):
+        chatrooms_name = None
+        with self.chatroom_lock:
+            chatrooms_name = {info["chatroom_id"] :info["name"] for info in self.chatroom_list.values() if info['server_id'] == server_id}
+        return chatrooms_name
+
+
     def _select_server_for_chatroom(self):
         """Select server with fewest chatrooms to create (load balancing)"""
         # Count number of chatrooms owned by each server
