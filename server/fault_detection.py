@@ -114,11 +114,17 @@ class HeartbeatMonitor:
                             logger.debug(f"fault_discovery failed for {sid}: {e}")
                 else:
                     # follower: check leader freshness
+                    # Skip timeout detection if election is in progress
+                    em = getattr(self.server, "election_manager", None)
+                    if em and hasattr(em, 'election_in_progress') and em.election_in_progress:
+                        logger.debug("Election in progress, skipping heartbeat timeout check")
+                        time.sleep(poll_interval)
+                        continue
+                    
                     leader_ts = getattr(self.server, "leader_latest_heartbeat", None)
                     if leader_ts and (time.time() - leader_ts > self.leader_timeout):
-                        logger.warning("leader heartbeat timeout detected, start election")
+                        logger.warning(f"leader heartbeat timeout detected ({time.time() - leader_ts:.1f}s > {self.leader_timeout}s), start election")
                         # Only trigger if we haven't recently done so
-                        em = getattr(self.server, "election_manager", None)
                         if em:
                             # Check if election is already in progress
                             if hasattr(em, 'state') and em.state == 'ELECTION':

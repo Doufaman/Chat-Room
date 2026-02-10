@@ -19,8 +19,8 @@ TYPE_ANSWER = 'ANSWER'
 TYPE_COORDINATOR = 'COORDINATOR'
 
 # --- Configuration Constants ---
-TIMEOUT_ELECTION = 3.0   # How long to wait for ANSWER
-TIMEOUT_COORDINATOR = 5.0 # How long to wait for COORDINATOR after receiving ANSWER
+TIMEOUT_ELECTION = 5.0   # How long to wait for ANSWER (increased for network delays)
+TIMEOUT_COORDINATOR = 8.0 # How long to wait for COORDINATOR after receiving ANSWER
 
 # --- States for Election Process ---
 STATE_FOLLOWER = "FOLLOWER"
@@ -73,6 +73,9 @@ class ElectionManager:
         # Election timing control (prevent rapid re-elections)
         self.last_election_time = 0
         self.min_election_interval = 2.0  # Minimum time between elections
+        
+        # Flag to pause heartbeat timeout detection during election
+        self.election_in_progress = False
         
         # Track if this server joined as Follower (should not self-elect initially)
         self.joined_as_follower = (initial_state == STATE_FOLLOWER)
@@ -201,6 +204,7 @@ class ElectionManager:
                     self.current_leader_id = sender_id
                     self.leader_ip = sender_ip
                     self.state = STATE_FOLLOWER
+                    self.election_in_progress = False  # Election completed, resume heartbeat detection
                     self._notify_state_change_if_changed(old_state)
                     self.election_trigger.set()
                     # Reset leader heartbeat timestamp
@@ -274,6 +278,9 @@ class ElectionManager:
     # --- Election Logic ---
     def handle_election(self):
         """Handle CANDIDATE state - run Bully election."""
+        # Set flag to pause heartbeat timeout detection
+        self.election_in_progress = True
+        
         # Add random delay to avoid simultaneous elections
         random_delay = random.uniform(0.1, 0.5)
         time.sleep(random_delay)
@@ -403,6 +410,7 @@ class ElectionManager:
             return
         
         self.last_election_time = current_time
+        self.election_in_progress = True  # Pause heartbeat timeout detection
         logger.warning(f"[{self._get_identity()}] Election triggered: {reason}")
         self.state = STATE_ELECTION
         self.election_trigger.set()
@@ -423,6 +431,7 @@ class ElectionManager:
             self.state = STATE_LEADER
             self.current_leader_id = self.my_id
             self.leader_ip = self.local_ip
+            self.election_in_progress = False  # Election completed
             self._notify_state_change()
         
         logger.info(f"[{self._get_identity()}] Broadcasting COORDINATOR (victory)")

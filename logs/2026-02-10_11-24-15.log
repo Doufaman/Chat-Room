@@ -1,0 +1,89 @@
+11:24:15 [root] [INFO] 日志系统初始化完成。文件保存至: logs/2026-02-10_11-24-15.log
+11:24:17 [utills.ip_validator] [DEBUG] IP 127.0.0.4 是回环地址（本地测试用）
+11:24:17 [election] [INFO] [I'm Follower - (421567286, 127.0.0.4)] Election Manager starting
+11:24:17 [election] [INFO] [I'm Follower - (421567286, 127.0.0.4)] UDP listener started on UDP:9003
+11:24:18 [network_manager] [DEBUG] Starting follower long-lived connection to leader at 127.0.0.1...
+11:24:18 [network_manager] [DEBUG] Follower established long-lived connection to leader at 127.0.0.1
+11:24:20 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 245273971, 'timestamp': 1770719060.740237, 'identity': 'LEADER'} from 245273971, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 245273971: '127.0.0.1'}
+11:24:23 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 245273971, 'timestamp': 1770719063.74103, 'identity': 'LEADER'} from 245273971, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 245273971: '127.0.0.1'}
+11:24:25 [server_role] [INFO] [Follower] New follower joined: 56406045 with IP: 127.0.0.5. Updated membership list: {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 245273971: '127.0.0.1', 56406045: '127.0.0.5'}
+11:24:26 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 245273971, 'timestamp': 1770719066.740196, 'identity': 'LEADER'} from 245273971, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 245273971: '127.0.0.1', 56406045: '127.0.0.5'}
+11:24:29 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 245273971, 'timestamp': 1770719069.7397609, 'identity': 'LEADER'} from 245273971, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 245273971: '127.0.0.1', 56406045: '127.0.0.5'}
+11:24:32 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 245273971, 'timestamp': 1770719072.7409868, 'identity': 'LEADER'} from 245273971, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 245273971: '127.0.0.1', 56406045: '127.0.0.5'}
+11:24:35 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 245273971, 'timestamp': 1770719075.74103, 'identity': 'LEADER'} from 245273971, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 245273971: '127.0.0.1', 56406045: '127.0.0.5'}
+11:24:38 [server_role] [INFO] [Follower] New follower joined: 16841055 with IP: 127.0.0.5. Updated membership list: {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 245273971: '127.0.0.1', 56406045: '127.0.0.5', 16841055: '127.0.0.5'}
+11:24:38 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 245273971, 'timestamp': 1770719078.7380521, 'identity': 'LEADER'} from 245273971, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 245273971: '127.0.0.1', 56406045: '127.0.0.5', 16841055: '127.0.0.5'}
+11:24:41 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 245273971, 'timestamp': 1770719081.741031, 'identity': 'LEADER'} from 245273971, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 245273971: '127.0.0.1', 56406045: '127.0.0.5', 16841055: '127.0.0.5'}
+11:24:46 [server.heartbeat] [ERROR] [I'm Follower - 421567286] Failed to send heartbeat to leader 245273971: [Errno 32] Broken pipe
+11:24:49 [network_manager] [ERROR] No connection found for 245273971, cannot send message
+11:24:52 [network_manager] [ERROR] No connection found for 245273971, cannot send message
+11:24:55 [network_manager] [ERROR] No connection found for 245273971, cannot send message
+11:24:57 [fault_detection] [WARNING] leader heartbeat timeout detected (16.0s > 15s), start election
+11:24:57 [election] [WARNING] [I'm Follower - (421567286, 127.0.0.4)] Election triggered: leader heartbeat timeout
+11:24:58 [election] [INFO] [I'm Election - (421567286, 127.0.0.4)] Election started; peers=[709734829, 353319114, 245273971, 56406045, 16841055]
+11:24:58 [election] [INFO] [I'm Election - (421567286, 127.0.0.4)] Challenging higher peers: [709734829]
+11:24:58 [election] [DEBUG] [I'm Election - (421567286, 127.0.0.4)] UDP send ELECTION -> 127.0.0.2:9003
+11:24:58 [server_role] [DEBUG] Closed old connection to 709734829
+11:24:58 [network_manager] [DEBUG] Starting follower long-lived connection to leader at 127.0.0.2...
+11:24:58 [network_manager] [DEBUG] Follower established long-lived connection to leader at 127.0.0.2
+11:24:58 [server_role] [INFO] Reconnected to new leader 709734829 at 127.0.0.2
+11:24:59 [fault_detection] [DEBUG] Election in progress, skipping heartbeat timeout check
+11:25:00 [election] [INFO] [I'm Election - (421567286, 127.0.0.4)] Received COORDINATOR from 709734829 (127.0.0.2)
+11:25:00 [election] [INFO] [I'm Election - (421567286, 127.0.0.4)] In ELECTION, accepting first COORDINATOR from 709734829
+11:25:00 [election] [INFO] [I'm Follower - (421567286, 127.0.0.4)] Reset leader heartbeat timer for new leader 709734829
+11:25:00 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 709734829, 'timestamp': 1770719100.2018402, 'identity': 'LEADER'} from 709734829, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 245273971: '127.0.0.1', 56406045: '127.0.0.5', 16841055: '127.0.0.5'}
+11:25:00 [election] [INFO] [I'm Follower - (421567286, 127.0.0.4)] Received COORDINATOR from 709734829 (127.0.0.2)
+11:25:00 [election] [INFO] [I'm Follower - (421567286, 127.0.0.4)] Connecting to new leader 709734829 at 127.0.0.2
+11:25:00 [network_manager] [DEBUG] Starting follower long-lived connection to leader at 127.0.0.2...
+11:25:00 [network_manager] [DEBUG] Follower established long-lived connection to leader at 127.0.0.2
+11:25:00 [election] [INFO] [I'm Follower - (421567286, 127.0.0.4)] Received COORDINATOR from 709734829 (127.0.0.2)
+11:25:00 [election] [INFO] [I'm Follower - (421567286, 127.0.0.4)] Received COORDINATOR from 709734829 (127.0.0.2)
+11:25:01 [election] [INFO] [I'm Follower - (421567286, 127.0.0.4)] Received COORDINATOR from 709734829 (127.0.0.2)
+11:25:03 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 709734829, 'timestamp': 1770719103.171705, 'identity': 'LEADER'} from 709734829, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 245273971: '127.0.0.1', 56406045: '127.0.0.5', 16841055: '127.0.0.5'}
+11:25:06 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 709734829, 'timestamp': 1770719106.1687691, 'identity': 'LEADER'} from 709734829, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 245273971: '127.0.0.1', 56406045: '127.0.0.5', 16841055: '127.0.0.5'}
+11:25:09 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 709734829, 'timestamp': 1770719109.168232, 'identity': 'LEADER'} from 709734829, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 245273971: '127.0.0.1', 56406045: '127.0.0.5', 16841055: '127.0.0.5'}
+11:25:15 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 709734829, 'timestamp': 1770719115.169136, 'identity': 'LEADER'} from 709734829, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 245273971: '127.0.0.1', 56406045: '127.0.0.5', 16841055: '127.0.0.5'}
+11:25:18 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 709734829, 'timestamp': 1770719118.170541, 'identity': 'LEADER'} from 709734829, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 245273971: '127.0.0.1', 56406045: '127.0.0.5', 16841055: '127.0.0.5'}
+11:25:19 [server_role] [INFO] [Follower] Server removed: 245273971 from group None. Updated membership list: {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 56406045: '127.0.0.5', 16841055: '127.0.0.5'}
+11:25:21 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 709734829, 'timestamp': 1770719121.1705768, 'identity': 'LEADER'} from 709734829, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 56406045: '127.0.0.5', 16841055: '127.0.0.5'}
+11:25:24 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 709734829, 'timestamp': 1770719124.167451, 'identity': 'LEADER'} from 709734829, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 56406045: '127.0.0.5', 16841055: '127.0.0.5'}
+11:25:27 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 709734829, 'timestamp': 1770719127.171056, 'identity': 'LEADER'} from 709734829, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 56406045: '127.0.0.5', 16841055: '127.0.0.5'}
+11:25:31 [server.heartbeat] [ERROR] [I'm Follower - 421567286] Failed to send heartbeat to leader 709734829: [Errno 32] Broken pipe
+11:25:34 [network_manager] [ERROR] No connection found for 709734829, cannot send message
+11:25:37 [network_manager] [ERROR] No connection found for 709734829, cannot send message
+11:25:40 [network_manager] [ERROR] No connection found for 709734829, cannot send message
+11:25:42 [fault_detection] [WARNING] leader heartbeat timeout detected (15.7s > 15s), start election
+11:25:42 [election] [WARNING] [I'm Follower - (421567286, 127.0.0.4)] Election triggered: leader heartbeat timeout
+11:25:43 [election] [INFO] [I'm Election - (421567286, 127.0.0.4)] Election started; peers=[709734829, 353319114, 56406045, 16841055]
+11:25:43 [election] [INFO] [I'm Election - (421567286, 127.0.0.4)] Challenging higher peers: [709734829]
+11:25:43 [election] [DEBUG] [I'm Election - (421567286, 127.0.0.4)] UDP send ELECTION -> 127.0.0.2:9003
+11:25:43 [network_manager] [ERROR] No connection found for 709734829, cannot send message
+11:25:44 [fault_detection] [DEBUG] Election in progress, skipping heartbeat timeout check
+11:25:45 [fault_detection] [DEBUG] Election in progress, skipping heartbeat timeout check
+11:25:46 [server_role] [DEBUG] Closed old connection to 353319114
+11:25:46 [network_manager] [DEBUG] Starting follower long-lived connection to leader at 127.0.0.3...
+11:25:46 [network_manager] [DEBUG] Follower established long-lived connection to leader at 127.0.0.3
+11:25:46 [server_role] [INFO] Reconnected to new leader 353319114 at 127.0.0.3
+11:25:47 [fault_detection] [DEBUG] Election in progress, skipping heartbeat timeout check
+11:25:47 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 353319114, 'timestamp': 1770719147.398433, 'identity': 'LEADER'} from 353319114, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 56406045: '127.0.0.5', 16841055: '127.0.0.5'}
+11:25:47 [election] [INFO] [I'm Election - (421567286, 127.0.0.4)] Received COORDINATOR from 353319114 (127.0.0.3)
+11:25:47 [election] [INFO] [I'm Election - (421567286, 127.0.0.4)] In ELECTION, accepting first COORDINATOR from 353319114
+11:25:47 [election] [INFO] [I'm Follower - (421567286, 127.0.0.4)] Reset leader heartbeat timer for new leader 353319114
+11:25:47 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 353319114, 'timestamp': 1770719147.8693361, 'identity': 'LEADER'} from 353319114, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 56406045: '127.0.0.5', 16841055: '127.0.0.5'}
+11:25:48 [election] [INFO] [I'm Follower - (421567286, 127.0.0.4)] Received COORDINATOR from 353319114 (127.0.0.3)
+11:25:48 [election] [INFO] [I'm Follower - (421567286, 127.0.0.4)] Accepting COORDINATOR from 353319114 (no current leader)
+11:25:48 [election] [INFO] [I'm Follower - (421567286, 127.0.0.4)] Connecting to new leader 353319114 at 127.0.0.3
+11:25:48 [network_manager] [DEBUG] Starting follower long-lived connection to leader at 127.0.0.3...
+11:25:48 [network_manager] [DEBUG] Follower established long-lived connection to leader at 127.0.0.3
+11:25:48 [election] [INFO] [I'm Follower - (421567286, 127.0.0.4)] Received COORDINATOR from 353319114 (127.0.0.3)
+11:25:48 [election] [INFO] [I'm Follower - (421567286, 127.0.0.4)] Accepting COORDINATOR from 353319114 (no current leader)
+11:25:48 [election] [INFO] [I'm Follower - (421567286, 127.0.0.4)] Received COORDINATOR from 353319114 (127.0.0.3)
+11:25:48 [election] [INFO] [I'm Follower - (421567286, 127.0.0.4)] Accepting COORDINATOR from 353319114 (no current leader)
+11:25:48 [election] [INFO] [I'm Follower - (421567286, 127.0.0.4)] Received COORDINATOR from 353319114 (127.0.0.3)
+11:25:48 [election] [INFO] [I'm Follower - (421567286, 127.0.0.4)] Accepting COORDINATOR from 353319114 (no current leader)
+11:25:50 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 353319114, 'timestamp': 1770719150.398418, 'identity': 'LEADER'} from 353319114, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 56406045: '127.0.0.5', 16841055: '127.0.0.5'}
+11:25:53 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 353319114, 'timestamp': 1770719153.398043, 'identity': 'LEADER'} from 353319114, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 56406045: '127.0.0.5', 16841055: '127.0.0.5'}
+11:25:59 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 353319114, 'timestamp': 1770719159.398307, 'identity': 'LEADER'} from 353319114, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 56406045: '127.0.0.5', 16841055: '127.0.0.5'}
+11:26:02 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 353319114, 'timestamp': 1770719162.394041, 'identity': 'LEADER'} from 353319114, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 56406045: '127.0.0.5', 16841055: '127.0.0.5'}
+11:26:05 [server.heartbeat] [DEBUG] [I'm Follower - 421567286] Heartbeat received message: HEARTBEAT {'server_id': 353319114, 'timestamp': 1770719165.396395, 'identity': 'LEADER'} from 353319114, current memnershiplist is {709734829: '127.0.0.2', 353319114: '127.0.0.3', 421567286: '127.0.0.4', 56406045: '127.0.0.5', 16841055: '127.0.0.5'}
+11:26:07 [server_role] [INFO] [Follower] Server removed: 709734829 from group None. Updated membership list: {353319114: '127.0.0.3', 421567286: '127.0.0.4', 56406045: '127.0.0.5', 16841055: '127.0.0.5'}

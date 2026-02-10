@@ -1,0 +1,362 @@
+11:03:12 [root] [INFO] 日志系统初始化完成。文件保存至: logs/2026-02-10_11-03-12.log
+11:03:14 [utills.ip_validator] [DEBUG] IP 127.0.0.4 是回环地址（本地测试用）
+11:03:14 [election] [INFO] [I'm Follower - (796159384, 127.0.0.4)] Election Manager starting
+11:03:14 [election] [INFO] [I'm Follower - (796159384, 127.0.0.4)] UDP listener started on UDP:9003
+11:03:15 [network_manager] [DEBUG] Starting follower long-lived connection to leader at 127.0.0.1...
+11:03:15 [network_manager] [DEBUG] Follower established long-lived connection to leader at 127.0.0.1
+11:03:17 [server.heartbeat] [DEBUG] [I'm Follower - 796159384] Heartbeat received message: HEARTBEAT {'server_id': 989101947, 'timestamp': 1770717797.688173, 'identity': 'LEADER'} from 989101947, current memnershiplist is {457685830: '127.0.0.2', 292976350: '127.0.0.3', 796159384: '127.0.0.4', 989101947: '127.0.0.1'}
+11:03:20 [server.heartbeat] [DEBUG] [I'm Follower - 796159384] Heartbeat received message: HEARTBEAT {'server_id': 989101947, 'timestamp': 1770717800.685097, 'identity': 'LEADER'} from 989101947, current memnershiplist is {457685830: '127.0.0.2', 292976350: '127.0.0.3', 796159384: '127.0.0.4', 989101947: '127.0.0.1'}
+11:03:25 [server.heartbeat] [ERROR] [I'm Follower - 796159384] Failed to send heartbeat to leader 989101947: [Errno 32] Broken pipe
+11:03:28 [network_manager] [ERROR] No connection found for 989101947, cannot send message
+11:03:31 [network_manager] [ERROR] No connection found for 989101947, cannot send message
+11:03:32 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:03:32 [election] [WARNING] [I'm Follower - (796159384, 127.0.0.4)] Election triggered: leader heartbeat timeout
+11:03:32 [election] [INFO] [I'm Election - (796159384, 127.0.0.4)] Election started; peers=[457685830, 292976350, 989101947]
+11:03:32 [election] [INFO] [I'm Election - (796159384, 127.0.0.4)] Challenging higher peers: [989101947]
+11:03:32 [election] [DEBUG] [I'm Election - (796159384, 127.0.0.4)] UDP send ELECTION -> 127.0.0.1:9003
+11:03:33 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:03:33 [fault_detection] [INFO] Election already in progress, skipping trigger
+11:03:34 [network_manager] [ERROR] No connection found for 989101947, cannot send message
+11:03:35 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:03:35 [fault_detection] [INFO] Election already in progress, skipping trigger
+11:03:35 [election] [INFO] [I'm Election - (796159384, 127.0.0.4)] No ANSWER received, becoming Leader
+11:03:35 [server_role] [DEBUG] Closed connection to old leader 457685830
+11:03:36 [membership] [INFO] server 796159384 assigned to group group_0
+11:03:36 [membership] [INFO] Leader initialized with server info: {'server_id': 796159384, 'load_info': {'cpu_percent': 5.7, 'memory_percent': 77.4}, 'address': '127.0.0.4'}
+11:03:36 [membership] [INFO] server added: 457685830
+11:03:36 [server_role] [INFO] [Leader] Initialized server 457685830 in membership
+11:03:36 [membership] [INFO] server added: 292976350
+11:03:36 [server_role] [INFO] [Leader] Initialized server 292976350 in membership
+11:03:36 [membership] [INFO] server added: 989101947
+11:03:36 [server_role] [INFO] [Leader] Initialized server 989101947 in membership
+11:03:36 [network_manager] [DEBUG] Starting leader long-lived connection listener...
+11:03:36 [network_manager] [DEBUG] Leader long-lived connection listener started
+11:03:36 [server_role] [INFO] [Leader] Notifying followers about new leader: 796159384
+11:03:36 [server_role] [INFO] [Leader] Notified follower 457685830 at 127.0.0.2 about new leader
+11:03:36 [server_role] [INFO] [Leader] Notified follower 292976350 at 127.0.0.3 about new leader
+11:03:36 [server_role] [INFO] [Leader] Notified follower 989101947 at 127.0.0.1 about new leader
+11:03:36 [server_role] [INFO] [Leader] Waiting for followers to connect...
+11:03:36 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717816.602588, 'identity': 'LEADER'}
+11:03:36 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:03:37 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:03:37 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717817.953364, 'identity': 'LEADER'}
+11:03:37 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:03:37 [server_role] [INFO] [Leader] Sent initial heartbeat after becoming leader
+11:03:37 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Broadcasting COORDINATOR (victory)
+11:03:37 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:03:37 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:37 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:37 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:03:37 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:03:37 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:37 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:03:37 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:03:37 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:37 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:37 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:03:37 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:37 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:37 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:03:37 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:37 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:37 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:03:37 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:37 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:37 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:03:37 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:37 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:03:37 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:03:37 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:37 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:37 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:03:37 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:37 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:37 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:03:37 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:37 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:03:37 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:03:37 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:38 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:38 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:03:38 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:38 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:38 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:38 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:03:38 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:38 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:38 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:38 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:03:38 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:38 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:38 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:39 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717819.60079, 'identity': 'LEADER'}
+11:03:39 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:03:42 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717822.602157, 'identity': 'LEADER'}
+11:03:42 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:03:45 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717825.6019468, 'identity': 'LEADER'}
+11:03:45 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:03:48 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717828.6005409, 'identity': 'LEADER'}
+11:03:48 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:03:49 [membership] [INFO] server 457685830 status changed: ACTIVE -> SUSPECT
+11:03:49 [membership] [INFO] server 292976350 status changed: ACTIVE -> SUSPECT
+11:03:49 [membership] [INFO] server 989101947 status changed: ACTIVE -> SUSPECT
+11:03:49 [fault_detection] [INFO] Suspected servers: [457685830, 292976350, 989101947]. Sending probes.
+11:03:49 [network_manager] [ERROR] No connection found for 457685830, cannot send message
+11:03:49 [network_manager] [ERROR] No connection found for 292976350, cannot send message
+11:03:49 [network_manager] [ERROR] No connection found for 989101947, cannot send message
+11:03:50 [fault_detection] [WARNING] 457685830 did not respond -> mark DEAD
+11:03:50 [membership] [INFO] server 457685830 status changed: SUSPECT -> DEAD
+11:03:50 [membership] [INFO] server removed: 457685830
+11:03:50 [fault_discovery] [INFO] Handling dead server 457685830
+11:03:50 [membership] [WARNING] server 457685830 is not existed
+11:03:50 [membership] [WARNING] server 457685830 is not assigned to any group
+11:03:50 [fault_detection] [WARNING] 292976350 did not respond -> mark DEAD
+11:03:50 [membership] [INFO] server 292976350 status changed: SUSPECT -> DEAD
+11:03:50 [membership] [INFO] server removed: 292976350
+11:03:50 [fault_discovery] [INFO] Handling dead server 292976350
+11:03:50 [membership] [WARNING] server 292976350 is not existed
+11:03:50 [membership] [WARNING] server 292976350 is not assigned to any group
+11:03:50 [fault_detection] [WARNING] 989101947 did not respond -> mark DEAD
+11:03:50 [membership] [INFO] server 989101947 status changed: SUSPECT -> DEAD
+11:03:50 [membership] [INFO] server removed: 989101947
+11:03:50 [fault_discovery] [INFO] Handling dead server 989101947
+11:03:50 [membership] [WARNING] server 989101947 is not existed
+11:03:50 [membership] [WARNING] server 989101947 is not assigned to any group
+11:03:51 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717831.603035, 'identity': 'LEADER'}
+11:03:51 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:03:54 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717834.5992918, 'identity': 'LEADER'}
+11:03:54 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:03:55 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:55 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:03:55 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:55 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:55 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:03:55 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:55 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:55 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:03:55 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:55 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:55 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:03:55 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:56 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:56 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:03:56 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:56 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:03:56 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:03:56 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:56 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:03:56 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:03:56 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:56 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:03:56 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:03:56 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:56 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:03:56 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:03:56 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:57 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:03:57 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:03:57 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:57 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717837.598093, 'identity': 'LEADER'}
+11:03:57 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:04:00 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717840.5982988, 'identity': 'LEADER'}
+11:04:00 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:04:03 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717843.6007092, 'identity': 'LEADER'}
+11:04:03 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:04:06 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717846.598207, 'identity': 'LEADER'}
+11:04:06 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:04:09 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717849.6007318, 'identity': 'LEADER'}
+11:04:09 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:04:12 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717852.6030452, 'identity': 'LEADER'}
+11:04:12 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:04:13 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:04:13 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:04:13 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:13 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:04:13 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:04:13 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:14 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:04:14 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:04:14 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:14 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:14 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:04:14 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:14 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:14 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:04:14 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:14 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:04:14 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:04:14 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:14 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:14 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:04:14 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:14 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:04:14 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:04:14 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:14 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:14 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:04:14 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:14 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:14 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:04:14 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:15 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:15 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:04:15 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:15 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717855.60269, 'identity': 'LEADER'}
+11:04:15 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:04:18 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717858.6021361, 'identity': 'LEADER'}
+11:04:18 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:04:21 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717861.60255, 'identity': 'LEADER'}
+11:04:21 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:04:24 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717864.599452, 'identity': 'LEADER'}
+11:04:24 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:04:27 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717867.601333, 'identity': 'LEADER'}
+11:04:27 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:04:30 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717870.6009102, 'identity': 'LEADER'}
+11:04:30 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:04:31 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:04:31 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:04:31 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:31 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:04:31 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:04:31 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:31 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:31 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:04:31 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:31 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:31 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:04:31 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:31 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:04:31 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:04:31 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:31 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:31 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:04:31 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:31 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:04:31 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:04:31 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:31 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:31 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:04:31 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:31 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:04:31 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:04:31 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:32 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:32 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:04:32 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:32 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:32 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:04:32 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:33 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717873.599846, 'identity': 'LEADER'}
+11:04:33 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:04:36 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717876.599947, 'identity': 'LEADER'}
+11:04:36 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:04:39 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717879.598989, 'identity': 'LEADER'}
+11:04:39 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:04:42 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717882.603063, 'identity': 'LEADER'}
+11:04:42 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:04:45 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717885.601717, 'identity': 'LEADER'}
+11:04:45 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:04:48 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717888.603034, 'identity': 'LEADER'}
+11:04:48 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:04:48 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:04:48 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:04:48 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:48 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:04:48 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:04:48 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:49 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:49 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:04:49 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:49 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:49 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:04:49 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:49 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:04:49 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:04:49 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:49 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:49 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:04:49 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:49 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:04:49 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:04:49 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:49 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:49 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:04:49 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:49 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:04:49 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:04:49 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:49 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:49 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:04:49 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:49 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:49 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:04:49 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:51 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717891.598413, 'identity': 'LEADER'}
+11:04:51 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:04:54 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717894.601571, 'identity': 'LEADER'}
+11:04:54 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:04:57 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717897.598999, 'identity': 'LEADER'}
+11:04:57 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:05:00 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717900.60036, 'identity': 'LEADER'}
+11:05:00 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:05:03 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717903.601435, 'identity': 'LEADER'}
+11:05:03 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:05:06 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:05:06 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:05:06 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:06 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:05:06 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:05:06 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:06 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717906.601077, 'identity': 'LEADER'}
+11:05:06 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:05:06 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:05:06 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:05:06 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:06 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:05:06 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:05:06 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:06 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:05:06 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:05:06 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:06 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:05:06 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:05:06 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:06 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:05:06 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:05:06 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:07 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:05:07 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:05:07 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:07 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:05:07 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:05:07 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:07 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:05:07 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:05:07 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:07 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:05:07 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 457685830's COORDINATOR (I'm already Leader)
+11:05:07 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:09 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717909.603043, 'identity': 'LEADER'}
+11:05:09 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:05:12 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717912.602299, 'identity': 'LEADER'}
+11:05:12 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:05:15 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717915.600584, 'identity': 'LEADER'}
+11:05:15 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:05:18 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717918.6003132, 'identity': 'LEADER'}
+11:05:18 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:05:21 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717921.6012201, 'identity': 'LEADER'}
+11:05:21 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:05:23 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:05:23 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:05:23 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:23 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:05:23 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:05:23 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:24 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:05:24 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:05:24 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:24 [election] [INFO] [I'm Leader - (796159384, 127.0.0.4)] Received COORDINATOR from 292976350 (127.0.0.3)
+11:05:24 [election] [WARNING] [I'm Leader - (796159384, 127.0.0.4)] Rejecting lower ID 292976350's COORDINATOR (I'm already Leader)
+11:05:24 [election] [DEBUG] [I'm Leader - (796159384, 127.0.0.4)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:24 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 796159384, 'timestamp': 1770717924.6011279, 'identity': 'LEADER'}
+11:05:24 [network_manager] [DEBUG] there are currently 0 followers to send to: []

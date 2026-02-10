@@ -23,8 +23,8 @@ DEAD = "DEAD"
 # ==================================================
 
 HEARTBEAT_INTERVAL = 3  # seconds
-HEARTBEAT_LEADER_TIMEOUT = 10  # seconds (3-4 heartbeat cycles)
-HEARTBEAT_SERVER_TIMEOUT = 12  # seconds
+HEARTBEAT_LEADER_TIMEOUT = 15  # seconds 
+HEARTBEAT_SERVER_TIMEOUT = 18  # seconds
 
 
 # ==================================================

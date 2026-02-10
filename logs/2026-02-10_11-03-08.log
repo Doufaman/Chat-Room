@@ -1,0 +1,408 @@
+11:03:08 [root] [INFO] 日志系统初始化完成。文件保存至: logs/2026-02-10_11-03-08.log
+11:03:10 [utills.ip_validator] [DEBUG] IP 127.0.0.3 是回环地址（本地测试用）
+11:03:10 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Election Manager starting
+11:03:10 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] UDP listener started on UDP:9003
+11:03:11 [network_manager] [DEBUG] Starting follower long-lived connection to leader at 127.0.0.1...
+11:03:11 [network_manager] [DEBUG] Follower established long-lived connection to leader at 127.0.0.1
+11:03:11 [server.heartbeat] [DEBUG] [I'm Follower - 292976350] Heartbeat received message: HEARTBEAT {'server_id': 989101947, 'timestamp': 1770717791.686191, 'identity': 'LEADER'} from 989101947, current memnershiplist is {457685830: '127.0.0.2', 292976350: '127.0.0.3', 989101947: '127.0.0.1'}
+11:03:14 [server.heartbeat] [DEBUG] [I'm Follower - 292976350] Heartbeat received message: HEARTBEAT {'server_id': 989101947, 'timestamp': 1770717794.6881542, 'identity': 'LEADER'} from 989101947, current memnershiplist is {457685830: '127.0.0.2', 292976350: '127.0.0.3', 989101947: '127.0.0.1'}
+11:03:15 [server_role] [INFO] [Follower] New follower joined: 796159384 with IP: 127.0.0.4. Updated membership list: {457685830: '127.0.0.2', 292976350: '127.0.0.3', 989101947: '127.0.0.1', 796159384: '127.0.0.4'}
+11:03:15 [server_role] [INFO] Received STEAL_NOTIFICATION: stolen_server=292976350, stolen_group_id=group_0, new_group_id=group_1, new_group_member={'796159384': '127.0.0.4'}
+11:03:15 [server_role] [INFO] Server 292976350 is being stolen from group group_0 to new group group_1
+11:03:15 [server_role] [INFO] Updated group info: group_id=group_1, group_members={'796159384': '127.0.0.4'}
+11:03:17 [server.heartbeat] [DEBUG] [I'm Follower - 292976350] Heartbeat received message: HEARTBEAT {'server_id': 989101947, 'timestamp': 1770717797.688173, 'identity': 'LEADER'} from 989101947, current memnershiplist is {457685830: '127.0.0.2', 292976350: '127.0.0.3', 989101947: '127.0.0.1', 796159384: '127.0.0.4'}
+11:03:20 [server.heartbeat] [DEBUG] [I'm Follower - 292976350] Heartbeat received message: HEARTBEAT {'server_id': 989101947, 'timestamp': 1770717800.685097, 'identity': 'LEADER'} from 989101947, current memnershiplist is {457685830: '127.0.0.2', 292976350: '127.0.0.3', 989101947: '127.0.0.1', 796159384: '127.0.0.4'}
+11:03:24 [server.heartbeat] [ERROR] [I'm Follower - 292976350] Failed to send heartbeat to leader 989101947: [Errno 32] Broken pipe
+11:03:27 [network_manager] [ERROR] No connection found for 989101947, cannot send message
+11:03:30 [network_manager] [ERROR] No connection found for 989101947, cannot send message
+11:03:31 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:03:31 [election] [WARNING] [I'm Follower - (292976350, 127.0.0.3)] Election triggered: leader heartbeat timeout
+11:03:31 [election] [INFO] [I'm Election - (292976350, 127.0.0.3)] Election started; peers=[457685830, 989101947, 796159384]
+11:03:31 [election] [INFO] [I'm Election - (292976350, 127.0.0.3)] Challenging higher peers: [457685830, 989101947, 796159384]
+11:03:31 [election] [DEBUG] [I'm Election - (292976350, 127.0.0.3)] UDP send ELECTION -> 127.0.0.2:9003
+11:03:31 [election] [DEBUG] [I'm Election - (292976350, 127.0.0.3)] UDP send ELECTION -> 127.0.0.1:9003
+11:03:31 [election] [DEBUG] [I'm Election - (292976350, 127.0.0.3)] UDP send ELECTION -> 127.0.0.4:9003
+11:03:32 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:03:32 [fault_detection] [INFO] Election already in progress, skipping trigger
+11:03:33 [network_manager] [ERROR] No connection found for 989101947, cannot send message
+11:03:34 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:03:34 [fault_detection] [INFO] Election already in progress, skipping trigger
+11:03:34 [election] [INFO] [I'm Election - (292976350, 127.0.0.3)] No ANSWER received, becoming Leader
+11:03:34 [server_role] [DEBUG] Closed connection to old leader 457685830
+11:03:35 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 292976350, 'timestamp': 1770717815.5810308, 'identity': 'LEADER'}
+11:03:35 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:03:35 [membership] [INFO] server 292976350 assigned to group group_0
+11:03:35 [membership] [INFO] Leader initialized with server info: {'server_id': 292976350, 'load_info': {'cpu_percent': 5.7, 'memory_percent': 77.4}, 'address': '127.0.0.3'}
+11:03:35 [membership] [INFO] server added: 457685830
+11:03:35 [server_role] [INFO] [Leader] Initialized server 457685830 in membership
+11:03:35 [membership] [INFO] server added: 989101947
+11:03:35 [server_role] [INFO] [Leader] Initialized server 989101947 in membership
+11:03:35 [membership] [INFO] server added: 796159384
+11:03:35 [server_role] [INFO] [Leader] Initialized server 796159384 in membership
+11:03:35 [network_manager] [DEBUG] Starting leader long-lived connection listener...
+11:03:35 [network_manager] [DEBUG] Leader long-lived connection listener started
+11:03:35 [server_role] [INFO] [Leader] Notifying followers about new leader: 292976350
+11:03:35 [server_role] [INFO] [Leader] Notified follower 457685830 at 127.0.0.2 about new leader
+11:03:35 [server_role] [INFO] [Leader] Notified follower 989101947 at 127.0.0.1 about new leader
+11:03:35 [server_role] [INFO] [Leader] Notified follower 796159384 at 127.0.0.4 about new leader
+11:03:35 [server_role] [INFO] [Leader] Waiting for followers to connect...
+11:03:37 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 292976350, 'timestamp': 1770717817.1705978, 'identity': 'LEADER'}
+11:03:37 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+11:03:37 [server_role] [INFO] [Leader] Sent initial heartbeat after becoming leader
+11:03:37 [election] [INFO] [I'm Leader - (292976350, 127.0.0.3)] Broadcasting COORDINATOR (victory)
+11:03:37 [election] [DEBUG] [I'm Leader - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:37 [election] [DEBUG] [I'm Leader - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:37 [election] [DEBUG] [I'm Leader - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:37 [election] [INFO] [I'm Leader - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:37 [election] [INFO] [I'm Leader - (292976350, 127.0.0.3)] Demoting to Follower, new Leader: 457685830
+11:03:37 [network_manager] [DEBUG] Starting follower long-lived connection to leader at 127.0.0.2...
+11:03:37 [network_manager] [DEBUG] Follower established long-lived connection to leader at 127.0.0.2
+11:03:37 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:37 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:37 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:37 [network_manager] [DEBUG] Registered long-lived connection from follower 292976350 at ('127.0.0.2', 63292)
+11:03:37 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:37 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:37 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:37 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:37 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:37 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:37 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:37 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:37 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:37 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:37 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:37 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:37 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:37 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:37 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:37 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:38 [network_manager] [DEBUG] Registered long-lived connection from follower 457685830 at ('127.0.0.4', 63293)
+11:03:38 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:38 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:38 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:38 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:38 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:38 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:38 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:38 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:38 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:38 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:41 [server.heartbeat] [DEBUG] [I'm Follower - 292976350] Heartbeat received message: HEARTBEAT {'server_id': 457685830, 'timestamp': 1770717820.538859, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 17.4, 'memory_percent': 75.5}} from 457685830, current memnershiplist is {457685830: '127.0.0.2', 292976350: '127.0.0.3', 989101947: '127.0.0.1', 796159384: '127.0.0.4'}
+11:03:41 [fault_detection] [WARNING] Received heartbeat from unexpected identity FOLLOWER while being FOLLOWER
+11:03:44 [server.heartbeat] [DEBUG] [I'm Follower - 292976350] Heartbeat received message: HEARTBEAT {'server_id': 457685830, 'timestamp': 1770717823.538087, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 5.9, 'memory_percent': 75.6}} from 457685830, current memnershiplist is {457685830: '127.0.0.2', 292976350: '127.0.0.3', 989101947: '127.0.0.1', 796159384: '127.0.0.4'}
+11:03:44 [fault_detection] [WARNING] Received heartbeat from unexpected identity FOLLOWER while being FOLLOWER
+11:03:47 [server.heartbeat] [DEBUG] [I'm Follower - 292976350] Heartbeat received message: HEARTBEAT {'server_id': 457685830, 'timestamp': 1770717826.5414069, 'identity': 'FOLLOWER', 'load_info': {'cpu_percent': 4.4, 'memory_percent': 75.8}} from 457685830, current memnershiplist is {457685830: '127.0.0.2', 292976350: '127.0.0.3', 989101947: '127.0.0.1', 796159384: '127.0.0.4'}
+11:03:47 [fault_detection] [WARNING] Received heartbeat from unexpected identity FOLLOWER while being FOLLOWER
+11:03:50 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:03:50 [election] [WARNING] [I'm Follower - (292976350, 127.0.0.3)] Election triggered: leader heartbeat timeout
+11:03:50 [server_role] [INFO] [Follower] Server removed: 457685830 from group None. Updated membership list: {292976350: '127.0.0.3', 989101947: '127.0.0.1', 796159384: '127.0.0.4'}
+11:03:50 [election] [INFO] [I'm Election - (292976350, 127.0.0.3)] Election started; peers=[989101947, 796159384]
+11:03:50 [election] [INFO] [I'm Election - (292976350, 127.0.0.3)] Challenging higher peers: [989101947, 796159384]
+11:03:50 [election] [DEBUG] [I'm Election - (292976350, 127.0.0.3)] UDP send ELECTION -> 127.0.0.1:9003
+11:03:50 [election] [DEBUG] [I'm Election - (292976350, 127.0.0.3)] UDP send ELECTION -> 127.0.0.4:9003
+11:03:51 [network_manager] [ERROR] No connection found for 457685830, cannot send message
+11:03:51 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:03:51 [fault_detection] [INFO] Election already in progress, skipping trigger
+11:03:53 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:03:53 [fault_detection] [INFO] Election already in progress, skipping trigger
+11:03:53 [election] [INFO] [I'm Election - (292976350, 127.0.0.3)] No ANSWER received, becoming Leader
+11:03:53 [server_role] [DEBUG] Closed connection to old leader 989101947
+11:03:54 [membership] [INFO] server 457685830 status changed: ACTIVE -> SUSPECT
+11:03:54 [membership] [INFO] server 989101947 status changed: ACTIVE -> SUSPECT
+11:03:54 [membership] [INFO] server 796159384 status changed: ACTIVE -> SUSPECT
+11:03:54 [fault_detection] [INFO] Suspected servers: [457685830, 989101947, 796159384]. Sending probes.
+11:03:54 [network_manager] [ERROR] No connection found for 457685830, cannot send message
+11:03:54 [network_manager] [ERROR] No connection found for 989101947, cannot send message
+11:03:54 [network_manager] [ERROR] No connection found for 796159384, cannot send message
+11:03:54 [membership] [INFO] server 292976350 assigned to group group_0
+11:03:54 [membership] [INFO] Leader initialized with server info: {'server_id': 292976350, 'load_info': {'cpu_percent': 6.8, 'memory_percent': 76.5}, 'address': '127.0.0.3'}
+11:03:54 [network_manager] [DEBUG] Starting leader long-lived connection listener...
+11:03:54 [network_manager] [DEBUG] Leader long-lived connection listener started
+11:03:54 [server_role] [INFO] [Leader] Notifying followers about new leader: 292976350
+11:03:54 [server_role] [INFO] [Leader] Notified follower 989101947 at 127.0.0.1 about new leader
+11:03:54 [server_role] [INFO] [Leader] Notified follower 796159384 at 127.0.0.4 about new leader
+11:03:54 [server_role] [INFO] [Leader] Waiting for followers to connect...
+11:03:55 [election] [INFO] [I'm Leader - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:55 [fault_detection] [WARNING] 457685830 did not respond -> mark DEAD
+11:03:55 [membership] [INFO] server 457685830 status changed: SUSPECT -> DEAD
+11:03:55 [membership] [INFO] server removed: 457685830
+11:03:55 [fault_discovery] [INFO] Handling dead server 457685830
+11:03:55 [membership] [WARNING] server 457685830 is not existed
+11:03:55 [membership] [WARNING] server 457685830 is not assigned to any group
+11:03:55 [fault_detection] [WARNING] 989101947 did not respond -> mark DEAD
+11:03:55 [membership] [INFO] server 989101947 status changed: SUSPECT -> DEAD
+11:03:55 [membership] [INFO] server removed: 989101947
+11:03:55 [fault_discovery] [INFO] Handling dead server 989101947
+11:03:55 [membership] [WARNING] server 989101947 is not existed
+11:03:55 [membership] [WARNING] server 989101947 is not assigned to any group
+11:03:55 [fault_detection] [WARNING] 796159384 did not respond -> mark DEAD
+11:03:55 [membership] [INFO] server 796159384 status changed: SUSPECT -> DEAD
+11:03:55 [membership] [INFO] server removed: 796159384
+11:03:55 [fault_discovery] [INFO] Handling dead server 796159384
+11:03:55 [membership] [WARNING] server 796159384 is not existed
+11:03:55 [membership] [WARNING] server 796159384 is not assigned to any group
+11:03:56 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 292976350, 'timestamp': 1770717836.278263, 'identity': 'LEADER'}
+11:03:56 [network_manager] [DEBUG] there are currently 1 followers to send to: [292976350]
+11:03:56 [server_role] [INFO] [Leader] Sent initial heartbeat after becoming leader
+11:03:56 [election] [INFO] [I'm Leader - (292976350, 127.0.0.3)] Broadcasting COORDINATOR (victory)
+11:03:56 [election] [INFO] [I'm Leader - (292976350, 127.0.0.3)] Demoting to Follower, new Leader: 457685830
+11:03:56 [election] [DEBUG] [I'm Leader - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:56 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:56 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:56 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:56 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:56 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:56 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:56 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:56 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:03:56 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:56 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:56 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:56 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:56 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:56 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:56 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:56 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:57 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:03:57 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:03:57 [network_manager] [ERROR] No connection found for 457685830, cannot send message
+11:04:00 [network_manager] [ERROR] No connection found for 457685830, cannot send message
+11:04:03 [network_manager] [ERROR] No connection found for 457685830, cannot send message
+11:04:06 [network_manager] [ERROR] No connection found for 457685830, cannot send message
+11:04:07 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:04:07 [election] [WARNING] [I'm Follower - (292976350, 127.0.0.3)] Election triggered: leader heartbeat timeout
+11:04:08 [election] [INFO] [I'm Election - (292976350, 127.0.0.3)] Election started; peers=[989101947, 796159384]
+11:04:08 [election] [INFO] [I'm Election - (292976350, 127.0.0.3)] Challenging higher peers: [989101947, 796159384]
+11:04:08 [election] [DEBUG] [I'm Election - (292976350, 127.0.0.3)] UDP send ELECTION -> 127.0.0.1:9003
+11:04:08 [election] [DEBUG] [I'm Election - (292976350, 127.0.0.3)] UDP send ELECTION -> 127.0.0.4:9003
+11:04:09 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:04:09 [fault_detection] [INFO] Election already in progress, skipping trigger
+11:04:09 [network_manager] [ERROR] No connection found for 457685830, cannot send message
+11:04:10 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:04:10 [fault_detection] [INFO] Election already in progress, skipping trigger
+11:04:11 [election] [INFO] [I'm Election - (292976350, 127.0.0.3)] No ANSWER received, becoming Leader
+11:04:11 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 292976350, 'timestamp': 1770717851.5842052, 'identity': 'LEADER'}
+11:04:11 [network_manager] [DEBUG] there are currently 1 followers to send to: [292976350]
+11:04:12 [membership] [INFO] server 292976350 assigned to group group_0
+11:04:12 [membership] [INFO] Leader initialized with server info: {'server_id': 292976350, 'load_info': {'cpu_percent': 6.3, 'memory_percent': 76.8}, 'address': '127.0.0.3'}
+11:04:12 [network_manager] [DEBUG] Starting leader long-lived connection listener...
+11:04:12 [network_manager] [DEBUG] Leader long-lived connection listener started
+11:04:12 [server_role] [INFO] [Leader] Notifying followers about new leader: 292976350
+11:04:12 [server_role] [INFO] [Leader] Waiting for followers to connect...
+11:04:13 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 292976350, 'timestamp': 1770717853.5947719, 'identity': 'LEADER'}
+11:04:13 [network_manager] [DEBUG] there are currently 1 followers to send to: [292976350]
+11:04:13 [server_role] [INFO] [Leader] Sent initial heartbeat after becoming leader
+11:04:13 [election] [INFO] [I'm Leader - (292976350, 127.0.0.3)] Broadcasting COORDINATOR (victory)
+11:04:13 [election] [DEBUG] [I'm Leader - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:13 [election] [INFO] [I'm Leader - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:13 [election] [INFO] [I'm Leader - (292976350, 127.0.0.3)] Demoting to Follower, new Leader: 796159384
+11:04:13 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:13 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:14 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:14 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:14 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:14 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:14 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:14 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:14 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:14 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:14 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:14 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:14 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:14 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:14 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:14 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:14 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:14 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:15 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:15 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:15 [network_manager] [ERROR] No connection found for 796159384, cannot send message
+11:04:18 [network_manager] [ERROR] No connection found for 796159384, cannot send message
+11:04:21 [network_manager] [ERROR] No connection found for 796159384, cannot send message
+11:04:24 [network_manager] [ERROR] No connection found for 796159384, cannot send message
+11:04:25 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:04:25 [election] [WARNING] [I'm Follower - (292976350, 127.0.0.3)] Election triggered: leader heartbeat timeout
+11:04:25 [election] [INFO] [I'm Election - (292976350, 127.0.0.3)] Election started; peers=[989101947, 796159384]
+11:04:25 [election] [INFO] [I'm Election - (292976350, 127.0.0.3)] Challenging higher peers: [989101947, 796159384]
+11:04:25 [election] [DEBUG] [I'm Election - (292976350, 127.0.0.3)] UDP send ELECTION -> 127.0.0.1:9003
+11:04:25 [election] [DEBUG] [I'm Election - (292976350, 127.0.0.3)] UDP send ELECTION -> 127.0.0.4:9003
+11:04:26 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:04:26 [fault_detection] [INFO] Election already in progress, skipping trigger
+11:04:27 [network_manager] [ERROR] No connection found for 796159384, cannot send message
+11:04:28 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:04:28 [fault_detection] [INFO] Election already in progress, skipping trigger
+11:04:28 [election] [INFO] [I'm Election - (292976350, 127.0.0.3)] No ANSWER received, becoming Leader
+11:04:29 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 292976350, 'timestamp': 1770717869.5797088, 'identity': 'LEADER'}
+11:04:29 [network_manager] [DEBUG] there are currently 1 followers to send to: [292976350]
+11:04:29 [membership] [INFO] server 292976350 assigned to group group_1
+11:04:29 [membership] [INFO] Leader initialized with server info: {'server_id': 292976350, 'load_info': {'cpu_percent': 8.7, 'memory_percent': 77.7}, 'address': '127.0.0.3'}
+11:04:29 [network_manager] [DEBUG] Starting leader long-lived connection listener...
+11:04:29 [network_manager] [DEBUG] Leader long-lived connection listener started
+11:04:29 [server_role] [INFO] [Leader] Notifying followers about new leader: 292976350
+11:04:29 [server_role] [INFO] [Leader] Waiting for followers to connect...
+11:04:31 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 292976350, 'timestamp': 1770717871.143094, 'identity': 'LEADER'}
+11:04:31 [network_manager] [DEBUG] there are currently 1 followers to send to: [292976350]
+11:04:31 [server_role] [INFO] [Leader] Sent initial heartbeat after becoming leader
+11:04:31 [election] [INFO] [I'm Leader - (292976350, 127.0.0.3)] Broadcasting COORDINATOR (victory)
+11:04:31 [election] [DEBUG] [I'm Leader - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:31 [election] [INFO] [I'm Leader - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:31 [election] [INFO] [I'm Leader - (292976350, 127.0.0.3)] Demoting to Follower, new Leader: 796159384
+11:04:31 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:31 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:31 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:31 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:31 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:31 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:31 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:31 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:31 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:31 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:31 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:31 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:31 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:31 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:31 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:31 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:32 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:32 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:32 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:32 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:33 [network_manager] [ERROR] No connection found for 796159384, cannot send message
+11:04:36 [network_manager] [ERROR] No connection found for 796159384, cannot send message
+11:04:39 [network_manager] [ERROR] No connection found for 796159384, cannot send message
+11:04:42 [network_manager] [ERROR] No connection found for 796159384, cannot send message
+11:04:42 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:04:42 [election] [WARNING] [I'm Follower - (292976350, 127.0.0.3)] Election triggered: leader heartbeat timeout
+11:04:43 [election] [INFO] [I'm Election - (292976350, 127.0.0.3)] Election started; peers=[989101947, 796159384]
+11:04:43 [election] [INFO] [I'm Election - (292976350, 127.0.0.3)] Challenging higher peers: [989101947, 796159384]
+11:04:43 [election] [DEBUG] [I'm Election - (292976350, 127.0.0.3)] UDP send ELECTION -> 127.0.0.1:9003
+11:04:43 [election] [DEBUG] [I'm Election - (292976350, 127.0.0.3)] UDP send ELECTION -> 127.0.0.4:9003
+11:04:44 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:04:44 [fault_detection] [INFO] Election already in progress, skipping trigger
+11:04:45 [network_manager] [ERROR] No connection found for 796159384, cannot send message
+11:04:45 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:04:45 [fault_detection] [INFO] Election already in progress, skipping trigger
+11:04:46 [election] [INFO] [I'm Election - (292976350, 127.0.0.3)] No ANSWER received, becoming Leader
+11:04:47 [membership] [INFO] server 292976350 assigned to group group_0
+11:04:47 [membership] [INFO] Leader initialized with server info: {'server_id': 292976350, 'load_info': {'cpu_percent': 10.4, 'memory_percent': 78.0}, 'address': '127.0.0.3'}
+11:04:47 [network_manager] [DEBUG] Starting leader long-lived connection listener...
+11:04:47 [network_manager] [DEBUG] Leader long-lived connection listener started
+11:04:47 [server_role] [INFO] [Leader] Notifying followers about new leader: 292976350
+11:04:47 [server_role] [INFO] [Leader] Waiting for followers to connect...
+11:04:47 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 292976350, 'timestamp': 1770717887.579935, 'identity': 'LEADER'}
+11:04:47 [network_manager] [DEBUG] there are currently 1 followers to send to: [292976350]
+11:04:48 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 292976350, 'timestamp': 1770717888.720163, 'identity': 'LEADER'}
+11:04:48 [network_manager] [DEBUG] there are currently 1 followers to send to: [292976350]
+11:04:48 [server_role] [INFO] [Leader] Sent initial heartbeat after becoming leader
+11:04:48 [election] [INFO] [I'm Leader - (292976350, 127.0.0.3)] Broadcasting COORDINATOR (victory)
+11:04:48 [election] [DEBUG] [I'm Leader - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:48 [election] [INFO] [I'm Leader - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:48 [election] [INFO] [I'm Leader - (292976350, 127.0.0.3)] Demoting to Follower, new Leader: 796159384
+11:04:48 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:48 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:49 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:49 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:49 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:49 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:49 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:49 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:49 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:49 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:49 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:49 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:49 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:49 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:49 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:04:49 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:49 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:49 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:49 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:04:49 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:04:51 [network_manager] [ERROR] No connection found for 796159384, cannot send message
+11:04:54 [network_manager] [ERROR] No connection found for 796159384, cannot send message
+11:04:57 [network_manager] [ERROR] No connection found for 796159384, cannot send message
+11:05:00 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:05:00 [election] [WARNING] [I'm Follower - (292976350, 127.0.0.3)] Election triggered: leader heartbeat timeout
+11:05:00 [network_manager] [ERROR] No connection found for 796159384, cannot send message
+11:05:00 [election] [INFO] [I'm Election - (292976350, 127.0.0.3)] Election started; peers=[989101947, 796159384]
+11:05:00 [election] [INFO] [I'm Election - (292976350, 127.0.0.3)] Challenging higher peers: [989101947, 796159384]
+11:05:00 [election] [DEBUG] [I'm Election - (292976350, 127.0.0.3)] UDP send ELECTION -> 127.0.0.1:9003
+11:05:00 [election] [DEBUG] [I'm Election - (292976350, 127.0.0.3)] UDP send ELECTION -> 127.0.0.4:9003
+11:05:01 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:05:01 [fault_detection] [INFO] Election already in progress, skipping trigger
+11:05:03 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:05:03 [fault_detection] [INFO] Election already in progress, skipping trigger
+11:05:03 [network_manager] [ERROR] No connection found for 796159384, cannot send message
+11:05:03 [election] [INFO] [I'm Election - (292976350, 127.0.0.3)] No ANSWER received, becoming Leader
+11:05:04 [membership] [INFO] server 292976350 assigned to group group_1
+11:05:04 [membership] [INFO] Leader initialized with server info: {'server_id': 292976350, 'load_info': {'cpu_percent': 12.7, 'memory_percent': 77.9}, 'address': '127.0.0.3'}
+11:05:04 [network_manager] [DEBUG] Starting leader long-lived connection listener...
+11:05:04 [network_manager] [DEBUG] Leader long-lived connection listener started
+11:05:04 [server_role] [INFO] [Leader] Notifying followers about new leader: 292976350
+11:05:04 [server_role] [INFO] [Leader] Waiting for followers to connect...
+11:05:05 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 292976350, 'timestamp': 1770717905.5825, 'identity': 'LEADER'}
+11:05:05 [network_manager] [DEBUG] there are currently 1 followers to send to: [292976350]
+11:05:06 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 292976350, 'timestamp': 1770717906.280631, 'identity': 'LEADER'}
+11:05:06 [network_manager] [DEBUG] there are currently 1 followers to send to: [292976350]
+11:05:06 [server_role] [INFO] [Leader] Sent initial heartbeat after becoming leader
+11:05:06 [election] [INFO] [I'm Leader - (292976350, 127.0.0.3)] Broadcasting COORDINATOR (victory)
+11:05:06 [election] [DEBUG] [I'm Leader - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:06 [election] [INFO] [I'm Leader - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:05:06 [election] [INFO] [I'm Leader - (292976350, 127.0.0.3)] Demoting to Follower, new Leader: 796159384
+11:05:06 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:06 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:05:06 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:06 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:05:06 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:05:06 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:05:06 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:05:06 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:05:06 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:06 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:05:06 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:05:06 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:05:07 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:07 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:05:07 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:05:07 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:05:07 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:05:07 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:05:07 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 457685830 (127.0.0.2)
+11:05:07 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:05:09 [network_manager] [ERROR] No connection found for 796159384, cannot send message
+11:05:12 [network_manager] [ERROR] No connection found for 796159384, cannot send message
+11:05:15 [network_manager] [ERROR] No connection found for 796159384, cannot send message
+11:05:17 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:05:17 [election] [WARNING] [I'm Follower - (292976350, 127.0.0.3)] Election triggered: leader heartbeat timeout
+11:05:18 [election] [INFO] [I'm Election - (292976350, 127.0.0.3)] Election started; peers=[989101947, 796159384]
+11:05:18 [election] [INFO] [I'm Election - (292976350, 127.0.0.3)] Challenging higher peers: [989101947, 796159384]
+11:05:18 [election] [DEBUG] [I'm Election - (292976350, 127.0.0.3)] UDP send ELECTION -> 127.0.0.1:9003
+11:05:18 [election] [DEBUG] [I'm Election - (292976350, 127.0.0.3)] UDP send ELECTION -> 127.0.0.4:9003
+11:05:18 [network_manager] [ERROR] No connection found for 796159384, cannot send message
+11:05:19 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:05:19 [fault_detection] [INFO] Election already in progress, skipping trigger
+11:05:20 [fault_detection] [WARNING] leader heartbeat timeout detected, start election
+11:05:20 [fault_detection] [INFO] Election already in progress, skipping trigger
+11:05:21 [election] [INFO] [I'm Election - (292976350, 127.0.0.3)] No ANSWER received, becoming Leader
+11:05:22 [membership] [INFO] server 292976350 assigned to group group_2
+11:05:22 [membership] [INFO] Leader initialized with server info: {'server_id': 292976350, 'load_info': {'cpu_percent': 10.7, 'memory_percent': 78.3}, 'address': '127.0.0.3'}
+11:05:22 [network_manager] [DEBUG] Starting leader long-lived connection listener...
+11:05:22 [network_manager] [DEBUG] Leader long-lived connection listener started
+11:05:22 [server_role] [INFO] [Leader] Notifying followers about new leader: 292976350
+11:05:22 [server_role] [INFO] [Leader] Waiting for followers to connect...
+11:05:23 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 292976350, 'timestamp': 1770717923.582668, 'identity': 'LEADER'}
+11:05:23 [network_manager] [DEBUG] there are currently 1 followers to send to: [292976350]
+11:05:23 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 292976350, 'timestamp': 1770717923.746069, 'identity': 'LEADER'}
+11:05:23 [network_manager] [DEBUG] there are currently 1 followers to send to: [292976350]
+11:05:23 [server_role] [INFO] [Leader] Sent initial heartbeat after becoming leader
+11:05:23 [election] [INFO] [I'm Leader - (292976350, 127.0.0.3)] Broadcasting COORDINATOR (victory)
+11:05:23 [election] [DEBUG] [I'm Leader - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:23 [election] [INFO] [I'm Leader - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:05:23 [election] [INFO] [I'm Leader - (292976350, 127.0.0.3)] Demoting to Follower, new Leader: 796159384
+11:05:23 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:23 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:05:24 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:24 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
+11:05:24 [election] [DEBUG] [I'm Follower - (292976350, 127.0.0.3)] UDP send COORDINATOR -> <broadcast>:9003
+11:05:24 [election] [INFO] [I'm Follower - (292976350, 127.0.0.3)] Received COORDINATOR from 796159384 (127.0.0.4)
