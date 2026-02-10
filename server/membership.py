@@ -283,6 +283,8 @@ class MembershipManager():
             for sid in self.group_servers[steal_group_id]:
                 steal_group_members[sid] = self.servers[sid]["address"]
             steal_group_members[steal_server_id] = self.servers[steal_server_id]["address"]
+            if steal_group_id == self.group_id:
+                del self.group_members[steal_server_id]
         if self.group_id == group_id:
             self.group_members[server_id] = self.servers[server_id]["address"]
             
@@ -290,6 +292,93 @@ class MembershipManager():
         logger.info(f"server {server_id} assigned to group {group_id}")
 
         return group_id, existed_members, steal_group_id, steal_server_id, steal_group_members
+
+    def check_and_repair_orphan_groups(self):
+        """
+        Detect and repair orphan groups (groups with only one server).
+        Merge the orphan server into another group with available capacity.
+
+        Return:
+            (moved_server_id, old_group_id, new_group_id, new_group_existing_members)
+
+        If no repair is needed, return None.
+        """
+
+        if not self.is_leader:
+            logger.error("illegal operation (not leader)")
+            return None
+
+        # If only one group exists, no repair needed
+        if len(self.group_servers) <= 1:
+            return None
+
+        for group_id, servers in list(self.group_servers.items()):
+            if len(servers) == 1:
+                orphan_server_id = servers[0]
+
+                # Try to find a target group with available capacity
+                target_group_id = None
+                min_load = float("inf")
+
+                for g_id, g_servers in self.group_servers.items():
+                    if g_id == group_id:
+                        continue
+                    if len(g_servers) < MAX_SERVERS_PER_GROUP:
+                        total_load = sum(
+                            self.servers[sid]["load_info"].get("cpu_percent", 0) +
+                            self.servers[sid]["load_info"].get("memory_percent", 0)
+                            for sid in g_servers
+                        )
+                        if total_load < min_load:
+                            min_load = total_load
+                            target_group_id = g_id
+
+                # No valid group found → cannot repair now
+                if target_group_id is None:
+                    logger.warning(f"cannot repair orphan group {group_id}")
+                    return None
+
+                # Prepare existing members info
+                new_group_existing_members = {
+                    sid: self.servers[sid]["address"]
+                    for sid in self.group_servers[target_group_id]
+                }
+
+                # Move orphan server
+                self.group_servers[group_id].remove(orphan_server_id)
+                self.group_servers[target_group_id].append(orphan_server_id)
+
+                self.server_groups[orphan_server_id] = target_group_id
+
+                # Remove empty group
+                del self.group_servers[group_id]
+
+                logger.info(
+                    f"repair orphan server {orphan_server_id}: "
+                    f"{group_id} -> {target_group_id}"
+                )
+
+                return (
+                    orphan_server_id,
+                    self.servers[orphan_server_id]["address"],
+                    target_group_id,
+                    new_group_existing_members,
+                )
+
+        return None
+
+    def update_group_info(self, moved_server_id, new_group_id, new_group_members, server_id):
+        """
+        Update group information after group change.
+        """
+        if not self.is_leader:
+            logger.error("illegal operation (not leader)")
+            return
+        if moved_server_id == server_id:
+            self.set_group_info(new_group_id, new_group_members)
+        elif new_group_id == self.group_id:
+            self.group_members[moved_server_id] = self.servers[moved_server_id]["address"]
+
 
     def get_group_servers(self, group_id: str) -> Dict[int, str]:
         """
@@ -315,7 +404,7 @@ class MembershipManager():
         del self.server_groups[server_id]
         return group_id
 
-    def get_server_group(self, server_id: int) -> Optional[str]:
+    def get_server_group(self, server_id: int):
         """
         Get the group_id of a server.
         """
@@ -342,13 +431,14 @@ class MembershipManager():
             self.group_members[server_id] = server_ip
    
 
-    def remove_group_member(self, stealserver_id: int, steal_group_id):
+    def remove_group_member(self,  steal_group_id, stealserver_id: int): 
         """
         Remove a server from group members.
         """
         if steal_group_id == self.group_id:
             if stealserver_id in self.group_members:
                 del self.group_members[stealserver_id]
+
 
 
     def bind_chatroom(self, chatroom_id: str):

@@ -16,7 +16,7 @@ from server.chatroom_manager import ChatroomManager
 from server.config import TYPE_FOLLOWER, TYPE_LEADER
 from utills.ip_validator import prompt_valid_ip
 
-DEBUG = True  # or False
+DEBUG = False  # or False
 
 if DEBUG:
     setup_logger(logging.DEBUG)
