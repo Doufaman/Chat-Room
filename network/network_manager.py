@@ -23,7 +23,9 @@ PORT_MULTICAST = 9002
 PORT_ELECTION = 9003  # Dedicated port for election messages
 PORT_LONG_LIVED = 9004  # Dedicated port for long-lived TCP connections (leader <-> followers)
 
-IP_BROADCAST = '255.255.255.255'
+# Hotspot network broadcast (172.20.10.0/28 network)
+IP_BROADCAST = '172.20.10.15'  # /28 subnet broadcast
+# IP_BROADCAST = '255.255.255.255'  # Standard broadcast (may not work in small subnets)
 IP_MULTICAST = '224.0.0.1'
 
 # independent UDP socket functions 
@@ -314,7 +316,7 @@ class NetworkManager:
                 if result:
                     conn, addr = result
                     # Receive identity message
-                    msg = self.receive_tcp_message(conn, timeout=2.0)
+                    msg = self.receive_tcp_message(conn, timeout=3.0)
                     if msg and msg[0] == "IDENTIFY":
                         f_id = msg[1].get("server_id")
                         self.register_connection(conn, server_id=f_id)
@@ -337,7 +339,7 @@ class NetworkManager:
             for f_id, conn in current_conns:
                 try:
                     # Non-blocking message read, timeout set to 0 or very small
-                    msg = self.receive_tcp_message(conn, timeout=0.01)
+                    msg = self.receive_tcp_message(conn, timeout=3)
                     if msg:
                         msg_type, payload, _ = msg
                         self._msg_callback(payload, msg_type, f_id) # trigger higher-level callback for processing

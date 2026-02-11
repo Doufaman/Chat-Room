@@ -1,0 +1,37 @@
+15:32:16 [root] [INFO] Log system initialized. File saved to: logs/2026-02-11_15-32-16.log
+15:32:32 [election] [INFO] [I'm Leader - (458905033, 172.20.10.8)] Election Manager starting
+15:32:32 [election] [INFO] [I'm Leader - (458905033, 172.20.10.8)] UDP listener started on UDP:9003
+15:32:33 [membership] [INFO] server 458905033 assigned to group group_0
+15:32:33 [membership] [INFO] Leader initialized with server info: {'server_id': 458905033, 'load_info': {'cpu_percent': 3.8, 'memory_percent': 80.9}, 'address': '172.20.10.8'}
+15:32:34 [election] [WARNING] [I'm Leader - (458905033, 172.20.10.8)] Election triggered: First server startup
+15:32:34 [election] [INFO] [I'm Election - (458905033, 172.20.10.8)] Election started; peers=[]
+15:32:34 [election] [INFO] [I'm Election - (458905033, 172.20.10.8)] No higher peers, becoming Leader
+15:32:34 [election] [INFO] [I'm Leader - (458905033, 172.20.10.8)] Broadcasting COORDINATOR (victory)
+15:32:43 [election] [INFO] [I'm Leader - (458905033, 172.20.10.8)] Received COORDINATOR from 259465356 (172.20.10.9)
+15:32:43 [election] [WARNING] [I'm Leader - (458905033, 172.20.10.8)] Rejecting lower ID 259465356's COORDINATOR (I'm already Leader)
+15:32:43 [election] [INFO] [I'm Leader - (458905033, 172.20.10.8)] Received COORDINATOR from 259465356 (172.20.10.9)
+15:32:43 [election] [WARNING] [I'm Leader - (458905033, 172.20.10.8)] Rejecting lower ID 259465356's COORDINATOR (I'm already Leader)
+15:32:44 [election] [INFO] [I'm Leader - (458905033, 172.20.10.8)] Received COORDINATOR from 259465356 (172.20.10.9)
+15:32:44 [election] [WARNING] [I'm Leader - (458905033, 172.20.10.8)] Rejecting lower ID 259465356's COORDINATOR (I'm already Leader)
+15:32:44 [election] [INFO] [I'm Leader - (458905033, 172.20.10.8)] Received COORDINATOR from 259465356 (172.20.10.9)
+15:32:44 [election] [WARNING] [I'm Leader - (458905033, 172.20.10.8)] Rejecting lower ID 259465356's COORDINATOR (I'm already Leader)
+15:32:52 [election] [INFO] [I'm Leader - (458905033, 172.20.10.8)] Received COORDINATOR from 259465356 (172.20.10.9)
+15:32:52 [election] [WARNING] [I'm Leader - (458905033, 172.20.10.8)] Rejecting lower ID 259465356's COORDINATOR (I'm already Leader)
+15:32:52 [election] [INFO] [I'm Leader - (458905033, 172.20.10.8)] Received COORDINATOR from 259465356 (172.20.10.9)
+15:32:52 [election] [WARNING] [I'm Leader - (458905033, 172.20.10.8)] Rejecting lower ID 259465356's COORDINATOR (I'm already Leader)
+15:32:52 [election] [INFO] [I'm Leader - (458905033, 172.20.10.8)] Received COORDINATOR from 259465356 (172.20.10.9)
+15:32:52 [election] [WARNING] [I'm Leader - (458905033, 172.20.10.8)] Rejecting lower ID 259465356's COORDINATOR (I'm already Leader)
+15:32:52 [election] [INFO] [I'm Leader - (458905033, 172.20.10.8)] Received COORDINATOR from 259465356 (172.20.10.9)
+15:32:52 [election] [WARNING] [I'm Leader - (458905033, 172.20.10.8)] Rejecting lower ID 259465356's COORDINATOR (I'm already Leader)
+15:32:52 [election] [INFO] [I'm Leader - (458905033, 172.20.10.8)] Received COORDINATOR from 259465356 (172.20.10.9)
+15:32:52 [election] [WARNING] [I'm Leader - (458905033, 172.20.10.8)] Rejecting lower ID 259465356's COORDINATOR (I'm already Leader)
+15:33:01 [election] [INFO] [I'm Leader - (458905033, 172.20.10.8)] Received COORDINATOR from 259465356 (172.20.10.9)
+15:33:01 [election] [WARNING] [I'm Leader - (458905033, 172.20.10.8)] Rejecting lower ID 259465356's COORDINATOR (I'm already Leader)
+15:33:01 [election] [INFO] [I'm Leader - (458905033, 172.20.10.8)] Received COORDINATOR from 259465356 (172.20.10.9)
+15:33:01 [election] [WARNING] [I'm Leader - (458905033, 172.20.10.8)] Rejecting lower ID 259465356's COORDINATOR (I'm already Leader)
+15:33:01 [election] [INFO] [I'm Leader - (458905033, 172.20.10.8)] Received COORDINATOR from 259465356 (172.20.10.9)
+15:33:01 [election] [WARNING] [I'm Leader - (458905033, 172.20.10.8)] Rejecting lower ID 259465356's COORDINATOR (I'm already Leader)
+15:33:02 [election] [INFO] [I'm Leader - (458905033, 172.20.10.8)] Received COORDINATOR from 259465356 (172.20.10.9)
+15:33:02 [election] [WARNING] [I'm Leader - (458905033, 172.20.10.8)] Rejecting lower ID 259465356's COORDINATOR (I'm already Leader)
+15:33:02 [election] [INFO] [I'm Leader - (458905033, 172.20.10.8)] Received COORDINATOR from 259465356 (172.20.10.9)
+15:33:02 [election] [WARNING] [I'm Leader - (458905033, 172.20.10.8)] Rejecting lower ID 259465356's COORDINATOR (I'm already Leader)

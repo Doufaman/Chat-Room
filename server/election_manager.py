@@ -19,8 +19,9 @@ TYPE_ANSWER = 'ANSWER'
 TYPE_COORDINATOR = 'COORDINATOR'
 
 # --- Configuration Constants ---
-TIMEOUT_ELECTION = 5.0   # How long to wait for ANSWER (increased for network delays)
-TIMEOUT_COORDINATOR = 8.0 # How long to wait for COORDINATOR after receiving ANSWER
+# Increased timeouts for stable hotspot network
+TIMEOUT_ELECTION = 8.0   # How long to wait for ANSWER (allow network delays)
+TIMEOUT_COORDINATOR = 12.0 # How long to wait for COORDINATOR after receiving ANSWER
 
 # --- States for Election Process ---
 STATE_FOLLOWER = "FOLLOWER"

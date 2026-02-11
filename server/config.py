@@ -22,9 +22,10 @@ DEAD = "DEAD"
 # Heartbeat / Fault Tolerance
 # ==================================================
 
-HEARTBEAT_INTERVAL = 1  # seconds (reduced for faster detection)
-HEARTBEAT_LEADER_TIMEOUT = 5  # seconds (reduced)
-HEARTBEAT_SERVER_TIMEOUT = 3  # seconds (reduced for faster crash detection)
+# Increased timeouts for stable hotspot network connections
+HEARTBEAT_INTERVAL = 5  # seconds - send heartbeat every 3s
+HEARTBEAT_LEADER_TIMEOUT = 12  # seconds - allow 5 missed heartbeats before timeout
+HEARTBEAT_SERVER_TIMEOUT = 10  # seconds - allow 4 missed heartbeats
 
 
 # ==================================================

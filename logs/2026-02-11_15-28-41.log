@@ -1,0 +1,50 @@
+15:28:41 [root] [INFO] Log system initialized. File saved to: logs/2026-02-11_15-28-41.log
+15:28:56 [election] [INFO] [I'm Leader - (529078505, 172.20.10.8)] Election Manager starting
+15:28:56 [election] [INFO] [I'm Leader - (529078505, 172.20.10.8)] UDP listener started on UDP:9003
+15:28:57 [membership] [INFO] server 529078505 assigned to group group_0
+15:28:57 [membership] [INFO] Leader initialized with server info: {'server_id': 529078505, 'load_info': {'cpu_percent': 6.0, 'memory_percent': 80.7}, 'address': '172.20.10.8'}
+15:28:57 [election] [WARNING] [I'm Leader - (529078505, 172.20.10.8)] Election triggered: First server startup
+15:28:58 [election] [INFO] [I'm Election - (529078505, 172.20.10.8)] Election started; peers=[]
+15:28:58 [election] [INFO] [I'm Election - (529078505, 172.20.10.8)] No higher peers, becoming Leader
+15:28:58 [election] [INFO] [I'm Leader - (529078505, 172.20.10.8)] Broadcasting COORDINATOR (victory)
+15:28:58 [server.heartbeat] [INFO] server 529078505 current chatroom_list: {}
+15:28:58 [fault_detection] [WARNING] Received heartbeat from unexpected identity LEADER while being LEADER
+15:28:59 [server.heartbeat] [INFO] server 529078505 current chatroom_list: {}
+15:28:59 [fault_detection] [WARNING] Received heartbeat from unexpected identity LEADER while being LEADER
+15:29:00 [server.heartbeat] [INFO] server 529078505 current chatroom_list: {}
+15:29:00 [fault_detection] [WARNING] Received heartbeat from unexpected identity LEADER while being LEADER
+15:29:01 [server.heartbeat] [INFO] server 529078505 current chatroom_list: {}
+15:29:01 [fault_detection] [WARNING] Received heartbeat from unexpected identity LEADER while being LEADER
+15:29:01 [election] [INFO] [I'm Leader - (529078505, 172.20.10.8)] Received COORDINATOR from 51797877 (172.20.10.9)
+15:29:01 [election] [WARNING] [I'm Leader - (529078505, 172.20.10.8)] Rejecting lower ID 51797877's COORDINATOR (I'm already Leader)
+15:29:01 [election] [INFO] [I'm Leader - (529078505, 172.20.10.8)] Received COORDINATOR from 51797877 (172.20.10.9)
+15:29:01 [election] [WARNING] [I'm Leader - (529078505, 172.20.10.8)] Rejecting lower ID 51797877's COORDINATOR (I'm already Leader)
+15:29:01 [election] [INFO] [I'm Leader - (529078505, 172.20.10.8)] Received COORDINATOR from 51797877 (172.20.10.9)
+15:29:01 [election] [WARNING] [I'm Leader - (529078505, 172.20.10.8)] Rejecting lower ID 51797877's COORDINATOR (I'm already Leader)
+15:29:01 [election] [INFO] [I'm Leader - (529078505, 172.20.10.8)] Received COORDINATOR from 51797877 (172.20.10.9)
+15:29:01 [election] [WARNING] [I'm Leader - (529078505, 172.20.10.8)] Rejecting lower ID 51797877's COORDINATOR (I'm already Leader)
+15:29:01 [election] [INFO] [I'm Leader - (529078505, 172.20.10.8)] Received COORDINATOR from 51797877 (172.20.10.9)
+15:29:01 [election] [WARNING] [I'm Leader - (529078505, 172.20.10.8)] Rejecting lower ID 51797877's COORDINATOR (I'm already Leader)
+15:29:02 [server.heartbeat] [INFO] server 529078505 current chatroom_list: {}
+15:29:02 [membership] [WARNING] server 51797877 is not existed
+15:29:02 [membership] [WARNING] server 51797877 is not existed
+15:29:03 [server.heartbeat] [INFO] server 529078505 current chatroom_list: {}
+15:29:03 [membership] [WARNING] server 51797877 is not existed
+15:29:03 [membership] [WARNING] server 51797877 is not existed
+15:29:04 [server.heartbeat] [INFO] server 529078505 current chatroom_list: {}
+15:29:04 [membership] [WARNING] server 51797877 is not existed
+15:29:04 [membership] [WARNING] server 51797877 is not existed
+15:29:05 [server.heartbeat] [INFO] server 529078505 current chatroom_list: {}
+15:29:05 [membership] [WARNING] server 51797877 is not existed
+15:29:05 [membership] [WARNING] server 51797877 is not existed
+15:29:06 [server.heartbeat] [INFO] server 529078505 current chatroom_list: {}
+15:29:06 [membership] [WARNING] server 51797877 is not existed
+15:29:06 [membership] [WARNING] server 51797877 is not existed
+15:29:10 [election] [INFO] [I'm Leader - (529078505, 172.20.10.8)] Received COORDINATOR from 51797877 (172.20.10.9)
+15:29:10 [election] [WARNING] [I'm Leader - (529078505, 172.20.10.8)] Rejecting lower ID 51797877's COORDINATOR (I'm already Leader)
+15:29:10 [election] [INFO] [I'm Leader - (529078505, 172.20.10.8)] Received COORDINATOR from 51797877 (172.20.10.9)
+15:29:10 [election] [WARNING] [I'm Leader - (529078505, 172.20.10.8)] Rejecting lower ID 51797877's COORDINATOR (I'm already Leader)
+15:29:11 [election] [INFO] [I'm Leader - (529078505, 172.20.10.8)] Received COORDINATOR from 51797877 (172.20.10.9)
+15:29:11 [election] [WARNING] [I'm Leader - (529078505, 172.20.10.8)] Rejecting lower ID 51797877's COORDINATOR (I'm already Leader)
+15:29:11 [election] [INFO] [I'm Leader - (529078505, 172.20.10.8)] Received COORDINATOR from 51797877 (172.20.10.9)
+15:29:11 [election] [WARNING] [I'm Leader - (529078505, 172.20.10.8)] Rejecting lower ID 51797877's COORDINATOR (I'm already Leader)

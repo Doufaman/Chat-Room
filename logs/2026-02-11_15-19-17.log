@@ -1,0 +1,739 @@
+15:19:17 [root] [INFO] Log system initialized. File saved to: logs/2026-02-11_15-19-17.log
+15:19:24 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Election Manager starting
+15:19:24 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] UDP listener started on UDP:9003
+15:19:25 [membership] [INFO] server 948812581 assigned to group group_0
+15:19:25 [membership] [INFO] Leader initialized with server info: {'server_id': 948812581, 'load_info': {'cpu_percent': 6.9, 'memory_percent': 81.1}, 'address': '172.20.10.8'}
+15:19:25 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Election triggered: First server startup
+15:19:25 [election] [INFO] [I'm Election - (948812581, 172.20.10.8)] Election started; peers=[]
+15:19:25 [election] [INFO] [I'm Election - (948812581, 172.20.10.8)] No higher peers, becoming Leader
+15:19:25 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Broadcasting COORDINATOR (victory)
+15:19:28 [membership] [INFO] server added: 288154570
+15:19:28 [membership] [INFO] server 288154570 assigned to group group_0
+15:19:32 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:19:32 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:19:32 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:19:32 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:19:32 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:19:32 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:19:32 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:19:32 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:19:32 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:19:32 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:19:34 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:34 [membership] [WARNING] server 835887691 is not existed
+15:19:34 [membership] [WARNING] server 835887691 is not existed
+15:19:35 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:35 [membership] [WARNING] server 835887691 is not existed
+15:19:35 [membership] [WARNING] server 835887691 is not existed
+15:19:35 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:35 [membership] [WARNING] server 835887691 is not existed
+15:19:35 [membership] [WARNING] server 835887691 is not existed
+15:19:35 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:19:35 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:19:35 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:19:35 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:19:35 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:19:35 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:19:36 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:19:36 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:19:36 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:36 [membership] [WARNING] server 835887691 is not existed
+15:19:36 [membership] [WARNING] server 835887691 is not existed
+15:19:36 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:19:36 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:19:36 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:36 [membership] [WARNING] server 835887691 is not existed
+15:19:36 [membership] [WARNING] server 835887691 is not existed
+15:19:37 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:37 [membership] [WARNING] server 835887691 is not existed
+15:19:37 [membership] [WARNING] server 835887691 is not existed
+15:19:37 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:37 [membership] [WARNING] server 835887691 is not existed
+15:19:37 [membership] [WARNING] server 835887691 is not existed
+15:19:38 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:38 [membership] [WARNING] server 835887691 is not existed
+15:19:38 [membership] [WARNING] server 835887691 is not existed
+15:19:38 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:38 [membership] [WARNING] server 835887691 is not existed
+15:19:38 [membership] [WARNING] server 835887691 is not existed
+15:19:39 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:39 [membership] [WARNING] server 835887691 is not existed
+15:19:39 [membership] [WARNING] server 835887691 is not existed
+15:19:39 [membership] [INFO] server 288154570 status changed: ACTIVE -> SUSPECT
+15:19:39 [fault_detection] [INFO] Suspected servers: [288154570]. Sending probes.
+15:19:39 [network_manager] [ERROR] No connection found for 288154570, cannot send message
+15:19:39 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:39 [membership] [WARNING] server 835887691 is not existed
+15:19:39 [membership] [WARNING] server 835887691 is not existed
+15:19:39 [fault_detection] [WARNING] 288154570 did not respond -> mark DEAD
+15:19:39 [membership] [INFO] server 288154570 status changed: SUSPECT -> DEAD
+15:19:39 [membership] [INFO] server removed: 288154570
+15:19:39 [fault_discovery] [INFO] Handling dead server 288154570
+15:19:39 [membership] [WARNING] server 288154570 is not existed
+15:19:39 [fault_discovery] [INFO] current group_id: group_0, group_members: {}
+15:19:39 [fault_discovery] [INFO] Dead server 288154570 had chatrooms: {}
+15:19:40 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:40 [membership] [WARNING] server 835887691 is not existed
+15:19:40 [membership] [WARNING] server 835887691 is not existed
+15:19:40 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:40 [membership] [WARNING] server 835887691 is not existed
+15:19:40 [membership] [WARNING] server 835887691 is not existed
+15:19:41 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:41 [membership] [WARNING] server 835887691 is not existed
+15:19:41 [membership] [WARNING] server 835887691 is not existed
+15:19:41 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:41 [membership] [WARNING] server 835887691 is not existed
+15:19:41 [membership] [WARNING] server 835887691 is not existed
+15:19:42 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:42 [membership] [WARNING] server 835887691 is not existed
+15:19:42 [membership] [WARNING] server 835887691 is not existed
+15:19:42 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:42 [membership] [WARNING] server 835887691 is not existed
+15:19:42 [membership] [WARNING] server 835887691 is not existed
+15:19:43 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:43 [membership] [WARNING] server 835887691 is not existed
+15:19:43 [membership] [WARNING] server 835887691 is not existed
+15:19:43 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:43 [membership] [WARNING] server 835887691 is not existed
+15:19:43 [membership] [WARNING] server 835887691 is not existed
+15:19:44 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:44 [membership] [WARNING] server 835887691 is not existed
+15:19:44 [membership] [WARNING] server 835887691 is not existed
+15:19:44 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:44 [membership] [WARNING] server 835887691 is not existed
+15:19:44 [membership] [WARNING] server 835887691 is not existed
+15:19:44 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:19:44 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:19:45 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:19:45 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:19:45 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:19:45 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:19:45 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:19:45 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:19:45 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:19:45 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:19:45 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:19:45 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:19:45 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:19:45 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:19:45 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:19:45 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:19:45 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:19:45 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:19:45 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:19:45 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:19:45 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:19:45 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:19:46 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:46 [membership] [WARNING] server 835887691 is not existed
+15:19:46 [membership] [WARNING] server 835887691 is not existed
+15:19:46 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:46 [membership] [WARNING] server 835887691 is not existed
+15:19:46 [membership] [WARNING] server 835887691 is not existed
+15:19:46 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:46 [membership] [WARNING] server 835887691 is not existed
+15:19:46 [membership] [WARNING] server 835887691 is not existed
+15:19:47 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:47 [membership] [WARNING] server 835887691 is not existed
+15:19:47 [membership] [WARNING] server 835887691 is not existed
+15:19:47 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:47 [membership] [WARNING] server 835887691 is not existed
+15:19:47 [membership] [WARNING] server 835887691 is not existed
+15:19:48 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:48 [membership] [WARNING] server 835887691 is not existed
+15:19:48 [membership] [WARNING] server 835887691 is not existed
+15:19:48 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:48 [membership] [WARNING] server 835887691 is not existed
+15:19:48 [membership] [WARNING] server 835887691 is not existed
+15:19:49 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:49 [membership] [WARNING] server 835887691 is not existed
+15:19:49 [membership] [WARNING] server 835887691 is not existed
+15:19:49 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:49 [membership] [WARNING] server 835887691 is not existed
+15:19:49 [membership] [WARNING] server 835887691 is not existed
+15:19:50 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:50 [membership] [WARNING] server 835887691 is not existed
+15:19:50 [membership] [WARNING] server 835887691 is not existed
+15:19:50 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:50 [membership] [WARNING] server 835887691 is not existed
+15:19:50 [membership] [WARNING] server 835887691 is not existed
+15:19:51 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:51 [membership] [WARNING] server 835887691 is not existed
+15:19:51 [membership] [WARNING] server 835887691 is not existed
+15:19:51 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:51 [membership] [WARNING] server 835887691 is not existed
+15:19:51 [membership] [WARNING] server 835887691 is not existed
+15:19:52 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:52 [membership] [WARNING] server 835887691 is not existed
+15:19:52 [membership] [WARNING] server 835887691 is not existed
+15:19:52 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:52 [membership] [WARNING] server 835887691 is not existed
+15:19:52 [membership] [WARNING] server 835887691 is not existed
+15:19:53 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:53 [membership] [WARNING] server 835887691 is not existed
+15:19:53 [membership] [WARNING] server 835887691 is not existed
+15:19:53 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:53 [membership] [WARNING] server 835887691 is not existed
+15:19:53 [membership] [WARNING] server 835887691 is not existed
+15:19:54 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:54 [membership] [WARNING] server 835887691 is not existed
+15:19:54 [membership] [WARNING] server 835887691 is not existed
+15:19:54 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:54 [membership] [WARNING] server 835887691 is not existed
+15:19:54 [membership] [WARNING] server 835887691 is not existed
+15:19:54 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:19:54 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:19:55 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:19:55 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:19:55 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:55 [membership] [WARNING] server 835887691 is not existed
+15:19:55 [membership] [WARNING] server 835887691 is not existed
+15:19:55 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:19:55 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:19:55 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:55 [membership] [WARNING] server 835887691 is not existed
+15:19:55 [membership] [WARNING] server 835887691 is not existed
+15:19:55 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:19:55 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:19:55 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:19:55 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:19:55 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:19:55 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:19:56 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:19:56 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:19:56 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:19:56 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:19:56 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:56 [membership] [WARNING] server 835887691 is not existed
+15:19:56 [membership] [WARNING] server 835887691 is not existed
+15:19:56 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:19:56 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:19:56 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:56 [membership] [WARNING] server 835887691 is not existed
+15:19:56 [membership] [WARNING] server 835887691 is not existed
+15:19:56 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:19:56 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:19:57 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:57 [membership] [WARNING] server 835887691 is not existed
+15:19:57 [membership] [WARNING] server 835887691 is not existed
+15:19:57 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:57 [membership] [WARNING] server 835887691 is not existed
+15:19:57 [membership] [WARNING] server 835887691 is not existed
+15:19:58 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:58 [membership] [WARNING] server 835887691 is not existed
+15:19:58 [membership] [WARNING] server 835887691 is not existed
+15:19:58 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:58 [membership] [WARNING] server 835887691 is not existed
+15:19:58 [membership] [WARNING] server 835887691 is not existed
+15:19:59 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:59 [membership] [WARNING] server 835887691 is not existed
+15:19:59 [membership] [WARNING] server 835887691 is not existed
+15:19:59 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:19:59 [membership] [WARNING] server 835887691 is not existed
+15:19:59 [membership] [WARNING] server 835887691 is not existed
+15:20:00 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:00 [membership] [WARNING] server 835887691 is not existed
+15:20:00 [membership] [WARNING] server 835887691 is not existed
+15:20:00 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:00 [membership] [WARNING] server 835887691 is not existed
+15:20:00 [membership] [WARNING] server 835887691 is not existed
+15:20:01 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:01 [membership] [WARNING] server 835887691 is not existed
+15:20:01 [membership] [WARNING] server 835887691 is not existed
+15:20:05 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:05 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:05 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:05 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:05 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:05 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:05 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:05 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:05 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:05 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:05 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:05 [membership] [WARNING] server 835887691 is not existed
+15:20:05 [membership] [WARNING] server 835887691 is not existed
+15:20:05 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:05 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:05 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:05 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:05 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:05 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:05 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:05 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:06 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:06 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:06 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:06 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:06 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:06 [membership] [WARNING] server 835887691 is not existed
+15:20:06 [membership] [WARNING] server 835887691 is not existed
+15:20:06 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:06 [membership] [WARNING] server 835887691 is not existed
+15:20:06 [membership] [WARNING] server 835887691 is not existed
+15:20:07 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:07 [membership] [WARNING] server 835887691 is not existed
+15:20:07 [membership] [WARNING] server 835887691 is not existed
+15:20:07 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:07 [membership] [WARNING] server 835887691 is not existed
+15:20:07 [membership] [WARNING] server 835887691 is not existed
+15:20:08 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:08 [membership] [WARNING] server 835887691 is not existed
+15:20:08 [membership] [WARNING] server 835887691 is not existed
+15:20:08 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:08 [membership] [WARNING] server 835887691 is not existed
+15:20:08 [membership] [WARNING] server 835887691 is not existed
+15:20:09 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:09 [membership] [WARNING] server 835887691 is not existed
+15:20:09 [membership] [WARNING] server 835887691 is not existed
+15:20:09 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:09 [membership] [WARNING] server 835887691 is not existed
+15:20:09 [membership] [WARNING] server 835887691 is not existed
+15:20:10 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:10 [membership] [WARNING] server 835887691 is not existed
+15:20:10 [membership] [WARNING] server 835887691 is not existed
+15:20:10 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:10 [membership] [WARNING] server 835887691 is not existed
+15:20:10 [membership] [WARNING] server 835887691 is not existed
+15:20:11 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:11 [membership] [WARNING] server 835887691 is not existed
+15:20:11 [membership] [WARNING] server 835887691 is not existed
+15:20:11 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:11 [membership] [WARNING] server 835887691 is not existed
+15:20:11 [membership] [WARNING] server 835887691 is not existed
+15:20:12 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:12 [membership] [WARNING] server 835887691 is not existed
+15:20:12 [membership] [WARNING] server 835887691 is not existed
+15:20:12 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:12 [membership] [WARNING] server 835887691 is not existed
+15:20:12 [membership] [WARNING] server 835887691 is not existed
+15:20:13 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:13 [membership] [WARNING] server 835887691 is not existed
+15:20:13 [membership] [WARNING] server 835887691 is not existed
+15:20:13 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:13 [membership] [WARNING] server 835887691 is not existed
+15:20:13 [membership] [WARNING] server 835887691 is not existed
+15:20:14 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:14 [membership] [WARNING] server 835887691 is not existed
+15:20:14 [membership] [WARNING] server 835887691 is not existed
+15:20:14 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:14 [membership] [WARNING] server 835887691 is not existed
+15:20:14 [membership] [WARNING] server 835887691 is not existed
+15:20:15 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:15 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:15 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:15 [membership] [WARNING] server 835887691 is not existed
+15:20:15 [membership] [WARNING] server 835887691 is not existed
+15:20:15 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:15 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:15 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:15 [membership] [WARNING] server 835887691 is not existed
+15:20:15 [membership] [WARNING] server 835887691 is not existed
+15:20:15 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:15 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:16 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:16 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:16 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:16 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:16 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:16 [membership] [WARNING] server 835887691 is not existed
+15:20:16 [membership] [WARNING] server 835887691 is not existed
+15:20:16 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:16 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:16 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:16 [membership] [WARNING] server 835887691 is not existed
+15:20:16 [membership] [WARNING] server 835887691 is not existed
+15:20:16 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:16 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:17 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:17 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:17 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:17 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:17 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:17 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:17 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:17 [membership] [WARNING] server 835887691 is not existed
+15:20:17 [membership] [WARNING] server 835887691 is not existed
+15:20:17 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:17 [membership] [WARNING] server 835887691 is not existed
+15:20:17 [membership] [WARNING] server 835887691 is not existed
+15:20:18 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:18 [membership] [WARNING] server 835887691 is not existed
+15:20:18 [membership] [WARNING] server 835887691 is not existed
+15:20:18 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:18 [membership] [WARNING] server 835887691 is not existed
+15:20:18 [membership] [WARNING] server 835887691 is not existed
+15:20:19 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:19 [membership] [WARNING] server 835887691 is not existed
+15:20:19 [membership] [WARNING] server 835887691 is not existed
+15:20:19 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:19 [membership] [WARNING] server 835887691 is not existed
+15:20:19 [membership] [WARNING] server 835887691 is not existed
+15:20:20 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:20 [membership] [WARNING] server 835887691 is not existed
+15:20:20 [membership] [WARNING] server 835887691 is not existed
+15:20:20 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:20 [membership] [WARNING] server 835887691 is not existed
+15:20:20 [membership] [WARNING] server 835887691 is not existed
+15:20:21 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:21 [membership] [WARNING] server 835887691 is not existed
+15:20:21 [membership] [WARNING] server 835887691 is not existed
+15:20:21 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:21 [membership] [WARNING] server 835887691 is not existed
+15:20:21 [membership] [WARNING] server 835887691 is not existed
+15:20:22 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:22 [membership] [WARNING] server 835887691 is not existed
+15:20:22 [membership] [WARNING] server 835887691 is not existed
+15:20:26 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:26 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:26 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:26 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:26 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:26 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:26 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:26 [membership] [WARNING] server 835887691 is not existed
+15:20:26 [membership] [WARNING] server 835887691 is not existed
+15:20:26 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:26 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:26 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:26 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:26 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:26 [membership] [WARNING] server 835887691 is not existed
+15:20:26 [membership] [WARNING] server 835887691 is not existed
+15:20:27 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:27 [membership] [WARNING] server 835887691 is not existed
+15:20:27 [membership] [WARNING] server 835887691 is not existed
+15:20:27 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:27 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:27 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:27 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:27 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:27 [membership] [WARNING] server 835887691 is not existed
+15:20:27 [membership] [WARNING] server 835887691 is not existed
+15:20:27 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:27 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:28 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:28 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:28 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:28 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:28 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:28 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:28 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:28 [membership] [WARNING] server 835887691 is not existed
+15:20:28 [membership] [WARNING] server 835887691 is not existed
+15:20:28 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:28 [membership] [WARNING] server 835887691 is not existed
+15:20:28 [membership] [WARNING] server 835887691 is not existed
+15:20:29 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:29 [membership] [WARNING] server 835887691 is not existed
+15:20:29 [membership] [WARNING] server 835887691 is not existed
+15:20:30 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:30 [membership] [WARNING] server 835887691 is not existed
+15:20:30 [membership] [WARNING] server 835887691 is not existed
+15:20:30 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:30 [membership] [WARNING] server 835887691 is not existed
+15:20:30 [membership] [WARNING] server 835887691 is not existed
+15:20:31 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:31 [membership] [WARNING] server 835887691 is not existed
+15:20:31 [membership] [WARNING] server 835887691 is not existed
+15:20:31 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:31 [membership] [WARNING] server 835887691 is not existed
+15:20:31 [membership] [WARNING] server 835887691 is not existed
+15:20:32 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:32 [membership] [WARNING] server 835887691 is not existed
+15:20:32 [membership] [WARNING] server 835887691 is not existed
+15:20:32 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:32 [membership] [WARNING] server 835887691 is not existed
+15:20:32 [membership] [WARNING] server 835887691 is not existed
+15:20:33 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:33 [membership] [WARNING] server 835887691 is not existed
+15:20:33 [membership] [WARNING] server 835887691 is not existed
+15:20:37 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:37 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:37 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:37 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:37 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:37 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:37 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:37 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:37 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:37 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:37 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:37 [membership] [WARNING] server 835887691 is not existed
+15:20:37 [membership] [WARNING] server 835887691 is not existed
+15:20:38 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:38 [membership] [WARNING] server 835887691 is not existed
+15:20:38 [membership] [WARNING] server 835887691 is not existed
+15:20:38 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:38 [membership] [WARNING] server 835887691 is not existed
+15:20:38 [membership] [WARNING] server 835887691 is not existed
+15:20:39 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:39 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:39 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:39 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:39 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:39 [membership] [WARNING] server 835887691 is not existed
+15:20:39 [membership] [WARNING] server 835887691 is not existed
+15:20:39 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:39 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:39 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:39 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:39 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:39 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:39 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:39 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:39 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:39 [membership] [WARNING] server 835887691 is not existed
+15:20:39 [membership] [WARNING] server 835887691 is not existed
+15:20:40 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:40 [membership] [WARNING] server 835887691 is not existed
+15:20:40 [membership] [WARNING] server 835887691 is not existed
+15:20:40 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:40 [membership] [WARNING] server 835887691 is not existed
+15:20:40 [membership] [WARNING] server 835887691 is not existed
+15:20:41 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:41 [membership] [WARNING] server 835887691 is not existed
+15:20:41 [membership] [WARNING] server 835887691 is not existed
+15:20:41 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:41 [membership] [WARNING] server 835887691 is not existed
+15:20:41 [membership] [WARNING] server 835887691 is not existed
+15:20:42 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:42 [membership] [WARNING] server 835887691 is not existed
+15:20:42 [membership] [WARNING] server 835887691 is not existed
+15:20:42 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:42 [membership] [WARNING] server 835887691 is not existed
+15:20:42 [membership] [WARNING] server 835887691 is not existed
+15:20:43 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:43 [membership] [WARNING] server 835887691 is not existed
+15:20:43 [membership] [WARNING] server 835887691 is not existed
+15:20:43 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:43 [membership] [WARNING] server 835887691 is not existed
+15:20:43 [membership] [WARNING] server 835887691 is not existed
+15:20:44 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:44 [membership] [WARNING] server 835887691 is not existed
+15:20:44 [membership] [WARNING] server 835887691 is not existed
+15:20:44 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:44 [membership] [WARNING] server 835887691 is not existed
+15:20:44 [membership] [WARNING] server 835887691 is not existed
+15:20:45 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:45 [membership] [WARNING] server 835887691 is not existed
+15:20:45 [membership] [WARNING] server 835887691 is not existed
+15:20:48 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:48 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:48 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:48 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:48 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:48 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:48 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:48 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:48 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:48 [membership] [WARNING] server 835887691 is not existed
+15:20:48 [membership] [WARNING] server 835887691 is not existed
+15:20:49 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:49 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:49 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:49 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:49 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:49 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:50 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:50 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:50 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:50 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:50 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:50 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:50 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:20:50 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:20:51 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:51 [membership] [WARNING] server 835887691 is not existed
+15:20:51 [membership] [WARNING] server 835887691 is not existed
+15:20:51 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:51 [membership] [WARNING] server 835887691 is not existed
+15:20:51 [membership] [WARNING] server 835887691 is not existed
+15:20:52 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:52 [membership] [WARNING] server 835887691 is not existed
+15:20:52 [membership] [WARNING] server 835887691 is not existed
+15:20:52 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:52 [membership] [WARNING] server 835887691 is not existed
+15:20:52 [membership] [WARNING] server 835887691 is not existed
+15:20:53 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:53 [membership] [WARNING] server 835887691 is not existed
+15:20:53 [membership] [WARNING] server 835887691 is not existed
+15:20:53 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:53 [membership] [WARNING] server 835887691 is not existed
+15:20:53 [membership] [WARNING] server 835887691 is not existed
+15:20:54 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:54 [membership] [WARNING] server 835887691 is not existed
+15:20:54 [membership] [WARNING] server 835887691 is not existed
+15:20:54 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:54 [membership] [WARNING] server 835887691 is not existed
+15:20:54 [membership] [WARNING] server 835887691 is not existed
+15:20:54 [server_role] [INFO] [Leader] Client client requesting chatroom list
+15:20:54 [server_role] [INFO] [Leader] Sent 0 chatrooms to client client
+15:20:55 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:55 [membership] [WARNING] server 835887691 is not existed
+15:20:55 [membership] [WARNING] server 835887691 is not existed
+15:20:55 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:55 [membership] [WARNING] server 835887691 is not existed
+15:20:55 [membership] [WARNING] server 835887691 is not existed
+15:20:59 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:59 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:59 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:59 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:59 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:59 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:59 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:59 [membership] [WARNING] server 835887691 is not existed
+15:20:59 [membership] [WARNING] server 835887691 is not existed
+15:20:59 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:20:59 [membership] [WARNING] server 835887691 is not existed
+15:20:59 [membership] [WARNING] server 835887691 is not existed
+15:20:59 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:59 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:20:59 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:20:59 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:21:00 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:21:00 [membership] [WARNING] server 835887691 is not existed
+15:21:00 [membership] [WARNING] server 835887691 is not existed
+15:21:00 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:21:00 [membership] [WARNING] server 835887691 is not existed
+15:21:00 [membership] [WARNING] server 835887691 is not existed
+15:21:00 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:00 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:00 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:00 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:01 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:01 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:01 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:01 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:01 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:01 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:01 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:21:01 [membership] [WARNING] server 835887691 is not existed
+15:21:01 [membership] [WARNING] server 835887691 is not existed
+15:21:01 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:21:01 [membership] [WARNING] server 835887691 is not existed
+15:21:01 [membership] [WARNING] server 835887691 is not existed
+15:21:01 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:01 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:02 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:21:02 [membership] [WARNING] server 835887691 is not existed
+15:21:02 [membership] [WARNING] server 835887691 is not existed
+15:21:02 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:21:02 [membership] [WARNING] server 835887691 is not existed
+15:21:02 [membership] [WARNING] server 835887691 is not existed
+15:21:03 [server_role] [INFO] [Leader] Client client requesting chatroom list
+15:21:03 [server_role] [INFO] [Leader] Sent 0 chatrooms to client client
+15:21:03 [server_role] [INFO] [Leader] Client client requesting chatroom list
+15:21:03 [server_role] [INFO] [Leader] Sent 0 chatrooms to client client
+15:21:03 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:21:03 [membership] [WARNING] server 835887691 is not existed
+15:21:03 [membership] [WARNING] server 835887691 is not existed
+15:21:03 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:21:03 [membership] [WARNING] server 835887691 is not existed
+15:21:03 [membership] [WARNING] server 835887691 is not existed
+15:21:05 [server.heartbeat] [INFO] server 948812581 current chatroom_list: {}
+15:21:05 [membership] [WARNING] server 835887691 is not existed
+15:21:05 [membership] [WARNING] server 835887691 is not existed
+15:21:08 [server_role] [INFO] [Leader] Chatroom distribution: {948812581: 0}, selected: 948812581
+15:21:08 [server_role] [INFO] [Leader] Creating chatroom "Room1" on server 948812581
+15:21:08 [server_role] [INFO] [Leader] Created and broadcasted chatroom: 948812581_1
+15:21:08 [server_role] [INFO] [Leader] Client client requesting chatroom list
+15:21:08 [server_role] [INFO] [Leader] Sent 1 chatrooms to client client
+15:21:10 [server_role] [INFO] [Leader] Chatroom distribution: {948812581: 1}, selected: 948812581
+15:21:10 [server_role] [INFO] [Leader] Creating chatroom "Room" on server 948812581
+15:21:10 [server_role] [INFO] [Leader] Created and broadcasted chatroom: 948812581_2
+15:21:10 [server_role] [INFO] [Leader] Client client requesting chatroom list
+15:21:10 [server_role] [INFO] [Leader] Sent 2 chatrooms to client client
+15:21:11 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:21:11 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:21:11 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:21:11 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:21:11 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:21:11 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:21:11 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:11 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:11 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:11 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:12 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:21:12 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:21:12 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:12 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:12 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:21:12 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:21:12 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:12 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:12 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:12 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:12 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:12 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:13 [server_role] [INFO] [Leader] Chatroom distribution: {948812581: 2}, selected: 948812581
+15:21:13 [server_role] [INFO] [Leader] Creating chatroom "roo" on server 948812581
+15:21:13 [server_role] [INFO] [Leader] Created and broadcasted chatroom: 948812581_3
+15:21:13 [server_role] [INFO] [Leader] Client client requesting chatroom list
+15:21:13 [server_role] [INFO] [Leader] Sent 3 chatrooms to client client
+15:21:22 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:21:22 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:21:22 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:21:22 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:21:22 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:21:22 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:21:23 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:21:23 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:21:23 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:23 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:23 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:23 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:23 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:21:23 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:21:23 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:23 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:23 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:23 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:23 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:23 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:24 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:24 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:33 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:21:33 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:21:33 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:33 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:33 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:33 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:33 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:21:33 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:21:34 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:34 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:34 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:21:34 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:21:34 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:34 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:34 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:21:34 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:21:34 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:34 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:34 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:21:34 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:21:34 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:34 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:44 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:21:44 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:21:44 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:21:44 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:21:45 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:21:45 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:21:45 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:45 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:45 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:45 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:45 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:21:45 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:21:45 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:45 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:45 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 321051011 (172.20.10.8)
+15:21:45 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 321051011's COORDINATOR (I'm already Leader)
+15:21:45 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:45 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:45 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:45 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)
+15:21:45 [election] [INFO] [I'm Leader - (948812581, 172.20.10.8)] Received COORDINATOR from 673011418 (172.20.10.8)
+15:21:45 [election] [WARNING] [I'm Leader - (948812581, 172.20.10.8)] Rejecting lower ID 673011418's COORDINATOR (I'm already Leader)

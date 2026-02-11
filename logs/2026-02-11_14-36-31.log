@@ -1,0 +1,86 @@
+14:36:31 [root] [INFO] Log system initialized. File saved to: logs/2026-02-11_14-36-31.log
+14:36:43 [election] [INFO] [I'm Leader - (135354747, 172.28.169.104)] Election Manager starting
+14:36:43 [election] [INFO] [I'm Leader - (135354747, 172.28.169.104)] UDP listener started on UDP:9003
+14:36:44 [membership] [INFO] server 135354747 assigned to group group_0
+14:36:44 [membership] [INFO] Leader initialized with server info: {'server_id': 135354747, 'load_info': {'cpu_percent': 3.8, 'memory_percent': 81.2}, 'address': '172.28.169.104'}
+14:36:44 [network_manager] [DEBUG] Starting leader long-lived connection listener...
+14:36:44 [network_manager] [DEBUG] Leader long-lived connection listener started
+14:36:44 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817004.495073, 'identity': 'LEADER'}
+14:36:44 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:36:44 [election] [WARNING] [I'm Leader - (135354747, 172.28.169.104)] Election triggered: First server startup
+14:36:45 [election] [INFO] [I'm Election - (135354747, 172.28.169.104)] Election started; peers=[]
+14:36:45 [election] [INFO] [I'm Election - (135354747, 172.28.169.104)] No higher peers, becoming Leader
+14:36:45 [election] [INFO] [I'm Leader - (135354747, 172.28.169.104)] Broadcasting COORDINATOR (victory)
+14:36:45 [election] [DEBUG] [I'm Leader - (135354747, 172.28.169.104)] UDP send COORDINATOR -> <broadcast>:9003
+14:36:45 [election] [DEBUG] [I'm Leader - (135354747, 172.28.169.104)] UDP send COORDINATOR -> <broadcast>:9003
+14:36:45 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817005.4962718, 'identity': 'LEADER'}
+14:36:45 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:36:45 [election] [DEBUG] [I'm Leader - (135354747, 172.28.169.104)] UDP send COORDINATOR -> <broadcast>:9003
+14:36:45 [election] [DEBUG] [I'm Leader - (135354747, 172.28.169.104)] UDP send COORDINATOR -> <broadcast>:9003
+14:36:45 [election] [DEBUG] [I'm Leader - (135354747, 172.28.169.104)] UDP send COORDINATOR -> <broadcast>:9003
+14:36:46 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817006.498653, 'identity': 'LEADER'}
+14:36:46 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:36:47 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817007.4975429, 'identity': 'LEADER'}
+14:36:47 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:36:48 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817008.49774, 'identity': 'LEADER'}
+14:36:48 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:36:49 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817009.5001202, 'identity': 'LEADER'}
+14:36:49 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:36:50 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817010.499846, 'identity': 'LEADER'}
+14:36:50 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:36:51 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817011.4976692, 'identity': 'LEADER'}
+14:36:51 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:36:52 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817012.4994922, 'identity': 'LEADER'}
+14:36:52 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:36:53 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817013.5001159, 'identity': 'LEADER'}
+14:36:53 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:36:54 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817014.500106, 'identity': 'LEADER'}
+14:36:54 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:36:55 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817015.500074, 'identity': 'LEADER'}
+14:36:55 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:36:56 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817016.4996748, 'identity': 'LEADER'}
+14:36:56 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:36:57 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817017.5001652, 'identity': 'LEADER'}
+14:36:57 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:36:58 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817018.497267, 'identity': 'LEADER'}
+14:36:58 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:36:59 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817019.497499, 'identity': 'LEADER'}
+14:36:59 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:37:00 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817020.5000901, 'identity': 'LEADER'}
+14:37:00 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:37:01 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817021.498743, 'identity': 'LEADER'}
+14:37:01 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:37:02 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817022.497857, 'identity': 'LEADER'}
+14:37:02 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:37:03 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817023.500103, 'identity': 'LEADER'}
+14:37:03 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:37:04 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817024.4986901, 'identity': 'LEADER'}
+14:37:04 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:37:05 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817025.496723, 'identity': 'LEADER'}
+14:37:05 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:37:06 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817026.4966981, 'identity': 'LEADER'}
+14:37:06 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:37:07 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817027.4994628, 'identity': 'LEADER'}
+14:37:07 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:37:08 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817028.4985, 'identity': 'LEADER'}
+14:37:08 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:37:09 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817029.5000908, 'identity': 'LEADER'}
+14:37:09 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:37:10 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817030.500088, 'identity': 'LEADER'}
+14:37:10 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:37:11 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817031.500105, 'identity': 'LEADER'}
+14:37:11 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:37:12 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817032.498988, 'identity': 'LEADER'}
+14:37:12 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:37:13 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817033.4969, 'identity': 'LEADER'}
+14:37:13 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:37:14 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817034.497323, 'identity': 'LEADER'}
+14:37:14 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:37:15 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817035.497092, 'identity': 'LEADER'}
+14:37:15 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:37:16 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817036.500093, 'identity': 'LEADER'}
+14:37:16 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:37:17 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817037.4957912, 'identity': 'LEADER'}
+14:37:17 [network_manager] [DEBUG] there are currently 0 followers to send to: []
+14:37:18 [network_manager] [DEBUG] Leader broadcasting message to followers: HEARTBEAT {'server_id': 135354747, 'timestamp': 1770817038.497474, 'identity': 'LEADER'}
+14:37:18 [network_manager] [DEBUG] there are currently 0 followers to send to: []
