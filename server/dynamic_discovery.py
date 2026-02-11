@@ -6,7 +6,7 @@ from server.config import TYPE_LEADER, TYPE_FOLLOWER
 #from typing import Type, Dict, Optional
 
 
-def dynamic_discovery(ip_local, timeout = 6.0):
+def dynamic_discovery(ip_local, timeout = 5.0):
     print(f"[dynamic_discovery] Discovery phase started. Waiting {timeout}s for Leader response...")
 
     # try to find leader
@@ -29,7 +29,7 @@ def dynamic_discovery(ip_local, timeout = 6.0):
         broad_msg_str = json.dumps(broad_msg, ensure_ascii=False)
         # Use hotspot network broadcast address (172.20.10.0/28)
         sock.sendto(broad_msg_str.encode(), ('172.20.10.15', 9000))
-        time.sleep(1.0)  # Wait for broadcast to propagate in hotspot network
+        time.sleep(0.5) # Just playing around
         
         while True:
             try:
