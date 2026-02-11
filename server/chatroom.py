@@ -18,19 +18,23 @@ class ChatRoom:
     """A single chat room that manages client connections and messages"""
     
     def __init__(self, room_id, room_name, port, local_ip, 
-                 on_client_count_change=None):
+                 network_manager=None, server=None, on_client_count_change=None):
         """
         Args:
             room_id: Unique ID for this chatroom
             room_name: Display name of the chatroom
             port: TCP port to listen on
             local_ip: Local IP address to bind
+            network_manager: Network manager instance for backup communication
+            server: Server instance reference
             on_client_count_change: Callback function(room_id, new_count) when client count changes
         """
         self.room_id = room_id
         self.room_name = room_name
         self.port = port
         self.local_ip = local_ip
+        self.network_manager = network_manager
+        self.server = server
         self.on_client_count_change = on_client_count_change
         
         # Client management
@@ -52,13 +56,22 @@ class ChatRoom:
         self.message_history = ChatMessageHistory(
             room_id=self.room_id,
             room_name=self.room_name,
-            max_history=5,
+            network_manager=self.network_manager,
+            server=self.server,
+            #max_history=5,
             #storage_dir="./chat_history"
         )
     
     def start(self):
         """Start the chatroom (run in a separate thread)"""
         self.running = True
+        
+        # Start message history manager thread (UDP listener for backups)
+        print(f"\n{'='*60}")
+        print(f"[ChatRoom {self.room_id}] Starting message history backup system...")
+        print(f"{'='*60}")
+        self.message_history.start()
+        print(f"[ChatRoom {self.room_id}] ✓ Backup listener ready\n")
         
         # Create server socket
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

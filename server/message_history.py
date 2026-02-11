@@ -6,12 +6,19 @@ Two-phase storage:
 """
 import json
 import threading
+import socket
 from collections import deque
 from datetime import datetime
 from pathlib import Path
 
-MAX_HISTORY_DEFAULT = 10  # Max messages in memory queue
+from network.network_manager import create_udp_socket, send_udp_message, receive_udp_message, PORT_BACKUP
+
+from utills.logger import get_logger
+logger = get_logger("backup")
+
+MAX_HISTORY_DEFAULT = 5  # Max messages in memory queue
 DEFAULT_STORAGE_DIR = Path(__file__).parent.parent / "chat_history"#"./chat_history"
+TYPE_BACKUP = "BACKUP"  # Message type for backup coordination (not implemented yet)
 
 class ChatMessageHistory:
     """
@@ -27,7 +34,10 @@ class ChatMessageHistory:
       - Append-only format (JSONL for easy parsing)
     """
     
-    def __init__(self, room_id, room_name, max_history=MAX_HISTORY_DEFAULT, storage_dir=DEFAULT_STORAGE_DIR):
+    def __init__(self, room_id, room_name, 
+                 network_manager,
+                 server,
+                 max_history=MAX_HISTORY_DEFAULT, storage_dir=DEFAULT_STORAGE_DIR):
         """
         Args:
             room_id: Unique room identifier
@@ -38,6 +48,11 @@ class ChatMessageHistory:
         self.room_id = room_id
         self.room_name = room_name
         self.max_history = max_history
+        self.network_manager = network_manager
+        self.server = server
+
+        # Get current group members from server's membership
+        #current_group = self.server.membership.get_group_servers()
         
         # Phase 1: In-memory FIFO queue
         self.history_queue = deque(maxlen=max_history)  # Auto-remove oldest when full
@@ -52,20 +67,86 @@ class ChatMessageHistory:
         
         # Thread safety
         self.lock = threading.Lock()
+        self.stop_event = threading.Event()
         
         # Statistics
         self.total_messages_saved = 0
         self.last_persist_count = 0
+
+        # Create independent UDP socket for backup messages
+        self.udp_socket = create_udp_socket('0.0.0.0', PORT_BACKUP)
+        # Enable Broadcast
+        self.udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        self.local_ip = network_manager.ip_local
+        
+        # Store server_id for filtering own messages
+        self.my_id = server.server_id
+        
+        logger.info(f"[MessageHistory] Initialized for Room '{room_name}' (ID: {room_id})")
+        logger.info(f"[MessageHistory] UDP socket listening on port {PORT_BACKUP}")
+        logger.info(f"[MessageHistory] Server ID: {self.my_id}, Local IP: {self.local_ip}")
+
+    def start(self):
+        """Start UDP listener thread for receiving backup messages"""
+        listener_thread = threading.Thread(target=self._udp_listener, daemon=True, name=f"MsgHistory-UDP-{self.room_name}")
+        listener_thread.start()
+        logger.info(f"[MessageHistory Room {self.room_id}] UDP listener thread started")
+        print(f"[MessageHistory] Started UDP listener for room '{self.room_name}' on port {PORT_BACKUP}")
+
+    def _udp_listener(self):
+        """Listen for message history replication messages from other servers"""
+        logger.info(f"[Room {self.room_name}] UDP listener running on port {PORT_BACKUP}")
+        print(f"[MessageHistory] UDP listener is now active for room '{self.room_name}'")
+        
+        while not self.stop_event.is_set():
+            try:
+                message, addr = receive_udp_message(self.udp_socket)
+                if not message:
+                    continue
+                print(f"[MessageHistory] Received UDP message history from {addr}")
+                # 检查消息是否是列表（备份消息）
+                
+                # 处理结构化消息
+                msg_type = message.get('msg_type')
+                msg_body = message.get('message', {})
+                sender_ip = message.get('sender_ip', addr[0])
+                room_name = message.get('room_name', '')  # 获取房间名称
+                room_id = message.get('room_id', '')
+                server_id = message.get('server_id', '')  # ← 获取负责该聊天室的服务器ID
+                
+                logger.info(f"Received {msg_type} from {sender_ip} for room '{room_name}' (server {server_id})")
+                print(f"[MessageHistory] Type: {msg_type}, Room: '{room_name}', Server: {server_id}, Sender: {sender_ip}")
+                
+                # Forward to message handler with room info
+                self.handle_messages_history(msg_type, msg_body, sender_ip, room_name, room_id, server_id)
+                
+            except Exception as e:
+                logger.error(f"Error in UDP listener: {e}")
+                print(f"[MessageHistory] ✗ UDP listener error: {e}")
+                import traceback
+                traceback.print_exc()
+
+    def handle_messages_history(self, msg_type, message, sender_ip, room_name='', room_id='', server_id=''):
+        """Handle received backup coordination messages"""
+        if msg_type == TYPE_BACKUP:
+            logger.info(f"Handling BACKUP: {len(message) if isinstance(message, list) else '?'} messages from {sender_ip}")
+            print(f"[MessageHistory] Processing BACKUP for room '{room_name}' (server {server_id})")
+            
+            # Save backup message to the correct room's file
+            if isinstance(message, list):
+                print(f"[MessageHistory] Saving {len(message)} messages for room '{room_name}' (server {server_id})...")
+                self._persist_to_file_otherservers(message, room_name, server_id)
+                print(f"[MessageHistory] ✓ Backup saved to '{room_name}_{server_id}.jsonl'")
+            else:
+                print(f"[MessageHistory] ⚠ Unexpected message format: {type(message)}")
+                self._persist_to_file_otherservers([message], room_name, server_id)
+        else:
+            logger.warning(f"Unknown message type: {msg_type} from {sender_ip}")
+
     
     def add_message(self, msg_type, sender, content, vector_clock=None):
         """
-        Add a message to the history.
-        
-        Args:
-            msg_type: 'JOIN', 'CHAT', or 'LEAVE'
-            sender: User ID of the sender
-            content: Message content
-            vector_clock: Vector clock dict for causal ordering
+        Add a message to the history
         
         Return:
             bool: True if persistence was triggered, False otherwise
@@ -86,15 +167,83 @@ class ChatMessageHistory:
             # Check if persistence is needed
             # Trigger when queue reaches max capacity
             queue_was_full = len(self.history_queue) == self.max_history
+            print("the queue was full?", queue_was_full, "current size:", len(self.history_queue))
             
             # TODO: synchronize history with other servers
             if queue_was_full:
+                print("FIFO queue reached max capacity. Start backup...")
+                
+                # IMPORTANT: 在清空队列前先复制消息
+                messages_to_backup = list(self.history_queue)
+                
+                # Send to other servers for backup
+                group_members = self.server.membership_manager.group_members
+                print(f"Current group ID: {self.server.membership_manager.group_id}")
+                print(f"Group members (current group): {group_members}")
+                print(f"Local IP: {self.local_ip}")
+                
+                if not group_members:
+                    logger.warning("No group members found! Skipping backup to other servers.")
+                    print("[MessageHistory] ⚠ WARNING: No group members, only saving locally")
+                
+                backup_count = 0
+                for target_id, target_ip in group_members.items():
+                    if target_ip != self.local_ip:  # Don't send to self
+                        logger.info(f"Sending backup to server {target_id} at {target_ip}")
+                        # 包含房间信息和服务器ID，以便接收方写入正确的文件
+                        message_history_packet = {
+                            "msg_type": TYPE_BACKUP,
+                            "message": messages_to_backup,
+                            "sender_ip": self.local_ip,
+                            "room_name": self.room_name,  # 房间名称
+                            "room_id": self.room_id,
+                            "server_id": self.server.server_id  # ← 负责聊天室的服务器ID
+                        }
+                        send_udp_message(self.udp_socket, message_history_packet, target_ip, PORT_BACKUP)
+                        print(f"→ Sent backup for room '{self.room_name}' (server {self.server.server_id}) to server {target_id} ({target_ip})")
+                        backup_count += 1
+                
+                if backup_count > 0:
+                    print(f"[MessageHistory] ✓ Backup sent to {backup_count} server(s)")
+                elif group_members:
+                    print(f"[MessageHistory] ℹ Only self in group, no backup needed")
+                
                 # Persistence triggered - save all messages in queue
                 self._persist_to_file()
                 return True
         
         return False
     
+    # write message history to file for other servers to backup
+    def _persist_to_file_otherservers(self, message_history, room_name, server_id):
+        """
+        Save backup messages to the correct room's history file.
+        
+        Args:
+            message_history: List of message records to save
+            room_name: Name of the room (used to construct file path)
+            server_id: ID of the server responsible for this chatroom
+        """
+        try:
+            # 根据房间名称和服务器ID构建正确的文件路径
+            #target_file = self.storage_dir / f"{room_name}_{server_id}.jsonl"
+            target_file = self.storage_dir / f"{server_id}_{room_name}.jsonl"
+            
+            with open(target_file, 'a', encoding='utf-8') as f:
+                for message in message_history:
+                    json_line = json.dumps(message, ensure_ascii=False)
+                    f.write(json_line + '\n')
+            
+            logger.info(f"Persisted {len(message_history)} backup messages to {target_file}")
+            print(f"[MessageHistory] Persisted {len(message_history)} messages to {target_file}")
+            
+        except Exception as e:
+            logger.error(f"ERROR persisting backup to file: {e}")
+            print(f"[MessageHistory] ✗ ERROR persisting backup: {e}")
+            import traceback
+            traceback.print_exc()
+
+    # write local message history to file
     def _persist_to_file(self):
         """
         Write all messages from queue to persistent storage.

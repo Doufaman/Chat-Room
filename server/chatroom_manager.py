@@ -31,16 +31,20 @@ class ChatroomManager:
         Server 2, Room 1 → 8000 + 200 + 1 = 8201
     """
     
-    def __init__(self, server_id, local_ip, membership_manager=None, on_client_count_change=None):
+    def __init__(self, server_id, local_ip, network_manager=None, server=None, membership_manager=None, on_client_count_change=None):
         """
         Args:
             server_id: This server's ID
             local_ip: Local IP address to bind chat rooms
+            network_manager: Network manager instance for backup communication
+            server: Server instance reference
             membership_manager: manage membership info
             on_client_count_change: Callback function(chatroom_id, new_count) when client count changes
         """
         self.server_id = server_id
         self.local_ip = local_ip
+        self.network_manager = network_manager
+        self.server = server
         self.membership_manager = membership_manager
         self.on_client_count_change = on_client_count_change
         
@@ -85,6 +89,8 @@ class ChatroomManager:
             
             # Create ChatRoom instance
             room = ChatRoom(room_id, room_name, port, self.local_ip, 
+                          network_manager=self.network_manager,
+                          server=self.server,
                           on_client_count_change=self.on_client_count_change)
             self.rooms[room_id] = room
             
