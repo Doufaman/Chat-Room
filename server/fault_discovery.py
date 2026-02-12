@@ -96,7 +96,9 @@ class ServerCrashDiscovery:
                     logger.info(f"current group_id: {self.server.membership_manager.group_id}, group_members: {self.server.membership_manager.group_members}")
 
 
-    def reassign_chatroom(self, dead_server_id, original_group_members):
+    def reassign_chatroom(self, dead_server_id, original_group_members = None):
+        new_assignment = {}
+
        # get affected chatrooms and reassign to other servers
         # 1) get the number of affected chatrooms;
         chatrooms_info = self.server.get_chatroom_info(dead_server_id)
@@ -126,6 +128,7 @@ class ServerCrashDiscovery:
             # 3) for each affected chatroom, assign to a new server
             for old_chatroom_id, chatroom_name in chatrooms_info.items():
                 new_server_id = self.server._select_server_for_chatroom()
+                new_assignment[new_server_id] = old_chatroom_id
                 logger.info(f"Reassigning chatroom '{chatroom_name}' of dead server {dead_server_id} to new server {new_server_id}")
                 # 3.1) if new server is leader, create chatroom, update chatroomlist, notify all the servers
                 if new_server_id == self.server.server_id:
@@ -178,6 +181,8 @@ class ServerCrashDiscovery:
                         )
                     else:
                         logger.warning(f"Cannot find IP for new server {new_server_id} to notify about chatroom takeover")
+
+        return new_assignment
 
 
  

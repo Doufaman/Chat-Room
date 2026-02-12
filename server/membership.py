@@ -54,7 +54,7 @@ class MembershipManager():
         # chatroom_id -> server_id
         self.chatrooms: Dict[str, int] = {} # owner: leader
 
-    def initialize_for_leader(self, is_leader, server_info):
+    def initialize_for_leader(self, is_leader, server_info, is_new_leader=False):
         """
         Initialize membership for leader with its own server info.
         """
@@ -66,9 +66,10 @@ class MembershipManager():
                 "load_info": server_info.get("load_info", {}),
                 "address": server_info.get("address", "")
             }
-            group_id, existed_members, _, _, _, = self.assign_group(server_info["server_id"])
-            self.group_id = group_id
-            self.group_members = existed_members
+            if not is_new_leader:
+                group_id, existed_members, _, _, _, = self.assign_group(server_info["server_id"])
+                self.group_id = group_id
+                self.group_members = existed_members
             logger.info(f"Leader initialized with server info: {server_info}")
 
     # ------------------------------------------------------------------
@@ -420,7 +421,10 @@ class MembershipManager():
         Set group information.
         """
         self.group_id = group_id
-        self.group_members = group_members
+        for member_id, member_ip in group_members.items():
+            int_member_id = int(member_id) if isinstance(member_id, str) else member_id
+            self.group_members[int_member_id] = member_ip
+        
 
     def add_group_member(self, server_id: int, server_ip: str):
         """
@@ -439,16 +443,22 @@ class MembershipManager():
             if stealserver_id in self.group_members:
                 del self.group_members[stealserver_id]
 
-
-
-    def bind_chatroom(self, chatroom_id: str):
+    def update_groups(self, group_members: Dict[int, str], group_id: str):
         """
-        Bind a chatroom to this server.
+        Check if any group has become orphan (only one server) and update group info accordingly.
         """
         pass
-        if chatroom_id not in self.chatrooms:
-            self.chatrooms.append(chatroom_id)
+        if not self.is_leader:
+            logger.error("illegal operation (not leader)")
+            return
+        if group_id not in self.group_servers:
+            self.group_servers[group_id] = list(group_members.keys())
 
+        for member_id, _ in group_members.items():
+            if member_id not in self.server_groups:
+                self.server_groups[member_id] = group_id
+            if member_id not in self.group_servers[group_id]:
+                self.group_servers[group_id].append(member_id)
     # ------------------------------------------------------------------
     # Chatroom management
     # ------------------------------------------------------------------

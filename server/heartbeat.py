@@ -101,7 +101,9 @@ class Heartbeat:
         role_tag = f"[I'm Leader - {server_id}]" if identity == "LEADER" else f"[I'm Follower - {server_id}]"
         
         logger.debug(f"{role_tag} Heartbeat received message: {msg_type} {msg} from {sender_addr}, current memnershiplist is {getattr(self.server, 'membership_list', None)}")
-        logger.info(f"server {self.server.server_id} current chatroom_list: {getattr(self.server, 'chatroom_list', None)}")
+        logger.info(f"server {self.server.server_id}, chatroom_list: {getattr(self.server, 'chatroom_list', None)}, group_members: {getattr(self.server.membership_manager, 'group_members', None)}")
+        if identity == "LEADER":
+            logger.info(f"server {self.server.server_id}, group_servers: {getattr(self.server.membership_manager, 'group_servers', None)}, server_groups: {getattr(self.server.membership_manager, 'server_groups', None)}")
         # dispatch to server-side handlers (fault_detection expected to provide these)
         if msg_type == "HEARTBEAT":
             if hasattr(self.server, "heartbeat_monitor"):

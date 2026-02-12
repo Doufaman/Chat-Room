@@ -53,6 +53,9 @@ class Server(Role):
         self._running = True
         #self.known_servers = set()
 
+        # recording new assignment of dead server's chatrooms, used for notifying new server to pull chatting history
+        self.assignment_of_chatrooms = None
+
         # ---------------------------
         # Election manager (UDP-only)
         # ---------------------------
@@ -313,7 +316,7 @@ class Server(Role):
                
                 # Send membership excluding self (leader should not include itself for followers)
                 membership_for_follower = {sid: sip for sid, sip in self.membership_list.items() if sid != self.server_id}
-                
+                logger.info(f"current chatroom_list: {self.chatroom_list}")
                 self.network_manager.send_unicast(
                     follower_ip,
                     9001,
@@ -324,7 +327,8 @@ class Server(Role):
                         "steal_group_id": steal_group_id,
                         "steal_server_id": steal_server_id,
                         "steal_group_members": steal_group_members,
-                        "membership_list": membership_for_follower}
+                        "membership_list": membership_for_follower,
+                        "chatroom_list": self.chatroom_list}
                 )           
                 # todo: notidy other followers about the new member
 
@@ -335,7 +339,8 @@ class Server(Role):
                             9001,
                             "NEW_FOLLOWER_JOINED",
                             {"new_follower_id": follower_id, 
-                             "new_follower_ip": follower_ip}
+                             "new_follower_ip": follower_ip,
+                             "group_id": group_id}
                         )
             
                 #print('hhey')
@@ -346,6 +351,17 @@ class Server(Role):
                 failed_server_id = message.get("failed_server_id")
                 self.handle_abnormal_state_report.handle_report(failed_ip, failed_port, failed_server_id)
                 logger.info(f"Received SERVER_FAILURE_REPORT: failed_ip={failed_ip}, failed_port={failed_port}")
+
+            elif msg_type == "REPORT_GROUP_MEMBERS":
+                group_id = message.get("group_id")
+                group_members = message.get("group_members", {})
+                dead_server_is_in_my_group = message.get("dead_server_is_in_my_group", False)
+                logger.info(f"Received REPORT_GROUP_MEMBERS: group_id={group_id}, group_members={group_members}, dead_server_is_in_my_group={dead_server_is_in_my_group}")
+                # Update membership manager with new group info
+                self.membership_manager.update_groups(group_members, group_id)
+                # if gather all group members: start check and repair orphan groups
+                if len(self.membership_manager.server_groups) == len(self.network_manager.servers):
+                    self.membership_manager.check_and_repair_orphan_groups()
         else:
             # Follower handles messages
             if msg_type == "CREATE_CHATROOM_LOCAL":
@@ -429,9 +445,11 @@ class Server(Role):
                 self.leader_id = message.get("leader_id")
                 membership_raw = message.get("membership_list", {})
                 self.membership_manager.set_group_info(message.get("group_id"), message.get("existed_members", {}))
+                logger.info(f"sever {self.server_id} assigned to group {message.get('group_id')} with members {message.get('existed_members', {})}")
                 steal_group_id = message.get("steal_group_id")
                 steal_server_id = message.get("steal_server_id")
                 steal_group_members = message.get("steal_group_members", {})
+                chatting_room_list = message.get("chatroom_list", {})
                 # if this follower is assigned to a group with steal_server
                 # notify steal message
                 if steal_group_id and steal_server_id:
@@ -468,6 +486,9 @@ class Server(Role):
                 self.membership_list[self.server_id] = self.network_manager.ip_local
                 print(f'[Follower] Registered with Leader {self.leader_id}. Current membership list: {self.membership_list}')
 
+                self.chatroom_list = chatting_room_list
+                logger.info(f"current chatroom_list: {self.chatroom_list}")
+
                 # Seed ElectionManager with leader info + peers based on membership.
                 try:
                     if self.election_manager:
@@ -478,9 +499,12 @@ class Server(Role):
             elif msg_type == "NEW_FOLLOWER_JOINED":
                 new_follower_id = message.get("new_follower_id")
                 new_follower_ip = message.get("new_follower_ip")
+                new_follower_group_id = message.get("group_id")
                 if new_follower_id != self.server_id:
                     new_follower_id = int(new_follower_id) if isinstance(new_follower_id, str) else new_follower_id
                     self.membership_list[new_follower_id] = new_follower_ip
+                    if new_follower_group_id == self.membership_manager.group_id:
+                        self.membership_manager.add_group_member(new_follower_id, new_follower_ip)
                     logger.info(f'[Follower] New follower joined: {new_follower_id} with IP: {new_follower_ip}. Updated membership list: {self.membership_list}')
                     try:
                         if self.election_manager:
@@ -504,6 +528,7 @@ class Server(Role):
             elif msg_type == "LEADER_CHANGED":
                 new_leader_id = message.get("new_leader_id")
                 new_leader_ip = message.get("new_leader_ip")
+                old_leader_id = message.get("old_leader_id")
                 print(f"[Server] Received LEADER_CHANGED notification: new leader is {new_leader_id} at {new_leader_ip}")
                 
                 if self.identity == TYPE_FOLLOWER:
@@ -523,6 +548,28 @@ class Server(Role):
                         logger.info(f"Reconnected to new leader {new_leader_id} at {new_leader_ip}")
                     except Exception as e:
                         logger.debug(f"Failed to reconnect to new leader: {e}")
+                    
+                    dead_server_is_in_my_group = False
+                    # clean group_members
+                    if old_leader_id in self.membership_manager.group_members:
+                        self.membership_manager.group_members.pop(old_leader_id, None)
+                        dead_server_is_in_my_group = True
+                    group_members = self.membership_manager.group_members.copy()
+                    group_members[self.server_id] = self.network_manager.ip_local
+                    logger.info(f"Removed old leader {old_leader_id} from group members")
+                    # report group info to new leader
+                    try:
+                        self.network_manager.send_unicast(
+                            new_leader_ip,
+                            9001,
+                            "REPORT_GROUP_MEMBERS",
+                            {"group_id": self.membership_manager.group_id, 
+                             "group_members": group_members,
+                             "dead_server_is_in_my_group": dead_server_is_in_my_group}
+                        )
+                        logger.info(f"Reported updated group members to new leader {new_leader_id}")
+                    except Exception as e:
+                        logger.debug(f"Failed to report group members update to new leader: {e}")
             elif msg_type == "GROUP_REASSIGN":
                 moved_server_id = message.get("server_id")
                 moved_server_ip = message.get("moved_server_ip")
@@ -555,8 +602,11 @@ class Server(Role):
         
         if new_role == TYPE_LEADER:
             print(f"[Server] Becoming LEADER (ID: {self.server_id})")
+            dead_leader_id = self.leader_id
             self.leader_id = self.server_id
             self.leader_address = self.network_manager.ip_local
+
+            logger.info(f"server {self.server_id}, current group_members: {self.membership_manager.group_members}, old_leader_id: {dead_leader_id}")
             
             # Close connection to old Leader (if converted from Follower)
             if old_role == TYPE_FOLLOWER:
@@ -580,9 +630,12 @@ class Server(Role):
                     "server_id": self.server_id,
                     "load_info": self.get_current_load(),
                     "address": self.network_manager.ip_local
-                })
+                }, is_new_leader=True)
                 
                 # Initialize heartbeat timestamps for other known servers
+                if dead_leader_id and dead_leader_id in self.membership_list:
+                    del self.membership_list[dead_leader_id]
+                    logger.info(f"Removed dead leader {dead_leader_id} from membership list")
                 current_time = time.time()
                 for server_id in self.membership_list.keys():
                     if server_id != self.server_id and server_id not in self.membership_manager.servers:
@@ -600,9 +653,18 @@ class Server(Role):
                 self.network_manager.start_leader_long_lived_listener()
             except Exception as e:
                 logger.debug(f"Failed to start leader long-lived listener: {e}")
+
+            # delete dead leader from goup_members if existed
+            try:
+                if dead_leader_id and dead_leader_id in self.membership_manager.group_members:
+                    del self.membership_manager.group_members[dead_leader_id]
+                    logger.info(f"Deleted dead leader {dead_leader_id} from group_members")
+            except Exception as e:
+                logger.debug(f"Failed to delete dead leader from group_members: {e}")
             
+
             # Notify all Followers to reconnect to new Leader
-            self._notify_followers_new_leader()
+            self._notify_followers_new_leader(dead_leader_id)
 
             # Ensure heartbeat + fault detection are running in leader mode
             try:
@@ -632,6 +694,26 @@ class Server(Role):
                     self.fault_discovery = ServerCrashDiscovery(self)
             except Exception as e:
                 logger.debug(f"Failed to start fault modules after becoming leader: {e}")
+
+            # reassign chatrooms from dead leader if applicable
+            try: 
+                self.assignment_of_chatrooms = self.fault_discovery.reassign_chatroom(dead_leader_id)
+            except Exception as e:
+                logger.debug(f"Failed to reassign chatrooms from dead leader: {e}")
+            
+            # clean and initialize group info for new leader
+            try:
+                self.membership_manager.group_servers = {}
+                self.membership_manager.server_groups = {}
+                # group_servers: {'group_0': [100913260, 813107781], 'group_1': [74905188, 765257638]}, server_groups: {100913260: 'group_0', 813107781: 'group_0', 74905188: 'group_1', 765257638: 'group_1'}
+                self.membership_manager.group_servers[self.membership_manager.group_id] = list(self.membership_manager.group_members.keys()) + [self.server_id]
+                for sid in self.membership_list.keys():
+                    self.membership_manager.server_groups[sid] = self.membership_manager.group_id
+                self.membership_manager.server_groups[self.server_id] = self.membership_manager.group_id
+                logger.info(f"[Leader] Initialized group info after becoming leader: group_servers={self.membership_manager.group_servers}, server_groups={self.membership_manager.server_groups}")
+            except Exception as e:
+                logger.debug(f"Failed to initialize group info for new leader: {e}")
+            
             
         elif new_role == TYPE_FOLLOWER:
             print(f"[Server] Becoming FOLLOWER (Leader ID: {leader_id})")
@@ -656,7 +738,7 @@ class Server(Role):
                 # Leader not in membership yet - will be set when we receive heartbeat
                 print(f"[Server] Leader {leader_id} not in membership list yet")
     
-    def _notify_followers_new_leader(self):
+    def _notify_followers_new_leader(self, old_leader_id):
         """Notify all known Followers about new Leader and their need to re-register."""
         if self.identity != TYPE_LEADER:
             return
@@ -671,7 +753,8 @@ class Server(Role):
                         "LEADER_CHANGED",
                         {
                             "new_leader_id": self.server_id,
-                            "new_leader_ip": self.leader_address
+                            "new_leader_ip": self.leader_address,
+                            "old_leader_id": old_leader_id
                         }
                     )
                     logger.info(f"[Leader] Notified follower {server_id} at {server_ip} about new leader")
