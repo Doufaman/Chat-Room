@@ -42,6 +42,8 @@ class Server(Role):
         self.chatroom_manager = ChatroomManager(
             server_id=self.server_id,
             local_ip=self.network_manager.ip_local,
+            network_manager=self.network_manager,
+            server=self,
             membership_manager=self.membership_manager,
             on_client_count_change=self._on_chatroom_client_count_change
         )

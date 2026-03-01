@@ -12,7 +12,6 @@ from utills.logger import get_logger
 
 logger = get_logger("election")
 
-
 # --- Message Types for Election ---
 TYPE_ELECTION = 'ELECTION'
 TYPE_ANSWER = 'ANSWER'

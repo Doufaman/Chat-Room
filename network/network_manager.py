@@ -22,8 +22,11 @@ PORT_BROADCAST = 9000
 PORT_MULTICAST = 9002
 PORT_ELECTION = 9003  # Dedicated port for election messages
 PORT_LONG_LIVED = 9004  # Dedicated port for long-lived TCP connections (leader <-> followers)
+PORT_BACKUP = 9006  # Dedicated port for backup message history replication (not implemented yet)
+
 
 IP_BROADCAST = '255.255.255.255'
+#IP_BROADCAST = '172.20.10.15'
 IP_MULTICAST = '224.0.0.1'
 
 # independent UDP socket functions 
@@ -213,7 +216,8 @@ class NetworkManager:
             server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             if hasattr(socket, 'SO_REUSEPORT'):
                 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-            server.bind((self.ip_local, self.port_unicast)) 
+            server.bind((self.ip_local, self.port_unicast))
+            #server.bind(('0.0.0.0', self.port_unicast))
             server.listen(5)
             while True:
                 conn, addr = server.accept()
